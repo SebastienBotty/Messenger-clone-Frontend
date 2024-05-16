@@ -1,0 +1,151 @@
+.WindowConversation {
+  width: 100%;
+  border: 1px solid #e5e5e5;
+}
+/*--------------------------------------------HEADER--------------------------------------*/
+.conversation-header {
+  height: 7.5vh;
+  width: 100%;
+  display: flex;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+}
+
+.conversation-member-info {
+  width: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 0.75rem;
+}
+
+.conversation-member-info .img-container img {
+  border-radius: 50%; /* Rend l'image ronde */
+  width: 3rem; /* Définit la largeur de l'image */
+  height: 3rem;
+}
+.conversation-member-name {
+  font-size: large;
+  font-weight: 500;
+}
+.online-since {
+  font-size: small;
+  font-weight: 200;
+}
+
+.conversation-buttons {
+  flex: 1;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  gap: 0.5rem;
+  padding-right: 1rem;
+}
+
+.conversation-buttons > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.conversation-buttons > *:hover {
+  background-color: #f2f2f2;
+}
+/*----------------------------------------------------------------Body*/
+
+.conversation-body {
+  height: 80vh;
+  overflow-y: scroll;
+}
+.message-container {
+  width: 100%;
+  background-color: aqua;
+}
+.message-container .img-container {
+  display: flex;
+  align-items: end;
+  margin-left: 0.75rem;
+  width: 1.75rem;
+}
+.message-container .img-container img {
+  background-color: yellow;
+  border-radius: 50%; /* Rend l'image ronde */
+  width: 1.75rem; /* Définit la largeur de l'image */
+  height: 1.75rem;
+}
+.message {
+  max-width: 40%;
+  border-radius: 2rem;
+  width: fit-content;
+  padding: 0.5rem 0.75rem;
+}
+#message-me {
+  display: flex;
+  justify-content: end;
+}
+#message-me .message {
+  background-color: #0084ff;
+  margin-right: 0.5rem;
+}
+#message-others {
+  display: flex;
+}
+#message-others .message {
+  background-color: #f0f0f0;
+  margin-left: 0.5rem;
+}
+/*---------------------------------------------------------------FOOTER---------------------*/
+.conversation-footer {
+  height: 6vh;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+}
+
+.conversation-footer .icons {
+  margin-left: 0.5rem;
+  width: fit-content;
+  gap: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.conversation-footer .icons > * {
+  cursor: pointer;
+  border-radius: 50%; /* Rend l'image ronde */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.conversation-footer .icons > *:hover {
+  background-color: #f0f2f5;
+}
+
+.conversation-footer .message-input {
+  width: 85%;
+  transition: width 0.3s ease-in;
+  margin: 0 0.5rem;
+  display: flex;
+  justify-content: end;
+}
+input.send-message {
+  position: relative;
+  font-size: larger;
+  background-color: #f0f2f5;
+  border-radius: 2rem;
+  height: 90%;
+  width: 100%;
+  border: none;
+  outline: none;
+  padding-left: 0.75rem;
+}
+
+.like-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
