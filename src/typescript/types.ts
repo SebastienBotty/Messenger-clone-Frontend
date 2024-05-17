@@ -11,8 +11,34 @@ export type MessageType = {
   date: Date;
 };
 
-export type DateDifference = {
+export type Date15minDifference = {
   isMoreThan15Minutes: boolean;
   hours: string;
   minutes: string;
+  date: Date;
 };
+
+export const dayNames: string[] = [
+  "Dimanche",
+  "Lundi",
+  "Mardi",
+  "Mercredi",
+  "Jeudi",
+  "Vendredi",
+  "Samedi",
+];
+
+export const monthNames: string[] = [
+  "Janvier",
+  "Février",
+  "Mars",
+  "Avril",
+  "Mai",
+  "Juin",
+  "Juillet",
+  "Août",
+  "Septembre",
+  "Octobre",
+  "Novembre",
+  "Décembre",
+];

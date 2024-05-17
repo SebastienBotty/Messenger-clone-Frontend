@@ -1,5 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { MessageType, DateDifference } from "../../typescript/types";
+import {
+  MessageType,
+  Date15minDifference,
+  dayNames,
+  monthNames,
+} from "../../typescript/types";
 import {
   AddCircle,
   Call,
@@ -26,19 +31,19 @@ function WindowConversation() {
       author: "John",
       text: "ça va? ",
       seen_by: ["Alice", "Bob"],
-      date: new Date("2024-05-16T09:16:00"),
+      date: new Date("2024-05-10T09:16:00"),
     },
     {
       author: "John",
       text: "Tu racontes quoi",
       seen_by: ["John", "Bob"],
-      date: new Date("2024-05-16T09:20:00"),
+      date: new Date("2024-05-07T09:20:00"),
     },
     {
       author: "me",
       text: "Hey, what's up?",
       seen_by: ["Alice", "Bob"],
-      date: new Date("2024-05-16T09:40:00"),
+      date: new Date("2024-05-10T09:40:00"),
     },
     {
       author: "me",
@@ -68,14 +73,14 @@ function WindowConversation() {
       author: "me",
       text: "Cool!",
       seen_by: ["Alice", "Bob"],
-      date: new Date("2024-05-16T10:40:00"),
+      date: new Date("2024-05-16T22:40:00"),
     },
   ]);
 
   const isMoreThan15Minutes = (
     currentDate: Date,
     previousDate: Date
-  ): DateDifference => {
+  ): Date15minDifference => {
     const differenceInMilliseconds = Math.abs(
       previousDate.getTime() - currentDate.getTime()
     );
@@ -95,9 +100,38 @@ function WindowConversation() {
       isMoreThan15Minutes,
       hours,
       minutes,
+      date: currentDate,
     };
   };
-  const checkPreviousMsgTime = (index: number): DateDifference => {
+  const compareNowToDate = (previousDate: Date): string | false => {
+    const currentDate = new Date();
+    const differenceInMilliseconds = Math.abs(
+      previousDate.getTime() - currentDate.getTime()
+    );
+    const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
+    const differenceInDays = differenceInMinutes / 60 / 24;
+
+    if (differenceInDays > 7) {
+      const formattedDate = `${previousDate.getDate()} ${monthNames[
+        previousDate.getMonth()
+      ].substring(
+        0,
+        3
+      )} ${previousDate.getFullYear()}, ${previousDate.getHours()}:${previousDate.getMinutes()}`;
+      return formattedDate;
+    } else if (previousDate.getDate() < currentDate.getDate()) {
+      const formattedDate = `${dayNames[previousDate.getDay()].substring(
+        0,
+        3
+      )} ${previousDate.getHours()}:${previousDate.getMinutes()}`;
+      console.log(formattedDate);
+      return formattedDate;
+    } else {
+      return false;
+    }
+  };
+
+  const checkPreviousMsgTime = (index: number): Date15minDifference => {
     const currMsgTime = messages[index].date;
     const prevMsgTime = messages[index - 1].date;
     return isMoreThan15Minutes(currMsgTime, prevMsgTime);
@@ -173,10 +207,11 @@ function WindowConversation() {
         onScroll={handleScroll}
       >
         {messages.map((message, index) => {
-          let checkMsgTime: DateDifference = {
+          let checkMsgTime: Date15minDifference = {
             isMoreThan15Minutes: false,
             hours: "0",
             minutes: "0",
+            date: new Date(),
           };
           if (index > 0) {
             checkMsgTime = checkPreviousMsgTime(index);
@@ -188,7 +223,8 @@ function WindowConversation() {
               <>
                 {checkMsgTime.isMoreThan15Minutes && (
                   <div className="message-container" id="Time-center-display">
-                    {checkMsgTime.hours}:{checkMsgTime.minutes}
+                    {compareNowToDate(checkMsgTime.date) ||
+                      checkMsgTime.hours + " : " + checkMsgTime.minutes}
                   </div>
                 )}
                 <div className="message-container" id="message-me">
@@ -207,7 +243,8 @@ function WindowConversation() {
               <>
                 {checkMsgTime.isMoreThan15Minutes && (
                   <div className="message-container" id="Time-center-display">
-                    {checkMsgTime.hours}:{checkMsgTime.minutes}
+                    {compareNowToDate(checkMsgTime.date) ||
+                      checkMsgTime.hours + " : " + checkMsgTime.minutes}
                   </div>
                 )}
                 <div className="message-container" id="message-others">
