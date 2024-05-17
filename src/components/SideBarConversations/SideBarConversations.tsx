@@ -34,7 +34,7 @@ function SideBarConversations() {
     },
   ]);
 
-  function timeSince(date: Date): string {
+  const timeSince = (date: Date): string => {
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -65,7 +65,7 @@ function SideBarConversations() {
     }
 
     return "Il y a un certain temps";
-  }
+  };
 
   // Exemple d'utilisation
   const pastDate = new Date("2024-05-15T12:00:00");
