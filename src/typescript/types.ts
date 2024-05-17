@@ -10,3 +10,9 @@ export type MessageType = {
   seen_by: string[];
   date: Date;
 };
+
+export type DateDifference = {
+  isMoreThan15Minutes: boolean;
+  hours: string;
+  minutes: string;
+};

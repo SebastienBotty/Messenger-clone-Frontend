@@ -63,6 +63,10 @@
   width: 100%;
   margin-top: 0.125rem;
 }
+
+#Time-center-display {
+  text-align: center;
+}
 .message-container .img-container {
   display: flex;
   align-items: end;
@@ -140,6 +144,10 @@ input.send-message {
   border: none;
   outline: none;
   padding-left: 0.75rem;
+}
+
+input.send-message:hover {
+  cursor: text;
 }
 
 .like-icon {

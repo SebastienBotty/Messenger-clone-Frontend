@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { MessageType } from "../../typescript/types";
+import { MessageType, DateDifference } from "../../typescript/types";
 import {
   AddCircle,
   Call,
@@ -24,60 +24,84 @@ function WindowConversation() {
   const [messages, setMessages] = useState<MessageType[]>([
     {
       author: "John",
-      text: "Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?",
+      text: "ça va? ",
       seen_by: ["Alice", "Bob"],
-      date: new Date("2024-05-16T09:00:00"),
+      date: new Date("2024-05-16T09:16:00"),
     },
     {
       author: "John",
-      text: "Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?",
-      seen_by: ["Alice", "Bob"],
-      date: new Date("2024-05-16T09:00:00"),
-    },
-    {
-      author: "John",
-      text: "I'm doing well, thank you!",
+      text: "Tu racontes quoi",
       seen_by: ["John", "Bob"],
-      date: new Date("2024-05-16T09:05:00"),
+      date: new Date("2024-05-16T09:20:00"),
     },
     {
       author: "me",
       text: "Hey, what's up?",
       seen_by: ["Alice", "Bob"],
-      date: new Date("2024-05-16T09:10:00"),
+      date: new Date("2024-05-16T09:40:00"),
     },
     {
       author: "me",
-      text: "Hey, what's up?",
+      text: "On est là tu connais",
       seen_by: ["Alice", "Bob"],
-      date: new Date("2024-05-16T09:10:00"),
+      date: new Date("2024-05-16T09:41:00"),
     },
     {
       author: "me",
-      text: "Hey, what's up?",
+      text: "Hamdoullah comme on dit?",
       seen_by: ["Alice", "Bob"],
-      date: new Date("2024-05-16T09:10:00"),
+      date: new Date("2024-05-16T09:57:00"),
     },
     {
       author: "John",
-      text: "Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?Hello, how are you?",
+      text: "Cool je suis content pour toi",
       seen_by: ["Alice", "Bob"],
-      date: new Date("2024-05-16T09:00:00"),
+      date: new Date("2024-05-16T10:00:00"),
     },
     {
       author: "John",
       text: "Not much, just chilling.",
       seen_by: ["Alice", "me"],
-      date: new Date("2024-05-16T09:15:00"),
+      date: new Date("2024-05-16T10:12:00"),
     },
     {
       author: "me",
       text: "Cool!",
       seen_by: ["Alice", "Bob"],
-      date: new Date("2024-05-16T09:20:00"),
+      date: new Date("2024-05-16T10:40:00"),
     },
   ]);
 
+  const isMoreThan15Minutes = (
+    currentDate: Date,
+    previousDate: Date
+  ): DateDifference => {
+    const differenceInMilliseconds = Math.abs(
+      previousDate.getTime() - currentDate.getTime()
+    );
+    const fifteenMinutesInMilliseconds = 15 * 60 * 1000;
+    const isMoreThan15Minutes =
+      differenceInMilliseconds > fifteenMinutesInMilliseconds;
+
+    const hours = String(currentDate.getHours());
+    let minutes: string = "";
+    if (currentDate.getMinutes() < 10) {
+      minutes = "0" + String(currentDate.getMinutes());
+    } else {
+      minutes = String(currentDate.getMinutes());
+    }
+
+    return {
+      isMoreThan15Minutes,
+      hours,
+      minutes,
+    };
+  };
+  const checkPreviousMsgTime = (index: number): DateDifference => {
+    const currMsgTime = messages[index].date;
+    const prevMsgTime = messages[index - 1].date;
+    return isMoreThan15Minutes(currMsgTime, prevMsgTime);
+  };
   const handleScroll = () => {
     if (scrollViewRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollViewRef.current;
@@ -91,13 +115,13 @@ function WindowConversation() {
       if (inputMessage.trim() != "") {
         console.log(inputMessage);
         setMessages((prev) => [
+          ...prev,
           {
             author: user,
             text: inputMessage,
             seen_by: [user],
             date: new Date(),
           },
-          ...prev,
         ]);
       }
 
@@ -148,13 +172,25 @@ function WindowConversation() {
         ref={scrollViewRef}
         onScroll={handleScroll}
       >
-        {messages
-          .slice()
-          .reverse()
-          .map((message) => {
-            const lastMessage = messages.indexOf(message) === 0;
-            if (message.author === user) {
-              return (
+        {messages.map((message, index) => {
+          let checkMsgTime: DateDifference = {
+            isMoreThan15Minutes: false,
+            hours: "0",
+            minutes: "0",
+          };
+          if (index > 0) {
+            checkMsgTime = checkPreviousMsgTime(index);
+          }
+          const lastMessage = index === messages.length - 1;
+          const currentMsg = messages.indexOf(message);
+          if (message.author === user) {
+            return (
+              <>
+                {checkMsgTime.isMoreThan15Minutes && (
+                  <div className="message-container" id="Time-center-display">
+                    {checkMsgTime.hours}:{checkMsgTime.minutes}
+                  </div>
+                )}
                 <div className="message-container" id="message-me">
                   <div
                     className="message"
@@ -163,11 +199,17 @@ function WindowConversation() {
                     {message.text}
                   </div>
                 </div>
-              );
-            }
-            const currentMsg = messages.indexOf(message);
-            if (messages[currentMsg + 1].author === message.author) {
-              return (
+              </>
+            );
+          }
+          if (messages[currentMsg + 1].author === message.author) {
+            return (
+              <>
+                {checkMsgTime.isMoreThan15Minutes && (
+                  <div className="message-container" id="Time-center-display">
+                    {checkMsgTime.hours}:{checkMsgTime.minutes}
+                  </div>
+                )}
                 <div className="message-container" id="message-others">
                   <div className="img-container"> </div>
                   <div
@@ -177,17 +219,18 @@ function WindowConversation() {
                     {message.text}
                   </div>
                 </div>
-              );
-            }
-            return (
-              <div className="message-container" id="message-others">
-                <div className="img-container">
-                  <img src={image} />
-                </div>
-                <div className="message">{message.text}</div>
-              </div>
+              </>
             );
-          })}
+          }
+          return (
+            <div className="message-container" id="message-others">
+              <div className="img-container">
+                <img src={image} />
+              </div>
+              <div className="message">{message.text}</div>
+            </div>
+          );
+        })}
       </div>
       <div className="conversation-footer">
         <div className="icons">
