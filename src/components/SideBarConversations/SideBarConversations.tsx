@@ -77,18 +77,23 @@ function SideBarConversations() {
         <div className="first-line">
           <div className="first-line-title">Discussions</div>
           <div className="sideBar-header-buttons">
-            <EllipsisHorizontal
-              color={"#00000"}
-              title="Paramètres"
-              height="2rem"
-              width="2rem"
-            />
-            <CreateOutline
-              color={"#00000"}
-              title="Nouvelle discussion"
-              height="2rem"
-              width="2rem"
-            />
+            <button>
+              <EllipsisHorizontal
+                color={"#00000"}
+                title="Paramètres"
+                height="2rem"
+                width="2rem"
+              />
+            </button>
+
+            <button>
+              <CreateOutline
+                color={"#00000"}
+                title="Nouvelle discussion"
+                height="2rem"
+                width="2rem"
+              />
+            </button>
           </div>
         </div>
         <div className="second-line">

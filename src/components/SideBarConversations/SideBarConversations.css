@@ -42,6 +42,17 @@
 .sideBar-header-buttons > *:hover {
   background-color: #d8dadf;
 }
+.sideBar-header-buttons button {
+  border: none;
+  outline: none;
+}
+.sideBar-header-buttons button:active {
+  filter: brightness(0.8);
+}
+
+.sideBar-header-buttons button:active > * {
+  transform: scale(0.9);
+}
 
 .second-line {
   display: flex;
