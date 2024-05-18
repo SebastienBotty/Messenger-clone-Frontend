@@ -124,7 +124,6 @@ function WindowConversation() {
         0,
         3
       )} ${previousDate.getHours()}:${previousDate.getMinutes()}`;
-      console.log(formattedDate);
       return formattedDate;
     } else {
       return false;
