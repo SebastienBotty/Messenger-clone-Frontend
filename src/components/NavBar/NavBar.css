@@ -2,4 +2,24 @@
   height: 7.5vh;
   background-color: aqua;
   border: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: end;
+}
+
+.navBar-right-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.navBar-right-buttons > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.navBar-right-buttons > *:hover {
+  background-color: #f2f2f2;
 }
