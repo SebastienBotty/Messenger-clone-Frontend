@@ -1,24 +1,21 @@
 import "./App.css";
-import React, { useState, useLayoutEffect, useContext } from "react";
-import { socket } from "./socket";
+import React, { useState, useLayoutEffect, createContext } from "react";
 import { auth } from "./firebase";
 import { User } from "firebase/auth";
 
-import SignIn from "./components/auth/signIn/signIn";
-import NavBar from "./components/NavBar/NavBar";
-import SideBarConversations from "./components/SideBarConversations/SideBarConversations";
-import WindowConversation from "./components/WindowConversation/WindowConversation";
+import UserLoggedIn from "./screens/userLoggedIn/userLoggedIn";
+import UserNotLogged from "./screens/userNotLogged/userNotLogged";
+
+export const UserContext = createContext<User | null>(null);
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
-  socket.on("connect", () => console.log("connecté"));
 
   useLayoutEffect(() => {
     const authSubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
       setIsAuthChecked(true);
-      console.log(user);
     });
 
     return () => authSubscribe();
@@ -35,15 +32,11 @@ function App() {
   return (
     <>
       {user ? (
-        <div className="App">
-          <NavBar handleSignOut={handleSignOut} />
-          <div className="content">
-            <SideBarConversations />
-            <WindowConversation />
-          </div>
-        </div>
+        <UserContext.Provider value={user}>
+          <UserLoggedIn handleSignOut={handleSignOut} />
+        </UserContext.Provider>
       ) : (
-        <SignIn />
+        <UserNotLogged />
       )}
     </>
   );

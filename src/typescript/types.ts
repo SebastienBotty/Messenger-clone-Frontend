@@ -18,6 +18,10 @@ export type Date15minDifference = {
   date: Date;
 };
 
+export type NavBarProps = {
+  handleSignOut: () => void;
+};
+
 export const dayNames: string[] = [
   "Dimanche",
   "Lundi",
