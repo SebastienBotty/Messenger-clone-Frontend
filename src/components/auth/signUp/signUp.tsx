@@ -3,9 +3,9 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
 
 function SignUp() {
-  const [userName, setUserName] = useState("");
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
+  const [userName, setUserName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const createUserinDb = async () => {
@@ -21,8 +21,12 @@ function SignUp() {
         },
         body: JSON.stringify(postData),
       });
-    } catch (error) {
-      console.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
     }
   };
   const createUserFireBase = () => {
@@ -51,8 +55,12 @@ function SignUp() {
       const jsonData = await response.json();
       console.log("Mail : " + jsonData.mailExists);
       return jsonData.mailExists;
-    } catch (error) {
-      console.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
       return true; //if there is an error, returns true to be sure user can't use this mail in case it is only used but there was an error
     }
   };
@@ -69,12 +77,16 @@ function SignUp() {
       console.log("Username : " + jsonData.userExists);
       return jsonData.userExists === true;
     } catch (error) {
-      console.error(error.message);
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
       return true; //if there is an error, returns true to be sure user can't use this mail in case it is only used but there was an error
     }
   };
 
-  const signUp = async (e) => {
+  const signUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -115,7 +127,7 @@ function SignUp() {
           onChange={(e) => setPassword(e.target.value)}
           required
         ></input>
-        <button type="sumbit"> Connecter</button>
+        <button type="submit"> Connecter</button>
       </form>
     </div>
   );

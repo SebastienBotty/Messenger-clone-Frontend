@@ -5,8 +5,8 @@ import { auth } from "../../../firebase";
 import "./signIn.css";
 
 function SignIn() {
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const checkEmail = async () => {
@@ -18,15 +18,19 @@ function SignIn() {
       const jsonData = await response.json();
       console.log("Mail : " + jsonData.mailExists);
       return jsonData.mailExists;
-    } catch (error) {
-      console.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
       return true; //if there is an error, returns true to be sure user can't use this mail in case it is only used but there was an error
     }
   };
-  const signIn = async (e) => {
+  const signIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const isMailExisting = checkEmail();
+      const isMailExisting = await checkEmail();
       if (isMailExisting) {
         signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
@@ -40,8 +44,12 @@ function SignIn() {
             console.error(errorCode, errorMessage);
           });
       }
-    } catch (error) {
-      console.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
     }
   };
   return (
@@ -60,7 +68,7 @@ function SignIn() {
           onChange={(e) => setPassword(e.target.value)}
           required
         ></input>
-        <button type="sumbit"> Connecter</button>
+        <button type="submit"> Connecter</button>
       </form>
     </div>
   );
