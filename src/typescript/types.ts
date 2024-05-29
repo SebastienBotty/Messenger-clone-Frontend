@@ -1,7 +1,18 @@
 export type ConversationType = {
-  name: string;
+  _id: string;
+  isGroupCouversation: boolean;
+  members: string[];
+  admin: string[];
   photo: string;
   lastMessage: MessageType;
+  creationDate: Date;
+};
+
+export type ConversationContextType = {
+  displayedConv: ConversationType | null;
+  setDisplayedConv: React.Dispatch<
+    React.SetStateAction<ConversationType | null>
+  >;
 };
 
 export type MessageType = {
@@ -9,6 +20,7 @@ export type MessageType = {
   text: string;
   seen_by: string[];
   date: Date;
+  conversationId: string;
 };
 
 export type Date15minDifference = {
@@ -20,6 +32,15 @@ export type Date15minDifference = {
 
 export type NavBarProps = {
   handleSignOut: () => void;
+};
+
+export type UserDataType = {
+  _id: string;
+  mail: string;
+  userName: string;
+  socketId: string | undefined;
+  photo: string | undefined;
+  conversations: string[];
 };
 
 export const dayNames: string[] = [
