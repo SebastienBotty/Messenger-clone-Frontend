@@ -189,13 +189,16 @@ function SideBarConversations() {
             );
           })
           .map((conversation: ConversationType, index: number) => {
-            if (index === 0) {
+            /*             if (index === 0) {
               setDisplayedConv(conversation);
-            }
+            } */
             return (
               <div
                 className="conversation"
-                onClick={() => setDisplayedConv(conversation)}
+                onClick={() => {
+                  setDisplayedConv(conversation);
+                  console.log("ON CLICK CONV : " + conversation._id);
+                }}
               >
                 <div className="conversation-img-container">
                   <img src={conversation.photo} />
