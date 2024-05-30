@@ -1,6 +1,6 @@
 export type ConversationType = {
   _id: string;
-  isGroupCouversation: boolean;
+  isGroupConversation: boolean;
   members: string[];
   admin: string[];
   photo: string;
@@ -16,11 +16,11 @@ export type ConversationContextType = {
 };
 
 export type MessageType = {
-  author: string;
+  author: string | undefined;
   text: string;
-  seen_by: string[];
+  seen_by: (string | undefined)[];
   date: Date;
-  conversationId: string;
+  conversationId: string | undefined;
 };
 
 export type Date15minDifference = {
