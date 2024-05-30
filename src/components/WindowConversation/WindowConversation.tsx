@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   MessageType,
   Date15minDifference,
   dayNames,
   monthNames,
-  ConversationType,
 } from "../../typescript/types";
 import {
   AddCircle,
@@ -27,13 +26,14 @@ function WindowConversation() {
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const [inputMessage, setInputMessage] = useState<string>("");
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
+  const firstMessageRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollViewRef = useRef<HTMLDivElement | null>(null);
-  const user = "me";
+  const user = useContext(UserContext)?.userName;
   const image =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=";
   const fetchMsgIndex = useRef(0);
-  const limitFetchMsg: number = 10;
+  const limitFetchMsg: number = 15;
   const [messages, setMessages] = useState<MessageType[]>([]);
 
   const fetchMessages = async () => {
@@ -46,14 +46,22 @@ function WindowConversation() {
         "&limit=" +
         limitFetchMsg
     );
+    console.log(limitFetchMsg);
+    console.log(fetchMsgIndex.current);
     try {
       if (!response.ok) {
         throw new Error("Erreur lor du fetch");
       }
       const jsonData = await response.json();
-      //console.log(jsonData);
+      console.log(jsonData);
       setMessages((prev) => [...prev, ...jsonData]);
       fetchMsgIndex.current += limitFetchMsg;
+
+      const div = scrollViewRef.current;
+      console.log("eeeeeeeeeeeeeeeeeeee");
+      if (firstMessageRef.current) {
+        firstMessageRef.current.scrollIntoView({ behavior: "smooth" });
+      }
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -91,6 +99,12 @@ function WindowConversation() {
       date: currentDate,
     };
   };
+
+  /* const isScrollAtTop = () => {
+    if (scrollViewRef.current && scrollViewRef.current.scrollTop === 0) {
+      fetchMessages();
+    }
+  }; */
   const compareNowToDate = (previousDateToForm: Date): string | false => {
     const currentDate = new Date();
     const previousDate = new Date(previousDateToForm);
@@ -133,25 +147,67 @@ function WindowConversation() {
   };
 
   const sendMessage = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const messageData = {
+      author: user,
+      text: inputMessage,
+      seen_by: [user],
+      date: new Date(),
+      conversationId: displayedConv?._id,
+    };
     if (event.key === "Enter") {
       if (inputMessage.trim() != "") {
-        setMessages((prev) => [
-          ...prev,
-          {
-            author: user,
-            text: inputMessage,
-            seen_by: [user],
-            date: new Date(),
-            conversationId: "test", //TODO : MODIFY IT TO CONVERSATION ID _______________________________________________
-          },
-        ]);
+        postMessage(messageData);
+        setMessages((prev) => [...prev, messageData]);
       }
 
       setInputMessage("");
     }
   };
 
+  const postMessage = async (messageData: MessageType) => {
+    try {
+      const response = await fetch(RESTAPIUri + "/message/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(messageData),
+      });
+      if (!response.ok) {
+        throw new Error("Erreur lors du POST MEssage");
+      }
+      const jsonData = await response.json();
+      console.log(jsonData);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+
+  /* useEffect(() => {
+    const div = scrollViewRef.current;
+    console.log(div?.scrollTop);
+    console.log(div?.scrollHeight);
+    if (div) {
+      scrollViewRef.current?.scrollTo({
+        top: div.scrollHeight,
+        behavior: "auto",
+      });
+      console.log("new div ", div.scrollTop);
+      div?.addEventListener("scroll", isScrollAtTop);
+    }
+
+    return () => {
+      div?.removeEventListener("scroll", isScrollAtTop);
+    };
+  }, []); */
+
   useEffect(() => {
+    console.log("ON WINDOW " + displayedConv?.isGroupConversation);
+    console.log(displayedConv);
     fetchMsgIndex.current = 0;
     setMessages([]);
     fetchMessages();
@@ -167,7 +223,7 @@ function WindowConversation() {
       <div className="conversation-header">
         <div className="conversation-member-info">
           <div className="img-container">
-            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=" />
+            <img src={image} />
           </div>
           <div className="conversation-member-info-text-container">
             <div className="conversation-member-name">
@@ -202,6 +258,9 @@ function WindowConversation() {
         ref={scrollViewRef}
         onScroll={handleScroll}
       >
+        <div className="load-more-messages">
+          <span onClick={() => fetchMessages()}>Charger plus de message</span>
+        </div>
         {messages
           .sort((a, b) => {
             return new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -216,11 +275,17 @@ function WindowConversation() {
             if (index > 0) {
               checkMsgTime = checkPreviousMsgTime(index);
             }
+            const firstMessage = index === 0;
             const lastMessage = index === messages.length - 1;
-            const currentMsg = messages.indexOf(message);
+            const currentMsg = index;
+
             if (message?.author === user) {
               return (
-                <>
+                <div
+                  key={message.author + "-" + index}
+                  onClick={() => console.log(message)}
+                  ref={firstMessage ? firstMessageRef : null}
+                >
                   {checkMsgTime.isMoreThan15Minutes && (
                     <div className="message-container" id="Time-center-display">
                       {compareNowToDate(checkMsgTime.date) ||
@@ -235,18 +300,32 @@ function WindowConversation() {
                       {message.text}
                     </div>
                   </div>
-                </>
+                </div>
               );
             }
             if (messages[currentMsg + 1]?.author === message?.author) {
               return (
-                <>
+                <div
+                  key={message.author + "-" + index}
+                  onClick={() => {
+                    const test = new Date(message.date);
+                    console.log(test.getTime());
+                  }}
+                >
                   {checkMsgTime.isMoreThan15Minutes && (
                     <div className="message-container" id="Time-center-display">
                       {compareNowToDate(checkMsgTime.date) ||
                         checkMsgTime.hours + " : " + checkMsgTime.minutes}
                     </div>
                   )}
+                  <div className="message-author-name">
+                    {messages[currentMsg]?.author !==
+                      messages[currentMsg - 1]?.author &&
+                      displayedConv?.isGroupConversation && (
+                        <div className="message-author">{message.author}</div>
+                      )}
+                  </div>
+
                   <div className="message-container" id="message-others">
                     <div className="img-container"> </div>
                     <div
@@ -256,7 +335,7 @@ function WindowConversation() {
                       {message.text}
                     </div>
                   </div>
-                </>
+                </div>
               );
             }
             return (
@@ -268,6 +347,7 @@ function WindowConversation() {
               </div>
             );
           })}
+        <div className="conversation-body-bottom"></div>
       </div>
       <div className="conversation-footer">
         <div className="icons">
@@ -302,7 +382,6 @@ function WindowConversation() {
             </>
           )}
         </div>
-        <form></form>
         <div
           className="message-input"
           style={inputMessage ? { width: "95%" } : {}}
@@ -323,7 +402,6 @@ function WindowConversation() {
             <Send color={"#00000"} height="3vh" width="3vh" />
           ) : (
             <ThumbsUp
-              onClick={() => fetchMessages()}
               color={"#00000"}
               title="Envoyer un j'aime"
               height="3vh"

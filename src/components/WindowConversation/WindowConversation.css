@@ -59,10 +59,22 @@
   height: 80vh;
   overflow-y: scroll;
 }
+
+.load-more-messages {
+  color: #0084ff;
+  text-align: center;
+}
+
+.load-more-messages > span {
+  cursor: pointer;
+}
+.load-more-messages > span:hover {
+  color: #65676b;
+}
 .message-container {
   width: 100%;
   margin-top: 0.125rem;
-  min-height: 2.25rem;
+  min-height: 2.5rem;
 }
 
 #Time-center-display {
@@ -79,6 +91,12 @@
   border-radius: 50%; /* Rend l'image ronde */
   width: 1.75rem; /* Définit la largeur de l'image */
   height: 1.75rem;
+}
+
+.message-author-name {
+  margin-left: 3.5rem;
+  color: #65676b;
+  font-size: small;
 }
 .message {
   max-width: 40%;
@@ -100,6 +118,10 @@
 #message-others .message {
   background-color: #f0f0f0;
   margin-left: 0.5rem;
+}
+
+.conversation-body-bottom {
+  height: 2.5rem;
 }
 /*---------------------------------------------------------------FOOTER---------------------*/
 .conversation-footer {
