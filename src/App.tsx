@@ -1,5 +1,6 @@
 import "./App.css";
 import React, { useState, useLayoutEffect, createContext } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { auth } from "./firebase";
 import { User } from "firebase/auth";
 import { UserDataType } from "./typescript/types";
@@ -13,6 +14,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthChecked, setIsAuthChecked] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserDataType | null>(null);
+  const navigate = useNavigate();
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   useLayoutEffect(() => {
@@ -31,6 +33,7 @@ function App() {
         console.log("JSON DATA SET ");
         console.log(jsonData);
         setUserData(jsonData);
+        navigate("/MyMessages", { state: jsonData });
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error(error.message);
@@ -48,6 +51,7 @@ function App() {
         fetchUserData(user);
       } else {
         setUserData(null);
+        navigate("/");
       }
     });
 
@@ -64,13 +68,13 @@ function App() {
   }
   return (
     <>
-      {userData ? (
-        <UserContext.Provider value={userData}>
-          <UserLoggedIn handleSignOut={handleSignOut} />
-        </UserContext.Provider>
-      ) : (
-        <UserNotLogged />
-      )}
+      <Routes>
+        <Route path="/" element={<UserNotLogged />}></Route>
+        <Route
+          path="/MyMessages"
+          element={<UserLoggedIn handleSignOut={handleSignOut} />}
+        />
+      </Routes>
     </>
   );
 }

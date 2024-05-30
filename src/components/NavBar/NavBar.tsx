@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import "./NavBar.css";
 import { ExitOutline } from "react-ionicons";
 import { NavBarProps } from "../../typescript/types";
-import { UserContext } from "../../App";
+import { UserContext } from "../../screens/userLoggedIn/userLoggedIn";
 
 function NavBar(props: NavBarProps) {
   const userData = useContext(UserContext);

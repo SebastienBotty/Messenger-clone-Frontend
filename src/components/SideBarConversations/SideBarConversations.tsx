@@ -7,18 +7,14 @@ import {
 import { ConversationType, MessageType } from "../../typescript/types";
 import "./SideBarConversations.css";
 
-import { UserContext } from "../../App";
-import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn";
+import {
+  useDisplayedConvContext,
+  UserContext,
+} from "../../screens/userLoggedIn/userLoggedIn";
 
 function SideBarConversations() {
   const userData = useContext(UserContext);
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
-  /*  console.log("USER DATA ---------------------------");
-  console.log(userData);
-  setTimeout(() => {
-    console.log("USER DATA après 5s ---------------------------");
-    console.log(userData);
-  }, 5000); */
   const RESTAPIUri: string | undefined = process.env.REACT_APP_REST_API_URI;
   const [searchConversation, setSearchConversation] = useState<string>("");
 
@@ -97,7 +93,7 @@ function SideBarConversations() {
         }
         const jsonData = await response.json();
         console.log("CONVERSATIONS");
-        console.log(jsonData);
+        console.log(conversations);
         for (let x of jsonData) {
           fetchConversationLastMsg(x);
         }
