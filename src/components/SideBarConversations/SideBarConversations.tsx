@@ -81,8 +81,6 @@ function SideBarConversations() {
       }
     };
     const fetchConversations = async (idsArray: string[]) => {
-      console.log("IDARRAYS");
-      console.log(idsArray);
       const conversationsIdStr: string = idsArray.join(",");
       try {
         const response = await fetch(
@@ -145,7 +143,7 @@ function SideBarConversations() {
               />
             </button>
 
-            <button>
+            <button onClick={() => setDisplayedConv(null)}>
               <CreateOutline
                 color={"#00000"}
                 title="Nouvelle discussion"

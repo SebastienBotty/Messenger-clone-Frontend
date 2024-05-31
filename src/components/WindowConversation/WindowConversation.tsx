@@ -1,9 +1,16 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useContext,
+  useCallback,
+} from "react";
 import {
   MessageType,
   Date15minDifference,
   dayNames,
   monthNames,
+  UserDataType,
 } from "../../typescript/types";
 import {
   AddCircle,
@@ -13,6 +20,7 @@ import {
   ImagesOutline,
   ThumbsUp,
   Send,
+  Close,
 } from "react-ionicons";
 
 import "./WindowConversation.css";
@@ -20,8 +28,15 @@ import {
   useDisplayedConvContext,
   UserContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
+import _ from "lodash";
 
 function WindowConversation() {
+  // Create conversation
+  const [addedMembers, setAddedMembers] = useState<string[]>([]);
+  const [searchUserInput, setSearchUserInput] = useState<string>("");
+  const [usersPrediction, setUsersPrediction] = useState<UserDataType[]>([]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  // Displayed conversation
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const [inputMessage, setInputMessage] = useState<string>("");
@@ -33,7 +48,7 @@ function WindowConversation() {
   const image =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=";
   const fetchMsgIndex = useRef(0);
-  const limitFetchMsg: number = 15;
+  const limitFetchMsg: number = 20;
   const [messages, setMessages] = useState<MessageType[]>([]);
 
   const fetchMessages = async () => {
@@ -146,6 +161,60 @@ function WindowConversation() {
     }
   };
 
+  const addMember = (username: string) => {
+    setAddedMembers((prev) => [...prev, username]);
+    console.log("xxxxx");
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  };
+  const debouncedFetchUsers = useCallback(
+    _.debounce(async (searchQuery) => {
+      console.log("))))))))");
+      console.log(searchQuery);
+      if (searchQuery.length > 2) {
+        try {
+          const response = await fetch(
+            RESTAPIUri + "/user/username?search=" + searchQuery
+          );
+          if (!response.ok) {
+            throw new Error("Erreur lors de la recherche d'utilisateur");
+          }
+          const jsonData = await response.json();
+          console.log(jsonData);
+          setUsersPrediction(jsonData);
+          return jsonData;
+        } catch (error) {
+          if (error instanceof Error) {
+            console.error(error.message);
+          } else {
+            console.error("An unknown error occurred");
+          }
+        }
+      } else {
+        return false;
+      }
+    }, 300),
+    []
+  );
+
+  const handleSearch = (user: UserDataType) => {
+    if (addedMembers.includes(user.userName)) {
+      console.log("User déja ajouté");
+      setSearchUserInput("");
+    } else {
+      addMember(user.userName);
+      setUsersPrediction([]);
+    }
+
+    setSearchUserInput("");
+  };
+
+  const searchUser = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchUserInput(e.target.value);
+    debouncedFetchUsers(e.target.value);
+  };
+
   const sendMessage = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const messageData = {
       author: user,
@@ -206,11 +275,18 @@ function WindowConversation() {
   }, []); */
 
   useEffect(() => {
-    console.log("ON WINDOW " + displayedConv?.isGroupConversation);
-    console.log(displayedConv);
-    fetchMsgIndex.current = 0;
-    setMessages([]);
-    fetchMessages();
+    if (displayedConv) {
+      console.log("ON WINDOW " + displayedConv?.isGroupConversation);
+      console.log(displayedConv);
+      fetchMsgIndex.current = 0;
+      setMessages([]);
+      fetchMessages();
+    } else {
+      if (searchInputRef.current) {
+        setMessages([]);
+        searchInputRef.current.focus();
+      }
+    }
   }, [displayedConv]);
 
   useEffect(() => {
@@ -222,45 +298,115 @@ function WindowConversation() {
     <div className="WindowConversation">
       <div className="conversation-header">
         <div className="conversation-member-info">
-          <div className="img-container">
-            <img src={image} />
-          </div>
-          <div className="conversation-member-info-text-container">
-            <div className="conversation-member-name">
-              {displayedConv?.members?.join(", ")}
+          {displayedConv ? (
+            <>
+              <div className="img-container">
+                <img src={image} />
+              </div>
+              <div className="conversation-member-info-text-container">
+                <div className="conversation-member-name">
+                  {displayedConv?.members?.join(", ")}
+                </div>
+                <div className="online-since">En ligne depuis X</div>
+              </div>
+            </>
+          ) : (
+            <div className="create-conversation-add-members">
+              <label htmlFor="add-members-input">A : </label>
+              <div className="added-members-container">
+                {addedMembers.map((addedMember) => {
+                  return (
+                    <div className="member" key={addedMember}>
+                      <span>{addedMember} </span>
+                      <div
+                        id="create-conversation-delete-member"
+                        onClick={() =>
+                          setAddedMembers((prev) =>
+                            prev.filter((item) => item !== addedMember)
+                          )
+                        }
+                      >
+                        <Close
+                          color={"#0084ff"}
+                          title={"Supprimer"}
+                          height="1.25rem"
+                          width="1.25rem"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="search-user">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  id="add-members-input"
+                  name="add-members-input"
+                  onChange={(e) => searchUser(e)}
+                  value={searchUserInput}
+                />
+                <div
+                  className="dropdown-search-list"
+                  id={searchUserInput.length > 2 ? "visible" : ""}
+                >
+                  {usersPrediction.map((userPrediction) => {
+                    if (
+                      !addedMembers.includes(userPrediction.userName) &&
+                      userPrediction.userName !== user
+                    ) {
+                      return (
+                        <li
+                          key={userPrediction._id}
+                          onClick={() => handleSearch(userPrediction)}
+                        >
+                          <div className="user-profile-pic">
+                            <img src={image} />
+                          </div>
+                          <span> {userPrediction.userName}</span>
+                        </li>
+                      );
+                    }
+                  })}
+                </div>
+              </div>
             </div>
-            <div className="online-since">En ligne depuis X</div>
+          )}
+        </div>
+        {displayedConv && (
+          <div className="conversation-buttons">
+            <Call
+              color={"#00000"}
+              title="Passer un appel vocal"
+              height="3vh"
+              width="3vh"
+            />
+            <Videocam
+              color={"#00000"}
+              title="Lancer un appel vidéo"
+              height="3vh"
+              width="3vh"
+            />
+            <InformationCircle
+              color={"#00000"}
+              title="Informations sur la conversation"
+              height="3vh"
+              width="3vh"
+            />
           </div>
-        </div>
-        <div className="conversation-buttons">
-          <Call
-            color={"#00000"}
-            title="Passer un appel vocal"
-            height="3vh"
-            width="3vh"
-          />
-          <Videocam
-            color={"#00000"}
-            title="Lancer un appel vidéo"
-            height="3vh"
-            width="3vh"
-          />
-          <InformationCircle
-            color={"#00000"}
-            title="Informations sur la conversation"
-            height="3vh"
-            width="3vh"
-          />
-        </div>
+        )}
       </div>
       <div
         className="conversation-body"
         ref={scrollViewRef}
         onScroll={handleScroll}
       >
-        <div className="load-more-messages">
-          <span onClick={() => fetchMessages()}>Charger plus de message</span>
-        </div>
+        {displayedConv && (
+          <div className="load-more-messages">
+            <span onClick={() => fetchMessages()}>Charger plus de message</span>
+          </div>
+        )}
+
         {messages
           .sort((a, b) => {
             return new Date(a.date).getTime() - new Date(b.date).getTime();

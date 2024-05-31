@@ -49,6 +49,7 @@ function App() {
       console.log(user); */
       if (user !== null) {
         fetchUserData(user);
+        console.log(user);
       } else {
         setUserData(null);
         navigate("/");
