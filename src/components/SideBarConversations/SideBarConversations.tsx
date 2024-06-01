@@ -203,7 +203,9 @@ function SideBarConversations() {
                 </div>
                 <div className="conversation-text-container">
                   <div id="conversation-name">
-                    {conversation.members.join(",")}
+                    {conversation.members
+                      .filter((item) => item !== userData?.userName)
+                      .join(", ")}
                   </div>
                   <div id="conversation-last-message">
                     <div className="truncated-text">
