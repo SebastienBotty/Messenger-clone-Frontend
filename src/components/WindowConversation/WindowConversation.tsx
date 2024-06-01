@@ -86,6 +86,87 @@ function WindowConversation() {
     }
   };
 
+  // Check if a private conversation between 2 users already exists
+  const isPrivateConvExisting = async () => {
+    try {
+      const response = await fetch(
+        RESTAPIUri +
+          "/conversation/privateConversation?username=" +
+          user +
+          "&recipient=" +
+          addedMembers[0]
+      );
+      if (!response.ok) {
+        throw new Error("Erreur de la vérif isPrivateConvExisting");
+      }
+
+      const jsonData = await response.json();
+      console.log(jsonData);
+      if (jsonData === false) {
+        postConversation();
+      } else {
+        setDisplayedConv(jsonData);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+
+  const postConversation = async () => {
+    const postData = {
+      members: [user, ...addedMembers],
+      admin: user,
+      creationDate: new Date(),
+    };
+    try {
+      const response = await fetch(RESTAPIUri + "/conversation/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postData),
+      });
+      if (!response.ok) {
+        throw new Error("Erreur lors du POST conversations");
+      }
+      const jsonData = await response.json();
+      console.log(jsonData);
+      if (jsonData._id) {
+        const messageData = {
+          author: user,
+          text: inputMessage,
+          seen_by: [user],
+          date: new Date(),
+          conversationId: jsonData._id,
+        };
+        postMessage(messageData);
+        setDisplayedConv(jsonData);
+        setAddedMembers([]);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+  const createConversation = async () => {
+    if (addedMembers.length > 1) {
+      postConversation();
+    } else if (addedMembers.length == 1) {
+      //If user wants to create a conversation with only one person, it first checks in his conversations
+      isPrivateConvExisting(); //if he doesn't already have a private (not a group where ppl left and they are only 2 left) conversation with the selected person.
+      //If not, creates the conversation, if yes,displays the conversation
+    } else {
+      console.log("pas assez de membre");
+    }
+  };
+
   const isMoreThan15Minutes = (
     currentDateToForm: Date,
     previousDateToForm: Date
@@ -215,7 +296,7 @@ function WindowConversation() {
     debouncedFetchUsers(e.target.value);
   };
 
-  const sendMessage = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const sendMessage = () => {
     const messageData = {
       author: user,
       text: inputMessage,
@@ -223,13 +304,16 @@ function WindowConversation() {
       date: new Date(),
       conversationId: displayedConv?._id,
     };
-    if (event.key === "Enter") {
-      if (inputMessage.trim() != "") {
-        postMessage(messageData);
-        setMessages((prev) => [...prev, messageData]);
-      }
+    postMessage(messageData);
+  };
 
-      setInputMessage("");
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && inputMessage.trim() != "") {
+      if (displayedConv) {
+        sendMessage();
+      } else {
+        createConversation();
+      }
     }
   };
 
@@ -247,6 +331,9 @@ function WindowConversation() {
       }
       const jsonData = await response.json();
       console.log(jsonData);
+      setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
+
+      setInputMessage("");
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -281,11 +368,10 @@ function WindowConversation() {
       fetchMsgIndex.current = 0;
       setMessages([]);
       fetchMessages();
-    } else {
-      if (searchInputRef.current) {
-        setMessages([]);
-        searchInputRef.current.focus();
-      }
+    } else if (searchInputRef.current) {
+      setMessages([]);
+      searchInputRef.current.focus();
+      setAddedMembers([]);
     }
   }, [displayedConv]);
 
@@ -305,7 +391,9 @@ function WindowConversation() {
               </div>
               <div className="conversation-member-info-text-container">
                 <div className="conversation-member-name">
-                  {displayedConv?.members?.join(", ")}
+                  {displayedConv?.members
+                    .filter((item) => item !== user)
+                    .join(", ")}
                 </div>
                 <div className="online-since">En ligne depuis X</div>
               </div>
@@ -537,7 +625,7 @@ function WindowConversation() {
             className="send-message"
             placeholder="Aa"
             value={inputMessage}
-            onKeyDown={sendMessage}
+            onKeyDown={handleKeyDown}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setInputMessage(e.target.value)
             }
@@ -545,7 +633,14 @@ function WindowConversation() {
         </div>
         <div className="like-icon">
           {inputMessage ? (
-            <Send color={"#00000"} height="3vh" width="3vh" />
+            <Send
+              color={"#00000"}
+              height="3vh"
+              width="3vh"
+              onClick={() =>
+                displayedConv ? sendMessage() : createConversation()
+              }
+            />
           ) : (
             <ThumbsUp
               color={"#00000"}
