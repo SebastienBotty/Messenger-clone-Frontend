@@ -32,8 +32,10 @@ function App() {
         const jsonData = await response.json();
         console.log("JSON DATA SET ");
         console.log(jsonData);
-        setUserData(jsonData);
-        navigate("/MyMessages", { state: jsonData });
+        setUserData(jsonData[0]);
+        localStorage.setItem("ApiToken", JSON.stringify(jsonData[1].ApiToken));
+        console.log(localStorage.getItem("ApiToken"));
+        navigate("/MyMessages", { state: jsonData[0] });
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error(error.message);
