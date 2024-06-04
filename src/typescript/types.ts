@@ -17,6 +17,7 @@ export type ConversationContextType = {
 
 export type MessageType = {
   author: string | undefined;
+  authorId?: string;
   text: string;
   seen_by: (string | undefined)[];
   date: Date;
