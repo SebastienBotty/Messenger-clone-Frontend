@@ -95,8 +95,8 @@ function SignUp() {
       if (isMailExisting || isUserExisting) {
         console.log("Mail ou username déja utilisé");
       } else {
-        createUserFireBase();
         createUserinDb();
+        createUserFireBase();
         console.log("user Created");
       }
     } catch (error) {
