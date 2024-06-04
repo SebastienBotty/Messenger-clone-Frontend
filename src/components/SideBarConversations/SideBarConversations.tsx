@@ -7,6 +7,7 @@ import {
 import { ConversationType, MessageType } from "../../typescript/types";
 import "./SideBarConversations.css";
 
+import { ApiToken } from "../../localStorage";
 import {
   useDisplayedConvContext,
   UserContext,
@@ -17,8 +18,9 @@ function SideBarConversations() {
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const RESTAPIUri: string | undefined = process.env.REACT_APP_REST_API_URI;
   const [searchConversation, setSearchConversation] = useState<string>("");
-
   const [conversations, setConversations] = useState<ConversationType[]>([]);
+
+  const authApiToken = ApiToken();
 
   const timeSince = (date: Date): string => {
     const now = new Date();
@@ -52,6 +54,12 @@ function SideBarConversations() {
 
     return "A l'instant";
   };
+  /**
+   * Retrieves the value of a cookie by its name.
+   *
+   * @param {string} name - The name of the cookie to retrieve.
+   * @return {string | null} The value of the cookie, or null if it does not exist.
+   */
 
   useEffect(() => {
     const fetchConversationLastMsg = async (conversation: ConversationType) => {
@@ -107,7 +115,12 @@ function SideBarConversations() {
     const fetchConversationsId = async () => {
       try {
         const response = await fetch(
-          RESTAPIUri + "/user/userConversationsId/userId/" + userData?._id
+          RESTAPIUri + "/user/userConversationsId/userId/" + userData?._id,
+          {
+            headers: {
+              Authorization: `Bearer ${authApiToken}`,
+            },
+          }
         );
         if (!response.ok) {
           throw new Error("Erreur lors du fetch");
@@ -192,6 +205,7 @@ function SideBarConversations() {
             } */
             return (
               <div
+                key={conversation._id}
                 className="conversation"
                 onClick={() => {
                   setDisplayedConv(conversation);

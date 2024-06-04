@@ -10,6 +10,7 @@ import {
 } from "../../typescript/types";
 import { socket } from "../../socket";
 import { useLocation } from "react-router-dom";
+import { ApiToken } from "../../localStorage";
 
 import "./userLoggedIn.css";
 
@@ -33,6 +34,7 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
+            authorization: "Bearer " + ApiToken(),
           },
           body: JSON.stringify({ socketId: socketId }),
         }
