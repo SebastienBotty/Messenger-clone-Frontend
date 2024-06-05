@@ -66,9 +66,15 @@ function SideBarConversations() {
       try {
         const response = await fetch(
           RESTAPIUri +
-            "/conversation/conversationId/" +
-            conversation._id +
-            "/lastMessage"
+            "/conversation/userId/" +
+            userData?._id +
+            "/conversation/lastMessage?conversationId=" +
+            conversation._id,
+          {
+            headers: {
+              Authorization: `Bearer ${authApiToken}`,
+            },
+          }
         );
         if (!response.ok) {
           throw new Error("Erreur lors du fetch");
@@ -89,10 +95,19 @@ function SideBarConversations() {
       }
     };
     const fetchConversations = async (idsArray: string[]) => {
-      const conversationsIdStr: string = idsArray.join(",");
+      const conversationsIdStr: string = idsArray.join("-");
       try {
         const response = await fetch(
-          RESTAPIUri + "/conversation/conversationsId/" + conversationsIdStr
+          RESTAPIUri +
+            "/conversation/userId/" +
+            userData?._id +
+            "/getConversations?conversationsId=" +
+            conversationsIdStr,
+          {
+            headers: {
+              Authorization: `Bearer ${authApiToken}`,
+            },
+          }
         );
         if (!response.ok) {
           throw new Error("Erreur lors du fetch");
