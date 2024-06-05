@@ -108,6 +108,13 @@
   height: 2.5rem;
 }
 
+.no-user-found {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
 .create-conversation-add-members {
   display: flex;
   height: 100%;

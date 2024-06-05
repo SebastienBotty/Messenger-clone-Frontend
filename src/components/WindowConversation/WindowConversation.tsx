@@ -101,10 +101,15 @@ function WindowConversation() {
     try {
       const response = await fetch(
         RESTAPIUri +
-          "/conversation/privateConversation?username=" +
+          "/conversation/userId/" +
+          userId +
+          "/privateConversation?username=" +
           user +
           "&recipient=" +
-          addedMembers[0]
+          addedMembers[0],
+        {
+          headers: { authorization: `Bearer ${ApiToken()}` },
+        }
       );
       if (!response.ok) {
         throw new Error("Erreur de la vérif isPrivateConvExisting");
@@ -255,7 +260,6 @@ function WindowConversation() {
 
   const addMember = (username: string) => {
     setAddedMembers((prev) => [...prev, username]);
-    console.log("xxxxx");
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
@@ -452,24 +456,32 @@ function WindowConversation() {
                   className="dropdown-search-list"
                   id={searchUserInput.length > 2 ? "visible" : ""}
                 >
-                  {usersPrediction.map((userPrediction) => {
-                    if (
-                      !addedMembers.includes(userPrediction.userName) &&
-                      userPrediction.userName !== user
-                    ) {
-                      return (
-                        <li
-                          key={userPrediction._id}
-                          onClick={() => handleSearch(userPrediction)}
-                        >
-                          <div className="user-profile-pic">
-                            <img src={image} />
-                          </div>
-                          <span> {userPrediction.userName}</span>
-                        </li>
-                      );
-                    }
-                  })}
+                  {usersPrediction.length > 0 ? (
+                    usersPrediction.map((userPrediction) => {
+                      if (
+                        !addedMembers.includes(userPrediction.userName) &&
+                        userPrediction.userName !== user
+                      ) {
+                        return (
+                          <li
+                            key={userPrediction._id}
+                            onClick={() => handleSearch(userPrediction)}
+                          >
+                            <div className="user-profile-pic">
+                              <img src={image} />
+                            </div>
+                            <span> {userPrediction.userName}</span>
+                          </li>
+                        );
+                      }
+                    })
+                  ) : (
+                    <li className="user-profile-pic">
+                      <div className="no-user-found">
+                        <span>Aucun utilisateur trouvé</span>
+                      </div>
+                    </li>
+                  )}
                 </div>
               </div>
             </div>
