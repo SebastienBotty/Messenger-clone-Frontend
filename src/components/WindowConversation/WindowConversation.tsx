@@ -30,6 +30,7 @@ import {
 } from "../../screens/userLoggedIn/userLoggedIn";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
+import { socket } from "../../socket";
 
 function WindowConversation() {
   // Create conversation
@@ -351,8 +352,9 @@ function WindowConversation() {
       }
       const jsonData = await response.json();
       console.log(jsonData);
+      console.log(displayedConv);
       setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
-
+      sendMsgToSocket(messageData, await getUsersSocket());
       //setInputMessage("");
     } catch (error) {
       if (error instanceof Error) {
@@ -361,6 +363,42 @@ function WindowConversation() {
         console.error("An unknown error occurred");
       }
     }
+  };
+
+  const getUsersSocket = async () => {
+    const convMembersStr = displayedConv?.members
+      ?.filter((member) => member !== user)
+      .join("-");
+    try {
+      const response = await fetch(
+        RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr,
+        {
+          headers: {
+            Authorization: "Bearer " + ApiToken(),
+          },
+        }
+      );
+      const jsonData = await response.json();
+      console.log("ICI SOCKET");
+      console.log(jsonData);
+
+      return jsonData;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+
+  const sendMsgToSocket = (
+    messageData: MessageType,
+    socketsObject: Promise<any>
+  ) => {
+    const socketData = [socketsObject, messageData, displayedConv?._id];
+    console.log(socketData);
+    socket.emit("message", socketData);
   };
 
   /* useEffect(() => {
@@ -388,11 +426,24 @@ function WindowConversation() {
       fetchMsgIndex.current = 0;
       setMessages([]);
       fetchMessages();
+      socket.on("message", (data) => {
+        const message = data[0];
+        const convId = data[1];
+        if (convId === displayedConv?._id) {
+          console.log("bonne conv");
+          setMessages((prev) => [...prev, message]);
+        } else {
+          console.log("pas bonne conv");
+        }
+      });
     } else if (searchInputRef.current) {
       setMessages([]);
       searchInputRef.current.focus();
       setAddedMembers([]);
     }
+    return () => {
+      socket.off("message");
+    };
   }, [displayedConv]);
 
   useEffect(() => {
@@ -402,6 +453,10 @@ function WindowConversation() {
   }, [messages, isAtBottom, displayedConv]);
   return (
     <div className="WindowConversation">
+      <button onClick={() => console.log(socket.id)}>CLIQUE ICI</button>
+      <button onClick={() => console.log(displayedConv?._id)}>
+        CLIQUE ICI 2
+      </button>
       <div className="conversation-header">
         <div className="conversation-member-info">
           {displayedConv ? (
