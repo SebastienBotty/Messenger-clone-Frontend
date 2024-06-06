@@ -24,9 +24,11 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
   const user = location.state;
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
+  const [displayedConv, setDisplayedConv] = useState<ConversationType | null>(
+    null
+  );
+
   const patchSocketId = async (socketId: string | undefined) => {
-    /*     console.log("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-    console.log(socketId); */
     try {
       const response = await fetch(
         RESTAPIUri + "/user/userId/" + user?._id + "/socketId",
@@ -52,18 +54,16 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
       }
     }
   };
-  socket.on("connect", () => {
-    patchSocketId(socket.id);
-  });
-
-  const [displayedConv, setDisplayedConv] = useState<ConversationType | null>(
-    null
-  );
 
   useEffect(() => {
     socket.connect();
+
+    socket.on("connect", () => {
+      patchSocketId(socket.id);
+    });
     return () => {
       if (socket) {
+        socket.off("connect");
         socket.disconnect();
       }
     };
