@@ -7,6 +7,8 @@ import {
   ConversationType,
   ConversationContextType,
   UserDataType,
+  MostRecentContextType,
+  TriggerContextType,
 } from "../../typescript/types";
 import { socket } from "../../socket";
 import { useLocation } from "react-router-dom";
@@ -17,6 +19,11 @@ import "./userLoggedIn.css";
 const DisplayedConvContext = createContext<ConversationContextType | undefined>(
   undefined
 );
+const MostRecentConvContext = createContext<MostRecentContextType | undefined>(
+  undefined
+);
+
+const TriggerContext = createContext<TriggerContextType | undefined>(undefined);
 export const UserContext = createContext<UserDataType | null>(null);
 
 function UserLoggedIn({ handleSignOut }: NavBarProps) {
@@ -27,6 +34,10 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
   const [displayedConv, setDisplayedConv] = useState<ConversationType | null>(
     null
   );
+  const [mostRecentConv, setMostRecentConv] = useState<ConversationType | null>(
+    null
+  );
+  const [trigger, setTrigger] = useState<boolean | null>(false);
 
   const patchSocketId = async (socketId: string | undefined) => {
     try {
@@ -74,12 +85,18 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
       <div className="userLoggedIn">
         <NavBar handleSignOut={handleSignOut} />
         <div className="content">
-          <DisplayedConvContext.Provider
-            value={{ displayedConv, setDisplayedConv }}
-          >
-            <SideBarConversations />
-            <WindowConversation />
-          </DisplayedConvContext.Provider>
+          <TriggerContext.Provider value={{ trigger, setTrigger }}>
+            <MostRecentConvContext.Provider
+              value={{ mostRecentConv, setMostRecentConv }}
+            >
+              <DisplayedConvContext.Provider
+                value={{ displayedConv, setDisplayedConv }}
+              >
+                <SideBarConversations />
+                <WindowConversation />
+              </DisplayedConvContext.Provider>
+            </MostRecentConvContext.Provider>
+          </TriggerContext.Provider>
         </div>
       </div>
     </UserContext.Provider>
@@ -93,3 +110,21 @@ export const useDisplayedConvContext = () => {
   return context;
 };
 export default UserLoggedIn;
+
+export const useMostRecentConvContext = () => {
+  const context = useContext(MostRecentConvContext);
+  if (context === undefined) {
+    throw new Error(
+      "useMostRecentConvContext must be used within a MyProvider"
+    );
+  }
+  return context;
+};
+
+export const useTriggerContext = () => {
+  const context = useContext(TriggerContext);
+  if (context === undefined) {
+    throw new Error("userTriggerContext must be used within a MyProvider");
+  }
+  return context;
+};

@@ -4,18 +4,24 @@ import {
   EllipsisHorizontal,
   SearchOutline,
 } from "react-ionicons";
-import { ConversationType, MessageType } from "../../typescript/types";
+import { ConversationType } from "../../typescript/types";
 import "./SideBarConversations.css";
 
 import { ApiToken } from "../../localStorage";
 import {
   useDisplayedConvContext,
   UserContext,
+  useMostRecentConvContext,
+  useTriggerContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
+
+import { socket } from "../../socket";
 
 function SideBarConversations() {
   const userData = useContext(UserContext);
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
+  const { trigger, setTrigger } = useTriggerContext();
   const RESTAPIUri: string | undefined = process.env.REACT_APP_REST_API_URI;
   const [searchConversation, setSearchConversation] = useState<string>("");
   const [conversations, setConversations] = useState<ConversationType[]>([]);
@@ -54,15 +60,11 @@ function SideBarConversations() {
 
     return "A l'instant";
   };
-  /**
-   * Retrieves the value of a cookie by its name.
-   *
-   * @param {string} name - The name of the cookie to retrieve.
-   * @return {string | null} The value of the cookie, or null if it does not exist.
-   */
-
-  useEffect(() => {
-    const fetchConversationLastMsg = async (conversation: ConversationType) => {
+  const fetchConversationLastMsg = async (
+    conversationArr: ConversationType[]
+  ) => {
+    const responseArr: ConversationType[] = [];
+    for (let conversation of conversationArr) {
       try {
         const response = await fetch(
           RESTAPIUri +
@@ -85,7 +87,7 @@ function SideBarConversations() {
         conversationObject.lastMessage.date = new Date(
           conversationObject.lastMessage.date
         );
-        setConversations((prev) => [...prev, conversationObject]);
+        responseArr.push(conversationObject);
       } catch (error) {
         if (error instanceof Error) {
           console.error(error.message);
@@ -93,68 +95,107 @@ function SideBarConversations() {
           console.error("An unknown error occurred");
         }
       }
-    };
-    const fetchConversations = async (idsArray: string[]) => {
-      const conversationsIdStr: string = idsArray.join("-");
-      try {
-        const response = await fetch(
-          RESTAPIUri +
-            "/conversation/userId/" +
-            userData?._id +
-            "/getConversations?conversationsId=" +
-            conversationsIdStr,
-          {
-            headers: {
-              Authorization: `Bearer ${authApiToken}`,
-            },
-          }
+    }
+    responseArr
+      .sort((a, b) => {
+        return (
+          new Date(a.lastMessage.date).getTime() -
+          new Date(b.lastMessage.date).getTime()
         );
-        if (!response.ok) {
-          throw new Error("Erreur lors du fetch");
+      })
+      .reverse();
+    return responseArr;
+  };
+  const fetchConversations = async (idsArray: string[]) => {
+    const conversationsIdStr: string = idsArray.join("-");
+    try {
+      const response = await fetch(
+        RESTAPIUri +
+          "/conversation/userId/" +
+          userData?._id +
+          "/getConversations?conversationsId=" +
+          conversationsIdStr,
+        {
+          headers: {
+            Authorization: `Bearer ${authApiToken}`,
+          },
         }
-        const jsonData = await response.json();
-        console.log("CONVERSATIONS");
-        console.log(conversations);
-        for (let x of jsonData) {
-          fetchConversationLastMsg(x);
-        }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.error(error.message);
-        } else {
-          console.error("An unknown error occurred");
-        }
+      );
+      if (!response.ok) {
+        throw new Error("Erreur lors du fetch");
       }
-    };
+      const jsonData = await response.json();
+      console.log("CONVERSATIONS");
+      console.log(jsonData);
+      /* for (let x of jsonData) {
+        fetchConversationLastMsg(x);
+      } */
+      const test = await fetchConversationLastMsg(jsonData);
 
-    const fetchConversationsId = async () => {
-      try {
-        const response = await fetch(
-          RESTAPIUri + "/user/userConversationsId/userId/" + userData?._id,
-          {
-            headers: {
-              Authorization: `Bearer ${authApiToken}`,
-            },
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Erreur lors du fetch");
-        }
-        const jsonData = await response.json();
-        fetchConversations(jsonData[0].conversations);
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.error(error.message);
-        } else {
-          console.error("An unknown error occurred");
-        }
+      setConversations((prev) => [...test, ...prev]);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
       }
-    };
+    }
+  };
 
+  const fetchConversationsId = async () => {
+    try {
+      const response = await fetch(
+        RESTAPIUri + "/user/userConversationsId/userId/" + userData?._id,
+        {
+          headers: {
+            Authorization: `Bearer ${authApiToken}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Erreur lors du fetch");
+      }
+      const jsonData = await response.json();
+      fetchConversations(jsonData[0].conversations);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+
+  const editConvLastMsg = async (lastConv: ConversationType) => {
+    const filteredConvArr = [...conversations].filter(
+      (conversation) => conversation._id !== lastConv._id
+    );
+    const conv = await fetchConversationLastMsg([lastConv]);
+    filteredConvArr.unshift(...conv);
+    setConversations(filteredConvArr);
+  };
+  useEffect(() => {
     fetchConversationsId();
-
     return () => {};
   }, []);
+
+  useEffect(() => {
+    socket.on("message", (data) => {
+      console.log("Message reçu");
+      setMostRecentConv(data[1]);
+    });
+
+    return () => {
+      socket.off("message");
+    };
+  }, [displayedConv]);
+
+  useEffect(() => {
+    if (mostRecentConv) {
+      editConvLastMsg(mostRecentConv);
+    }
+    return () => {};
+  }, [mostRecentConv, trigger]);
 
   return (
     <div className="SideBarConversations">
@@ -208,16 +249,13 @@ function SideBarConversations() {
       </div>
       <div className="conversations-container">
         {conversations
-          .sort((a, b) => {
+          /* .sort((a, b) => {
             return (
               new Date(b.lastMessage.date).getTime() -
               new Date(a.lastMessage.date).getTime()
             );
-          })
+          }) */
           .map((conversation: ConversationType, index: number) => {
-            /*             if (index === 0) {
-              setDisplayedConv(conversation);
-            } */
             return (
               <div
                 key={conversation._id}
@@ -226,6 +264,11 @@ function SideBarConversations() {
                   setDisplayedConv(conversation);
                   console.log("ON CLICK CONV : " + conversation._id);
                 }}
+                id={
+                  conversation._id === displayedConv?._id
+                    ? "selected-conversation"
+                    : ""
+                }
               >
                 <div className="conversation-img-container">
                   <img src={conversation.photo} />

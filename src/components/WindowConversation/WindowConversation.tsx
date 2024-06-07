@@ -27,6 +27,8 @@ import "./WindowConversation.css";
 import {
   useDisplayedConvContext,
   UserContext,
+  useMostRecentConvContext,
+  useTriggerContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
@@ -41,6 +43,8 @@ function WindowConversation() {
   // Displayed conversation
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
+  const { trigger, setTrigger } = useTriggerContext();
   const [inputMessage, setInputMessage] = useState<string>("");
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
   const firstMessageRef = useRef<HTMLDivElement | null>(null);
@@ -355,7 +359,9 @@ function WindowConversation() {
       console.log(displayedConv);
       setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
       sendMsgToSocket(messageData, await getUsersSocket());
-      //setInputMessage("");
+      //Reload the sideBar component to fetch the latest conversation
+      setTrigger(!trigger);
+      setMostRecentConv(displayedConv);
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -396,7 +402,7 @@ function WindowConversation() {
     messageData: MessageType,
     socketsObject: Promise<any>
   ) => {
-    const socketData = [socketsObject, messageData, displayedConv?._id];
+    const socketData = [socketsObject, messageData, displayedConv];
     console.log(socketData);
     socket.emit("message", socketData);
   };
@@ -426,9 +432,12 @@ function WindowConversation() {
       fetchMsgIndex.current = 0;
       setMessages([]);
       fetchMessages();
+
       socket.on("message", (data) => {
         const message = data[0];
-        const convId = data[1];
+        const convId = data[1]._id;
+        console.log("-------------------------ICI");
+        console.log(data[1]);
         if (convId === displayedConv?._id) {
           console.log("bonne conv");
           setMessages((prev) => [...prev, message]);
