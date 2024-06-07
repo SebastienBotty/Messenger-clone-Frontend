@@ -131,7 +131,7 @@ function SideBarConversations() {
         fetchConversationLastMsg(x);
       } */
       const test = await fetchConversationLastMsg(jsonData);
-
+      setDisplayedConv(test[0]);
       setConversations((prev) => [...test, ...prev]);
     } catch (error: unknown) {
       if (error instanceof Error) {
