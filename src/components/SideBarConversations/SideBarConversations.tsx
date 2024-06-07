@@ -23,7 +23,8 @@ function SideBarConversations() {
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
   const { trigger, setTrigger } = useTriggerContext();
   const RESTAPIUri: string | undefined = process.env.REACT_APP_REST_API_URI;
-  const [searchConversation, setSearchConversation] = useState<string>("");
+  const [searchConversationInput, setSearchConversationInput] =
+    useState<string>("");
   const [conversations, setConversations] = useState<ConversationType[]>([]);
 
   const authApiToken = ApiToken();
@@ -174,10 +175,57 @@ function SideBarConversations() {
     filteredConvArr.unshift(...conv);
     setConversations(filteredConvArr);
   };
+
   useEffect(() => {
     fetchConversationsId();
     return () => {};
   }, []);
+
+  const conversationsMap = (conversation: ConversationType, index: number) => {
+    return (
+      <div
+        key={conversation._id}
+        className="conversation"
+        onClick={() => {
+          setDisplayedConv(conversation);
+          console.log("ON CLICK CONV : " + conversation._id);
+        }}
+        id={
+          conversation._id === displayedConv?._id ? "selected-conversation" : ""
+        }
+      >
+        <div className="conversation-img-container">
+          <img src={conversation.photo} />
+        </div>
+        <div className="conversation-text-container">
+          <div id="conversation-name">
+            {conversation.members
+              .filter((item) => item !== userData?.userName)
+              .join(", ")}
+          </div>
+          <div id="conversation-last-message">
+            <div className="truncated-text">
+              {conversation.isGroupConversation
+                ? conversation.lastMessage.author +
+                  ": " +
+                  conversation.lastMessage.text
+                : conversation.lastMessage.text}
+            </div>
+            - {timeSince(conversation.lastMessage.date)}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const convFilterMember = (conversation: ConversationType) => {
+    console.log(searchConversationInput);
+    console.log(conversation.members);
+    return conversation.members
+      .join(",")
+      .toLocaleLowerCase()
+      .includes(searchConversationInput.toLowerCase());
+  };
 
   useEffect(() => {
     socket.on("message", (data) => {
@@ -234,9 +282,9 @@ function SideBarConversations() {
             id="search-conversations"
             type="text"
             placeholder="Rechercher dans Messenger"
-            value={searchConversation}
+            value={searchConversationInput}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearchConversation(e.target.value)
+              setSearchConversationInput(e.target.value)
             }
           />
         </div>
@@ -248,48 +296,15 @@ function SideBarConversations() {
         </div>
       </div>
       <div className="conversations-container">
-        {searchConversation ? (
-          <div className="conversation">"oui"</div>
-        ) : (
-          conversations.map((conversation: ConversationType, index: number) => {
-            return (
-              <div
-                key={conversation._id}
-                className="conversation"
-                onClick={() => {
-                  setDisplayedConv(conversation);
-                  console.log("ON CLICK CONV : " + conversation._id);
-                }}
-                id={
-                  conversation._id === displayedConv?._id
-                    ? "selected-conversation"
-                    : ""
-                }
-              >
-                <div className="conversation-img-container">
-                  <img src={conversation.photo} />
-                </div>
-                <div className="conversation-text-container">
-                  <div id="conversation-name">
-                    {conversation.members
-                      .filter((item) => item !== userData?.userName)
-                      .join(", ")}
-                  </div>
-                  <div id="conversation-last-message">
-                    <div className="truncated-text">
-                      {conversation.isGroupConversation
-                        ? conversation.lastMessage.author +
-                          ": " +
-                          conversation.lastMessage.text
-                        : conversation.lastMessage.text}
-                    </div>
-                    - {timeSince(conversation.lastMessage.date)}
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
+        {searchConversationInput
+          ? conversations
+              .filter((item) => convFilterMember(item))
+              .map((conversation, index) =>
+                conversationsMap(conversation, index)
+              )
+          : conversations.map((conversation, index) =>
+              conversationsMap(conversation, index)
+            )}
       </div>
     </div>
   );
