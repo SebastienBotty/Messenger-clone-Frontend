@@ -276,7 +276,10 @@ function WindowConversation() {
       if (searchQuery.length > 2) {
         try {
           const response = await fetch(
-            RESTAPIUri + "/user/username?search=" + searchQuery
+            RESTAPIUri + "/user/username?search=" + searchQuery,
+            {
+              headers: { authorization: `Bearer ${ApiToken()}` },
+            }
           );
           if (!response.ok) {
             throw new Error("Erreur lors de la recherche d'utilisateur");
