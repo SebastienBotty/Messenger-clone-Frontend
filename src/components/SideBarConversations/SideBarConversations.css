@@ -1,5 +1,7 @@
 .SideBarConversations {
   width: 21vw;
+  min-width: 21vw;
+  max-width: 21vw;
   overflow: none;
   height: calc(100vh - 5vh);
 }
