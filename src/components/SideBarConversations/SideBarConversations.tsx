@@ -248,14 +248,10 @@ function SideBarConversations() {
         </div>
       </div>
       <div className="conversations-container">
-        {conversations
-          /* .sort((a, b) => {
-            return (
-              new Date(b.lastMessage.date).getTime() -
-              new Date(a.lastMessage.date).getTime()
-            );
-          }) */
-          .map((conversation: ConversationType, index: number) => {
+        {searchConversation ? (
+          <div className="conversation">"oui"</div>
+        ) : (
+          conversations.map((conversation: ConversationType, index: number) => {
             return (
               <div
                 key={conversation._id}
@@ -281,14 +277,19 @@ function SideBarConversations() {
                   </div>
                   <div id="conversation-last-message">
                     <div className="truncated-text">
-                      {conversation.lastMessage.text}
+                      {conversation.isGroupConversation
+                        ? conversation.lastMessage.author +
+                          ": " +
+                          conversation.lastMessage.text
+                        : conversation.lastMessage.text}
                     </div>
                     - {timeSince(conversation.lastMessage.date)}
                   </div>
                 </div>
               </div>
             );
-          })}
+          })
+        )}
       </div>
     </div>
   );
