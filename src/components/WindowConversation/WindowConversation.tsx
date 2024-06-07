@@ -462,10 +462,6 @@ function WindowConversation() {
   }, [messages, isAtBottom, displayedConv]);
   return (
     <div className="WindowConversation">
-      <button onClick={() => console.log(socket.id)}>CLIQUE ICI</button>
-      <button onClick={() => console.log(displayedConv?._id)}>
-        CLIQUE ICI 2
-      </button>
       <div className="conversation-header">
         <div className="conversation-member-info">
           {displayedConv ? (
