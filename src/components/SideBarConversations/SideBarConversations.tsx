@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
+  Close,
   CreateOutline,
   EllipsisHorizontal,
   SearchOutline,
@@ -181,6 +182,13 @@ function SideBarConversations() {
     return () => {};
   }, []);
 
+  /**
+   * Renders a single conversation item.
+   *
+   * @param {ConversationType} conversation - The conversation object to render.
+   * @param {number} index - The index of the conversation in the conversations array.
+   * @return {JSX.Element} The rendered conversation item.
+   */
   const conversationsMap = (conversation: ConversationType, index: number) => {
     return (
       <div
@@ -217,10 +225,13 @@ function SideBarConversations() {
       </div>
     );
   };
-
+  /**
+   * Filters a conversation based on the search input.
+   *
+   * @param {ConversationType} conversation - The conversation to filter.
+   * @return {boolean} Returns true if the conversation's members contain the search input, false otherwise.
+   */
   const convFilterMember = (conversation: ConversationType) => {
-    console.log(searchConversationInput);
-    console.log(conversation.members);
     return conversation.members
       .join(",")
       .toLocaleLowerCase()
@@ -287,6 +298,14 @@ function SideBarConversations() {
               setSearchConversationInput(e.target.value)
             }
           />
+          {searchConversationInput && (
+            <div
+              id="search-input-cross"
+              onClick={() => setSearchConversationInput("")}
+            >
+              <Close color={"#9B7575"} height="1.25rem" width="1.25rem" />
+            </div>
+          )}
         </div>
         <div className="third-line">
           <div className="buttons-container">
