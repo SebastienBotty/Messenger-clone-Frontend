@@ -1,10 +1,10 @@
 .SideBarConversations {
-  width: 26vw;
+  width: 21vw;
   height: calc(100vh - 7.5vh);
-  border: 1px solid #e5e5e5;
-  overflow: hidden;
+  overflow: none;
+  height: calc(100vh - 5vh);
 }
-
+/*--------------------------------------------HEADER--------------------------------------*/
 .sideBar-header {
   height: 17.5vh;
   border: 1px solid #e5e5e5;
@@ -110,10 +110,10 @@
 .select-conversation-type:hover {
   filter: brightness(0.9);
 }
-
+/*--------------------------------------------CONVERSATIONS--------------------------------------*/
 .conversations-container {
   overflow-y: scroll;
-  height: 100%;
+  height: calc(100% - 17.5vh);
 }
 .conversation {
   display: flex;

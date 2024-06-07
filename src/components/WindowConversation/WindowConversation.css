@@ -1,6 +1,6 @@
 .WindowConversation {
   width: 100%;
-  border: 1px solid #e5e5e5;
+  height: calc(100vh - 5vh);
 }
 /*--------------------------------------------HEADER--------------------------------------*/
 .conversation-header {
