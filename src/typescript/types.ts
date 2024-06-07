@@ -15,6 +15,17 @@ export type ConversationContextType = {
   >;
 };
 
+export type MostRecentContextType = {
+  mostRecentConv: ConversationType | null;
+  setMostRecentConv: React.Dispatch<
+    React.SetStateAction<ConversationType | null>
+  >;
+};
+
+export type TriggerContextType = {
+  trigger: boolean | null;
+  setTrigger: React.Dispatch<React.SetStateAction<boolean | null>>;
+};
 export type MessageType = {
   author: string | undefined;
   authorId?: string;
