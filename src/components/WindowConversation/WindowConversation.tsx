@@ -11,6 +11,7 @@ import {
   dayNames,
   monthNames,
   UserDataType,
+  ConversationType,
 } from "../../typescript/types";
 import {
   AddCircle,
@@ -145,6 +146,7 @@ function WindowConversation() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${ApiToken()}`,
         },
         body: JSON.stringify(postData),
       });
@@ -164,7 +166,7 @@ function WindowConversation() {
         };
         setInputMessage("");
 
-        postMessage(messageData);
+        postMessage(messageData, jsonData);
         setDisplayedConv(jsonData);
         setAddedMembers([]);
       }
@@ -344,7 +346,10 @@ function WindowConversation() {
     }
   };
 
-  const postMessage = async (messageData: MessageType) => {
+  const postMessage = async (
+    messageData: MessageType,
+    conversationData?: ConversationType
+  ) => {
     try {
       const response = await fetch(RESTAPIUri + "/message/", {
         method: "POST",
@@ -364,7 +369,13 @@ function WindowConversation() {
       sendMsgToSocket(messageData, await getUsersSocket());
       //Reload the sideBar component to fetch the latest conversation
       setTrigger(!trigger);
-      setMostRecentConv(displayedConv);
+      console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+      console.log(displayedConv);
+      if (conversationData) {
+        setMostRecentConv(conversationData);
+      } else {
+        setMostRecentConv(displayedConv);
+      }
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
