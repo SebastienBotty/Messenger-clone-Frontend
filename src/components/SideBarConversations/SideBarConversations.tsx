@@ -28,6 +28,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     useState<string>("");
   const [conversations, setConversations] = useState<ConversationType[]>([]);
 
+  const notificationSound = new Audio("notification.wav");
+
   const authApiToken = ApiToken();
 
   const timeSince = (date: Date): string => {
@@ -242,10 +244,27 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       .toLocaleLowerCase()
       .includes(searchConversationInput.toLowerCase());
   };
-
+  const moreThanOneMinBetween = (date1: Date, date2: Date): boolean => {
+    const differenceInMilliseconds = Math.abs(
+      date2.getTime() - date1.getTime()
+    );
+    const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
+    return differenceInMinutes > 1;
+  };
   useEffect(() => {
     socket.on("message", (data) => {
       console.log("Message reçu");
+      console.log(data[0]);
+      console.log(data[2]);
+      if (
+        moreThanOneMinBetween(new Date(data[0].date), new Date(data[2].date))
+      ) {
+        console.log("more than 1 min");
+        notificationSound.play();
+      } else {
+        console.log("less than 1 min");
+      }
+
       setMostRecentConv(data[1]);
     });
 

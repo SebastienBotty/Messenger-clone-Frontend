@@ -426,7 +426,16 @@ function WindowConversation() {
     socketsObject: Promise<any>,
     conversation: ConversationType | null
   ) => {
-    const socketData = [socketsObject, messageData, conversation];
+    const socketData =
+      conversation == displayedConv
+        ? [
+            socketsObject,
+            messageData,
+            conversation,
+            messages[messages.length - 1],
+          ]
+        : [socketsObject, messageData, displayedConv];
+    console.log(messages[messages.length - 1]);
     console.log(socketData);
     socket.emit("message", socketData);
   };
