@@ -256,13 +256,15 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       console.log("Message reçu");
       console.log(data[0]);
       console.log(data[2]);
-      if (
-        moreThanOneMinBetween(new Date(data[0].date), new Date(data[2].date))
-      ) {
-        console.log("more than 1 min");
-        notificationSound.play();
+      if (data[2]) {
+        if (
+          moreThanOneMinBetween(new Date(data[0].date), new Date(data[2].date))
+        ) {
+          console.log("more than 1 min");
+          notificationSound.play();
+        }
       } else {
-        console.log("less than 1 min");
+        notificationSound.play();
       }
 
       setMostRecentConv(data[1]);
