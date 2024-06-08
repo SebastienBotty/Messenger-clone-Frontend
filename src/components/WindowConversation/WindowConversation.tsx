@@ -366,15 +366,24 @@ function WindowConversation() {
       console.log(jsonData);
       console.log(displayedConv);
       setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
-      sendMsgToSocket(messageData, await getUsersSocket());
       //Reload the sideBar component to fetch the latest conversation
       setTrigger(!trigger);
       console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
       console.log(displayedConv);
       if (conversationData) {
         setMostRecentConv(conversationData);
+        sendMsgToSocket(
+          messageData,
+          await getUsersSocket(conversationData),
+          conversationData
+        );
       } else {
         setMostRecentConv(displayedConv);
+        sendMsgToSocket(
+          messageData,
+          await getUsersSocket(displayedConv),
+          displayedConv
+        );
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -385,8 +394,8 @@ function WindowConversation() {
     }
   };
 
-  const getUsersSocket = async () => {
-    const convMembersStr = displayedConv?.members
+  const getUsersSocket = async (conversation: ConversationType | null) => {
+    const convMembersStr = conversation?.members
       ?.filter((member) => member !== user)
       .join("-");
     try {
@@ -414,9 +423,10 @@ function WindowConversation() {
 
   const sendMsgToSocket = (
     messageData: MessageType,
-    socketsObject: Promise<any>
+    socketsObject: Promise<any>,
+    conversation: ConversationType | null
   ) => {
-    const socketData = [socketsObject, messageData, displayedConv];
+    const socketData = [socketsObject, messageData, conversation];
     console.log(socketData);
     socket.emit("message", socketData);
   };
@@ -450,8 +460,7 @@ function WindowConversation() {
       socket.on("message", (data) => {
         const message = data[0];
         const convId = data[1]._id;
-        console.log("-------------------------ICI");
-        console.log(data[1]);
+
         if (convId === displayedConv?._id) {
           console.log("bonne conv");
           setMessages((prev) => [...prev, message]);
