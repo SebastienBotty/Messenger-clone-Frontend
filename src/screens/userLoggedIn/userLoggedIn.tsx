@@ -38,6 +38,8 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
     null
   );
   const [trigger, setTrigger] = useState<boolean | null>(false);
+  const [showConversationWindow, setShowConversationWindow] =
+    useState<boolean>(false);
 
   const patchSocketId = async (socketId: string | undefined) => {
     try {
@@ -79,6 +81,14 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
       }
     };
   }, []);
+  // When page loads, displayedConv is set to null, when it receives a data, it sets the state to true then shows the conversation window.
+  useEffect(() => {
+    if (displayedConv !== null) {
+      setShowConversationWindow(true);
+    }
+
+    return () => {};
+  }, [displayedConv]);
 
   return (
     <UserContext.Provider value={user}>
@@ -93,7 +103,7 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
                 value={{ displayedConv, setDisplayedConv }}
               >
                 <SideBarConversations />
-                <WindowConversation />
+                {showConversationWindow && <WindowConversation />}
               </DisplayedConvContext.Provider>
             </MostRecentConvContext.Provider>
           </TriggerContext.Provider>
