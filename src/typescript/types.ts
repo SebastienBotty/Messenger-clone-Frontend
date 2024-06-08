@@ -54,6 +54,9 @@ export type UserDataType = {
   photo: string | undefined;
   conversations: string[];
 };
+export type SideBarPropsType = {
+  setShowConversationWindow: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
 export const dayNames: string[] = [
   "Dimanche",

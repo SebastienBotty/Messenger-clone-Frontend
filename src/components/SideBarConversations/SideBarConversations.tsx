@@ -5,7 +5,7 @@ import {
   EllipsisHorizontal,
   SearchOutline,
 } from "react-ionicons";
-import { ConversationType } from "../../typescript/types";
+import { ConversationType, SideBarPropsType } from "../../typescript/types";
 import "./SideBarConversations.css";
 
 import { ApiToken } from "../../localStorage";
@@ -18,7 +18,7 @@ import {
 
 import { socket } from "../../socket";
 
-function SideBarConversations() {
+function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const userData = useContext(UserContext);
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
@@ -158,7 +158,11 @@ function SideBarConversations() {
         throw new Error("Erreur lors du fetch");
       }
       const jsonData = await response.json();
-      fetchConversations(jsonData[0].conversations);
+      if (jsonData[0].conversations.length > 0) {
+        fetchConversations(jsonData[0].conversations);
+      } else {
+        setShowConversationWindow(true);
+      }
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -192,7 +196,7 @@ function SideBarConversations() {
   const conversationsMap = (conversation: ConversationType, index: number) => {
     return (
       <div
-        key={conversation._id}
+        key={conversation._id + "-" + index}
         className="conversation"
         onClick={() => {
           setDisplayedConv(conversation);

@@ -102,7 +102,9 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
               <DisplayedConvContext.Provider
                 value={{ displayedConv, setDisplayedConv }}
               >
-                <SideBarConversations />
+                <SideBarConversations
+                  setShowConversationWindow={setShowConversationWindow}
+                />
                 {showConversationWindow && <WindowConversation />}
               </DisplayedConvContext.Provider>
             </MostRecentConvContext.Provider>
