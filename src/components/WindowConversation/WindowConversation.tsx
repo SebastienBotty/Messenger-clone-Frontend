@@ -165,7 +165,8 @@ function WindowConversation() {
           conversationId: jsonData._id,
         };
         setInputMessage("");
-
+        console.log(" CONVERSATION DANS POST CONVERSATION");
+        console.log(jsonData);
         postMessage(messageData, jsonData);
         setDisplayedConv(jsonData);
         setAddedMembers([]);
@@ -363,13 +364,11 @@ function WindowConversation() {
         throw new Error("Erreur lors du POST MEssage");
       }
       const jsonData = await response.json();
-      console.log(jsonData);
-      console.log(displayedConv);
+      /*  console.log(jsonData);
+      console.log(displayedConv); */
       setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
       //Reload the sideBar component to fetch the latest conversation
       setTrigger(!trigger);
-      console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
-      console.log(displayedConv);
       if (conversationData) {
         setMostRecentConv(conversationData);
         sendMsgToSocket(
@@ -434,7 +433,7 @@ function WindowConversation() {
             conversation,
             messages[messages.length - 1],
           ]
-        : [socketsObject, messageData, displayedConv];
+        : [socketsObject, messageData, conversation];
     console.log(messages[messages.length - 1]);
     console.log(socketData);
     socket.emit("message", socketData);
