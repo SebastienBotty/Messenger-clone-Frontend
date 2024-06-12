@@ -31,6 +31,7 @@ import {
   useMostRecentConvContext,
   useTriggerContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
+import TypingDots from "../TypingDots/TypingdDots";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
 import { socket } from "../../socket";
@@ -51,6 +52,8 @@ function WindowConversation() {
   const firstMessageRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollViewRef = useRef<HTMLDivElement | null>(null);
+  const inputMessageRef = useRef<HTMLInputElement>(null);
+  const [convMembersTyping, setConvMembersTyping] = useState<string[]>([]);
   const user = useContext(UserContext)?.userName;
   const userId = useContext(UserContext)?._id;
 
@@ -422,18 +425,18 @@ function WindowConversation() {
 
   const sendMsgToSocket = (
     messageData: MessageType,
-    socketsObject: Promise<any>,
+    convMembersSocket: Promise<any>,
     conversation: ConversationType | null
   ) => {
     const socketData =
       conversation == displayedConv
         ? [
-            socketsObject,
+            convMembersSocket,
             messageData,
             conversation,
             messages[messages.length - 1],
           ]
-        : [socketsObject, messageData, conversation];
+        : [convMembersSocket, messageData, conversation];
     console.log(messages[messages.length - 1]);
     console.log(socketData);
     socket.emit("message", socketData);
@@ -457,6 +460,29 @@ function WindowConversation() {
     };
   }, []); */
 
+  const sendUserWrittingToSocket = async (isWriting: boolean) => {
+    if (displayedConv) {
+      const convMembersSocket = await getUsersSocket(displayedConv);
+      const socketData = [convMembersSocket, isWriting, user, displayedConv];
+      socket.emit("typing", socketData);
+    }
+  };
+
+  const displayMembersTyping = () => {
+    if (convMembersTyping.length > 2) {
+      return (
+        <>
+          {convMembersTyping[0]}, {convMembersTyping[1]} et
+          {convMembersTyping.length - 2 > 1
+            ? convMembersTyping.length - 2 + " autres... "
+            : " un autre..."}
+        </>
+      );
+    } else {
+      return <>{convMembersTyping.join(", ")}</>;
+    }
+  };
+
   useEffect(() => {
     if (displayedConv) {
       console.log("ON WINDOW " + displayedConv?.isGroupConversation);
@@ -474,6 +500,18 @@ function WindowConversation() {
           setMessages((prev) => [...prev, message]);
         } else {
           console.log("pas bonne conv");
+        }
+      });
+      socket.on("typing", (data) => {
+        console.log(data);
+        if (data[2]._id === displayedConv?._id) {
+          if (data[0] === true) {
+            setConvMembersTyping((prev) => [...prev, data[1]]);
+          } else if (data[0] === false) {
+            setConvMembersTyping((prev) =>
+              prev.filter((item) => item !== data[1])
+            );
+          }
         }
       });
     } else if (searchInputRef.current) {
@@ -700,7 +738,13 @@ function WindowConversation() {
               </div>
             );
           })}
-        <div className="conversation-body-bottom"></div>
+        <div className="conversation-body-bottom" style={{ display: "flex" }}>
+          {convMembersTyping.length > 0 && (
+            <div className="typing-users">
+              <TypingDots /> {displayMembersTyping()}
+            </div>
+          )}
+        </div>
       </div>
       <div className="conversation-footer">
         <div className="icons">
@@ -745,9 +789,12 @@ function WindowConversation() {
             placeholder="Aa"
             value={inputMessage}
             onKeyDown={handleKeyDown}
+            ref={inputMessageRef}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setInputMessage(e.target.value)
             }
+            onFocus={() => sendUserWrittingToSocket(true)}
+            onBlur={() => sendUserWrittingToSocket(false)}
           />
         </div>
         <div className="like-icon">
