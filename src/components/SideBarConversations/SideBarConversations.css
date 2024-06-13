@@ -172,13 +172,17 @@
   justify-content: center;
 }
 
-#conversation-name {
+.conversation-name {
   font-size: large;
-  font-weight: 500;
+  font-weight: 600;
   width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #conversation-last-message {
+  position: relative;
   width: 100%;
   font-size: medium;
   font-weight: 400;
@@ -190,13 +194,22 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #65676b;
 }
 
-#conversation-name {
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+#unseen-conversation {
+  font-weight: 600;
+  color: black;
+}
+.unseen-conversation-notification {
+  position: absolute;
+  right: 0;
+  margin-right: 0.5rem;
+  align-self: center;
+  background-color: #0c6bd3;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
 }
 
 #selected-conversation {
