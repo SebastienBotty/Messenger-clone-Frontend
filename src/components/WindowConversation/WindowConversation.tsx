@@ -35,7 +35,7 @@ import TypingDots from "../TypingDots/TypingdDots";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
 import { socket } from "../../socket";
-
+import { markMessagesAsSeen } from "../../utils";
 function WindowConversation() {
   // Create conversation
   const [addedMembers, setAddedMembers] = useState<string[]>([]);
@@ -163,7 +163,7 @@ function WindowConversation() {
           author: user,
           authorId: userId,
           text: inputMessage,
-          seen_by: [user],
+          seenBy: [user],
           date: new Date(),
           conversationId: jsonData._id,
         };
@@ -331,7 +331,7 @@ function WindowConversation() {
       authorId: userId,
 
       text: inputMessage,
-      seen_by: [user],
+      seenBy: [user],
       date: new Date(),
       conversationId: displayedConv?._id,
     };
@@ -375,14 +375,14 @@ function WindowConversation() {
       if (conversationData) {
         setMostRecentConv(conversationData);
         sendMsgToSocket(
-          messageData,
+          jsonData,
           await getUsersSocket(conversationData),
           conversationData
         );
       } else {
         setMostRecentConv(displayedConv);
         sendMsgToSocket(
-          messageData,
+          jsonData,
           await getUsersSocket(displayedConv),
           displayedConv
         );
@@ -512,6 +512,10 @@ function WindowConversation() {
               prev.filter((item) => item !== data[1])
             );
           }
+        } else {
+          setConvMembersTyping((prev) =>
+            prev.filter((item) => item !== data[1])
+          );
         }
       });
     } else if (searchInputRef.current) {
