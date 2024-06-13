@@ -35,7 +35,6 @@ import TypingDots from "../TypingDots/TypingdDots";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
 import { socket } from "../../socket";
-import { markMessagesAsSeen } from "../../utils";
 function WindowConversation() {
   // Create conversation
   const [addedMembers, setAddedMembers] = useState<string[]>([]);
