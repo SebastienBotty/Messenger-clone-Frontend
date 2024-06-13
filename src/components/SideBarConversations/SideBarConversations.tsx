@@ -184,6 +184,79 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     setConversations(filteredConvArr);
   };
 
+  const handleConversationClick = async (conversation: ConversationType) => {
+    console.log(conversation.lastMessage);
+    if (conversation.lastMessage._id && userData?._id && userData?.userName) {
+      setDisplayedConv(conversation);
+
+      if (!conversation.lastMessage.seenBy.includes(userData?.userName)) {
+        updateSeenConversation(conversation.lastMessage._id, conversation);
+      }
+    }
+  };
+  const markMessagesAsSeen = async (
+    messageId: string,
+    userId: string,
+    username: string
+  ) => {
+    try {
+      const response = await fetch(
+        RESTAPIUri + "/message/userId/" + userId + "/markMessageAsSeen",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + ApiToken(),
+          },
+          body: JSON.stringify({
+            messageId: messageId,
+            username: username,
+          }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Erreur lors du PATCH markMessagesAsSeen");
+      }
+      const jsonData = await response.json();
+      console.log(jsonData);
+      return jsonData;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+  const updateSeenConversation = async (
+    messageId: string,
+    conversation: ConversationType
+  ) => {
+    if (userData) {
+      const setMsgSeen = await markMessagesAsSeen(
+        messageId,
+        userData._id,
+        userData.userName
+      );
+      if (setMsgSeen) {
+        setConversations((prev) => {
+          return prev.map((conv) => {
+            if (conv._id === conversation._id) {
+              return {
+                ...conv,
+                lastMessage: {
+                  ...conv.lastMessage,
+                  seenBy: setMsgSeen.seenBy,
+                },
+              };
+            }
+            return conv;
+          });
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     fetchConversationsId();
     return () => {};
@@ -202,7 +275,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         key={conversation._id + "-" + index}
         className="conversation"
         onClick={() => {
-          setDisplayedConv(conversation);
+          handleConversationClick(conversation);
           console.log("ON CLICK CONV : " + conversation._id);
         }}
         id={
@@ -213,13 +286,20 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           <img src={conversation.photo} />
         </div>
         <div className="conversation-text-container">
-          <div id="conversation-name">
+          <div className="conversation-name">
             {conversation.members
               .filter((item) => item !== userData?.userName)
               .join(", ")}
           </div>
           <div id="conversation-last-message">
-            <div className="truncated-text">
+            <div
+              className="truncated-text"
+              id={
+                conversation.lastMessage.seenBy.includes(userData?.userName)
+                  ? "seen"
+                  : "unseen-conversation"
+              }
+            >
               {conversation.isGroupConversation
                 ? conversation.lastMessage.author +
                   ": " +
@@ -227,6 +307,9 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                 : conversation.lastMessage.text}
             </div>
             - {timeSince(conversation.lastMessage.date)}
+            {!conversation.lastMessage.seenBy.includes(userData?.userName) && (
+              <div className="unseen-conversation-notification"></div>
+            )}
           </div>
         </div>
       </div>
@@ -255,18 +338,21 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     socket.on("message", (data) => {
       console.log("Message reçu");
       console.log(data[0]);
+      console.log(data[1]);
       console.log(data[2]);
       if (data[2]) {
         if (
           moreThanOneMinBetween(new Date(data[0].date), new Date(data[2].date))
         ) {
-          console.log("more than 1 min");
           notificationSound.play();
         }
       } else {
         notificationSound.play();
       }
-
+      if (displayedConv?._id === data[0].conversationId) {
+        // On new message, if the displayed conversation is the one with the new message, update the last message and mark it as seen
+        updateSeenConversation(data[0]._id, data[1]);
+      }
       setMostRecentConv(data[1]);
     });
 
