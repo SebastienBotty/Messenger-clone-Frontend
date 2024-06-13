@@ -30,9 +30,10 @@ export type MessageType = {
   author: string | undefined;
   authorId?: string;
   text: string;
-  seen_by: (string | undefined)[];
+  seenBy: (string | undefined)[];
   date: Date;
   conversationId: string | undefined;
+  _id?: string;
 };
 
 export type Date15minDifference = {
