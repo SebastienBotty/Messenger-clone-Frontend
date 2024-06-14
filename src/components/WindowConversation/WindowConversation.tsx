@@ -811,7 +811,11 @@ function WindowConversation() {
                   <div className="img-container">
                     <img src={image} />
                   </div>
-                  <div className="message" onClick={() => console.log(message)}>
+                  <div
+                    className="message"
+                    ref={lastMessage ? messagesEndRef : null}
+                    onClick={() => console.log(message)}
+                  >
                     {message.text}
                   </div>
                 </div>
