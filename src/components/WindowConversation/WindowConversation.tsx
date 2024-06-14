@@ -12,6 +12,7 @@ import {
   monthNames,
   UserDataType,
   ConversationType,
+  LastMsgSeenByMembersType,
 } from "../../typescript/types";
 import {
   AddCircle,
@@ -48,11 +49,14 @@ function WindowConversation() {
   const { trigger, setTrigger } = useTriggerContext();
   const [inputMessage, setInputMessage] = useState<string>("");
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
+  const [convMembersTyping, setConvMembersTyping] = useState<string[]>([]);
+  const [lastMsgSeenByConvMembers, setLastMsgSeenByConvMembers] = useState<
+    LastMsgSeenByMembersType[]
+  >([]);
   const firstMessageRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollViewRef = useRef<HTMLDivElement | null>(null);
   const inputMessageRef = useRef<HTMLInputElement>(null);
-  const [convMembersTyping, setConvMembersTyping] = useState<string[]>([]);
   const user = useContext(UserContext)?.userName;
   const userId = useContext(UserContext)?._id;
 
@@ -84,21 +88,40 @@ function WindowConversation() {
         throw new Error("Erreur lor du fetch");
       }
       const jsonData = await response.json();
+      console.log("iciiiiiiiiiiiiiiiiiiiiii");
       console.log(jsonData);
       setMessages((prev) => [...prev, ...jsonData]);
       fetchMsgIndex.current += limitFetchMsg;
-
-      const div = scrollViewRef.current;
-      console.log("eeeeeeeeeeeeeeeeeeee");
       if (firstMessageRef.current) {
         firstMessageRef.current.scrollIntoView({ behavior: "smooth" });
       }
+      return jsonData;
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
       } else {
         console.error("An unknown error occurred");
       }
+    }
+  };
+
+  const lastMsgSeenByMembers = (messagesArr: MessageType[]) => {
+    const tempArray: LastMsgSeenByMembersType[] = [];
+    if (displayedConv) {
+      for (const member of displayedConv.members) {
+        if (member !== user) {
+          for (const msg of messagesArr) {
+            if (msg.seenBy.includes(member)) {
+              tempArray.push({ username: member, messageId: msg._id });
+              break;
+            }
+            //fetch
+          }
+        }
+      }
+      console.log(tempArray);
+      setLastMsgSeenByConvMembers(tempArray);
+      return false;
     }
   };
 
@@ -373,14 +396,14 @@ function WindowConversation() {
       setTrigger(!trigger);
       if (conversationData) {
         setMostRecentConv(conversationData);
-        sendMsgToSocket(
+        emitMsgToSocket(
           jsonData,
           await getUsersSocket(conversationData),
           conversationData
         );
       } else {
         setMostRecentConv(displayedConv);
-        sendMsgToSocket(
+        emitMsgToSocket(
           jsonData,
           await getUsersSocket(displayedConv),
           displayedConv
@@ -422,7 +445,7 @@ function WindowConversation() {
     }
   };
 
-  const sendMsgToSocket = (
+  const emitMsgToSocket = (
     messageData: MessageType,
     convMembersSocket: Promise<any>,
     conversation: ConversationType | null
@@ -439,6 +462,24 @@ function WindowConversation() {
     console.log(messages[messages.length - 1]);
     console.log(socketData);
     socket.emit("message", socketData);
+  };
+  const emitSeenMsgToSocket = async (
+    messageData: MessageType,
+    conversation: ConversationType | null
+  ) => {
+    const convMembersSocket = await getUsersSocket(conversation);
+    const seenMsgData = messageData;
+    messageData.seenBy = [user];
+    const socketData = [convMembersSocket, seenMsgData, conversation];
+    socket.emit("seenMessage", socketData);
+  };
+
+  const emitUserWrittingToSocket = async (isWriting: boolean) => {
+    if (displayedConv) {
+      const convMembersSocket = await getUsersSocket(displayedConv);
+      const socketData = [convMembersSocket, isWriting, user, displayedConv];
+      socket.emit("typing", socketData);
+    }
   };
 
   /* useEffect(() => {
@@ -459,14 +500,6 @@ function WindowConversation() {
     };
   }, []); */
 
-  const sendUserWrittingToSocket = async (isWriting: boolean) => {
-    if (displayedConv) {
-      const convMembersSocket = await getUsersSocket(displayedConv);
-      const socketData = [convMembersSocket, isWriting, user, displayedConv];
-      socket.emit("typing", socketData);
-    }
-  };
-
   const displayMembersTyping = () => {
     if (convMembersTyping.length > 2) {
       return (
@@ -482,23 +515,49 @@ function WindowConversation() {
     }
   };
 
+  const asyncFetchMsg = async () => {
+    const fetchedMessages = await fetchMessages();
+    lastMsgSeenByMembers(fetchedMessages);
+
+    emitSeenMsgToSocket(fetchedMessages[0], displayedConv);
+  };
   useEffect(() => {
     if (displayedConv) {
       console.log("ON WINDOW " + displayedConv?.isGroupConversation);
       console.log(displayedConv);
       fetchMsgIndex.current = 0;
       setMessages([]);
-      fetchMessages();
+      asyncFetchMsg();
 
       socket.on("message", (data) => {
         const message = data[0];
         const convId = data[1]._id;
-
+        console.log("MESSAGE RECU");
+        console.log(message);
         if (convId === displayedConv?._id) {
           console.log("bonne conv");
           setMessages((prev) => [...prev, message]);
+          emitSeenMsgToSocket(message, displayedConv);
         } else {
           console.log("pas bonne conv");
+        }
+      });
+
+      socket.on("seenMessage", (data) => {
+        const message = data[0];
+        const conv = data[1];
+        console.log("iciiiiiiiiiii");
+        console.log(message);
+        console.log(conv);
+
+        if (conv?._id === displayedConv?._id) {
+          setLastMsgSeenByConvMembers((prev) =>
+            prev.map((item) =>
+              item.username === message.seenBy[0]
+                ? { ...item, messageId: message._id }
+                : item
+            )
+          );
         }
       });
       socket.on("typing", (data) => {
@@ -694,6 +753,13 @@ function WindowConversation() {
                       {message.text}
                     </div>
                   </div>
+                  <div className="seen-by">
+                    {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                      if (message._id === lastMsgSeen.messageId) {
+                        return <div>{lastMsgSeen.username}</div>;
+                      }
+                    })}
+                  </div>
                 </div>
               );
             }
@@ -729,16 +795,34 @@ function WindowConversation() {
                       {message.text}
                     </div>
                   </div>
+                  <div className="seen-by">
+                    {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                      if (message._id === lastMsgSeen.messageId) {
+                        return <div>{lastMsgSeen.username}</div>;
+                      }
+                    })}
+                  </div>
                 </div>
               );
             }
             return (
-              <div className="message-container" id="message-others">
-                <div className="img-container">
-                  <img src={image} />
+              <>
+                <div className="message-container" id="message-others">
+                  <div className="img-container">
+                    <img src={image} />
+                  </div>
+                  <div className="message" onClick={() => console.log(message)}>
+                    {message.text}
+                  </div>
                 </div>
-                <div className="message">{message.text}</div>
-              </div>
+                <div className="seen-by">
+                  {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                    if (message._id === lastMsgSeen.messageId) {
+                      return <div>{lastMsgSeen.username}</div>;
+                    }
+                  })}
+                </div>
+              </>
             );
           })}
         <div className="conversation-body-bottom" style={{ display: "flex" }}>
@@ -796,8 +880,8 @@ function WindowConversation() {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setInputMessage(e.target.value)
             }
-            onFocus={() => sendUserWrittingToSocket(true)}
-            onBlur={() => sendUserWrittingToSocket(false)}
+            onFocus={() => emitUserWrittingToSocket(true)}
+            onBlur={() => emitUserWrittingToSocket(false)}
           />
         </div>
         <div className="like-icon">

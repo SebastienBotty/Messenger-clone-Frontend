@@ -36,6 +36,11 @@ export type MessageType = {
   _id?: string;
 };
 
+export type LastMsgSeenByMembersType = {
+  username: string;
+  messageId: string | undefined;
+};
+
 export type Date15minDifference = {
   isMoreThan15Minutes: boolean;
   hours: string;

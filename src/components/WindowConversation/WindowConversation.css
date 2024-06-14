@@ -242,6 +242,13 @@
   text-align: center;
 }
 
+.seen-by {
+  height: 1rem;
+  width: 100%;
+  display: flex;
+  justify-content: end;
+}
+
 /*---------------------------------------------------------------FOOTER---------------------*/
 .conversation-footer {
   height: 6vh;
