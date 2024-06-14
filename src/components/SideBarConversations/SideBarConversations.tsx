@@ -430,6 +430,17 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         {searchConversationInput
           ? conversations
               .filter((item) => convFilterMember(item))
+              .sort((a, b) => {
+                // If either a or b has test: true, it should come first
+                if (a.isGroupConversation) return 1;
+                if (b.isGroupConversation) return -1;
+
+                // If neither has test: true, sort by date
+                return (
+                  new Date(a.lastMessage.date).getTime() -
+                  new Date(b.lastMessage.date).getTime()
+                );
+              })
               .map((conversation, index) =>
                 conversationsMap(conversation, index)
               )
