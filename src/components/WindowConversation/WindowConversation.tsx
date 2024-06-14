@@ -105,7 +105,16 @@ function WindowConversation() {
     }
   };
 
-  const lastMsgSeenByMembers = (messagesArr: MessageType[]) => {
+  /**
+   * Returns an array of the last messages seen by each member in the conversation (only the X first messages fetched on loading component)
+   * excluding the current user. If a member has not seen any messages, it fetches
+   * the last message they have seen in the DB. The function takes an array of MessageType objects
+   * as input and updates the state with the last messages seen by each member.
+   *
+   * @param {MessageType[]} messagesArr - An array of MessageType objects representing
+   * the messages in the conversation.
+   * @return {boolean} This function always returns false.
+   */ const lastMsgSeenByMembers = async (messagesArr: MessageType[]) => {
     const tempArray: LastMsgSeenByMembersType[] = [];
     if (displayedConv) {
       for (const member of displayedConv.members) {
@@ -113,15 +122,50 @@ function WindowConversation() {
           for (const msg of messagesArr) {
             if (msg.seenBy.includes(member)) {
               tempArray.push({ username: member, messageId: msg._id });
-              break;
+              break; //Stop after finding the first msg he has seen(the latest one)
             }
-            //fetch
+          }
+          //if no msg has been seen by this member, fetches the last message he has seen
+
+          if (tempArray.every((item) => item.username !== member)) {
+            console.log("PLUS DE 15 MESSAGES");
+            const lastMsgIdSeenByUser = await fetchLastMsgIdSeenByUser(member);
+            tempArray.push({
+              username: member,
+              messageId: lastMsgIdSeenByUser,
+            });
           }
         }
       }
-      console.log(tempArray);
       setLastMsgSeenByConvMembers(tempArray);
       return false;
+    }
+  };
+  const fetchLastMsgIdSeenByUser = async (username: string) => {
+    try {
+      const response = await fetch(
+        RESTAPIUri +
+          "/message/userId/" +
+          userId +
+          "/getLastMsgSeenByUser?conversationId=" +
+          displayedConv?._id +
+          "&username=" +
+          username,
+        {
+          headers: { authorization: `Bearer ${ApiToken()}` },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Erreur lor du fetch lastMsgSeen");
+      }
+      const jsonData = await response.json();
+      return jsonData;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
     }
   };
 
@@ -523,8 +567,6 @@ function WindowConversation() {
   };
   useEffect(() => {
     if (displayedConv) {
-      console.log("ON WINDOW " + displayedConv?.isGroupConversation);
-      console.log(displayedConv);
       fetchMsgIndex.current = 0;
       setMessages([]);
       asyncFetchMsg();
@@ -532,23 +574,16 @@ function WindowConversation() {
       socket.on("message", (data) => {
         const message = data[0];
         const convId = data[1]._id;
-        console.log("MESSAGE RECU");
-        console.log(message);
+
         if (convId === displayedConv?._id) {
-          console.log("bonne conv");
           setMessages((prev) => [...prev, message]);
           emitSeenMsgToSocket(message, displayedConv);
-        } else {
-          console.log("pas bonne conv");
         }
       });
 
       socket.on("seenMessage", (data) => {
         const message = data[0];
         const conv = data[1];
-        console.log("iciiiiiiiiiii");
-        console.log(message);
-        console.log(conv);
 
         if (conv?._id === displayedConv?._id) {
           setLastMsgSeenByConvMembers((prev) =>
@@ -561,7 +596,6 @@ function WindowConversation() {
         }
       });
       socket.on("typing", (data) => {
-        console.log(data);
         if (data[2]._id === displayedConv?._id) {
           if (data[0] === true) {
             setConvMembersTyping((prev) => [...prev, data[1]]);
