@@ -243,7 +243,8 @@
 }
 
 .seen-by {
-  height: 1rem;
+  min-height: 0;
+  max-height: 1rem;
   width: 100%;
   display: flex;
   justify-content: end;
