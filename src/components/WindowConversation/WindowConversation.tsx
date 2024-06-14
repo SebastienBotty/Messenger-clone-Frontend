@@ -130,6 +130,9 @@ function WindowConversation() {
           if (tempArray.every((item) => item.username !== member)) {
             console.log("PLUS DE 15 MESSAGES");
             const lastMsgIdSeenByUser = await fetchLastMsgIdSeenByUser(member);
+            if (!lastMsgIdSeenByUser) {
+              break;
+            }
             tempArray.push({
               username: member,
               messageId: lastMsgIdSeenByUser,
