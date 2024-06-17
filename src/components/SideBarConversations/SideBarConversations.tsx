@@ -301,7 +301,9 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
               }
             >
               {conversation.isGroupConversation
-                ? conversation.lastMessage.author +
+                ? (conversation.lastMessage.author === userData?.userName
+                    ? "vous"
+                    : conversation.lastMessage.author) +
                   ": " +
                   conversation.lastMessage.text
                 : conversation.lastMessage.text}
