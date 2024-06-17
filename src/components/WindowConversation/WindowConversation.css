@@ -1,6 +1,7 @@
 .WindowConversation {
   width: calc(100vw - 21vw - 1px);
   height: calc(100vh - 5vh);
+  position: relative;
 }
 /*--------------------------------------------HEADER--------------------------------------*/
 .conversation-header {
@@ -208,9 +209,9 @@
 }
 .message {
   max-width: 40%;
-  border-radius: 1.5rem;
+  border-radius: 1.75rem;
   width: fit-content;
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
   white-space: pre-wrap; /* Préserve les espaces blancs et enroule le texte */
   word-wrap: break-word;
   text-wrap: wrap;
@@ -251,6 +252,28 @@
   width: 100%;
   display: flex;
   justify-content: end;
+}
+
+.button-go-to-last-message {
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 7.5rem;
+  left: 50%;
+  transform: translateX(-75%); /* Centre l'élément horizontalement */
+  width: fit-content;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.button-go-to-last-message > button {
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0.5rem;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.1);
+}
+
+.button-go-to-last-message > button:hover {
+  background-color: #f4f5f8;
 }
 
 /*---------------------------------------------------------------FOOTER---------------------*/

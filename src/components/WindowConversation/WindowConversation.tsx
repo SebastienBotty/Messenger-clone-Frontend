@@ -23,6 +23,7 @@ import {
   ThumbsUp,
   Send,
   Close,
+  ArrowDown,
 } from "react-ionicons";
 
 import "./WindowConversation.css";
@@ -334,7 +335,7 @@ function WindowConversation() {
     if (scrollViewRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollViewRef.current;
       // Vérifie si l'utilisateur est proche du bas
-      setIsAtBottom(scrollTop + clientHeight >= scrollHeight - 50);
+      setIsAtBottom(scrollTop + clientHeight >= scrollHeight - 300);
     }
   };
 
@@ -746,9 +747,32 @@ function WindowConversation() {
         onScroll={handleScroll}
       >
         {displayedConv && (
-          <div className="load-more-messages">
-            <span onClick={() => fetchMessages()}>Charger plus de message</span>
-          </div>
+          <>
+            <div className="load-more-messages">
+              <span onClick={() => fetchMessages()}>
+                Charger plus de message
+              </span>
+            </div>
+            <div
+              className="button-go-to-last-message"
+              style={isAtBottom ? { display: "none" } : { display: "block" }}
+            >
+              <button
+                onClick={() =>
+                  scrollViewRef.current?.scrollTo({
+                    top: scrollViewRef.current.scrollHeight,
+                  })
+                }
+              >
+                <ArrowDown
+                  color={"#00000"}
+                  title="Informations sur la conversation"
+                  height="3vh"
+                  width="3vh"
+                />
+              </button>
+            </div>
+          </>
         )}
 
         {messages
