@@ -1,5 +1,5 @@
 .WindowConversation {
-  width: 100%;
+  width: calc(100vw - 21vw - 1px);
   height: calc(100vh - 5vh);
 }
 /*--------------------------------------------HEADER--------------------------------------*/
@@ -211,6 +211,9 @@
   border-radius: 2rem;
   width: fit-content;
   padding: 0.5rem 0.75rem;
+  white-space: pre-wrap; /* Préserve les espaces blancs et enroule le texte */
+  word-wrap: break-word;
+  text-wrap: wrap;
 }
 #message-me {
   display: flex;
