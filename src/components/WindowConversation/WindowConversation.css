@@ -208,7 +208,7 @@
 }
 .message {
   max-width: 40%;
-  border-radius: 2rem;
+  border-radius: 1.5rem;
   width: fit-content;
   padding: 0.5rem 0.75rem;
   white-space: pre-wrap; /* Préserve les espaces blancs et enroule le texte */
