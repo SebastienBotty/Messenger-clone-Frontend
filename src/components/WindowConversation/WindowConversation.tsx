@@ -38,6 +38,8 @@ import _ from "lodash";
 import { ApiToken } from "../../localStorage";
 import { socket } from "../../socket";
 function WindowConversation() {
+  const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
+
   // Create conversation
   const [addedMembers, setAddedMembers] = useState<string[]>([]);
   const [searchUserInput, setSearchUserInput] = useState<string>("");
@@ -60,6 +62,12 @@ function WindowConversation() {
   const inputMessageRef = useRef<HTMLInputElement>(null);
   const user = useContext(UserContext)?.userName;
   const userId = useContext(UserContext)?._id;
+
+  // Files handling
+  const inputFileRef = useRef<HTMLInputElement>(null);
+  const [droppedFiles, setDroppedFiles] = useState<File[]>([]);
+  const [showDragOverOverlay, setShowDragOverOverlay] =
+    useState<boolean>(false);
 
   const image =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=";
@@ -400,11 +408,19 @@ function WindowConversation() {
       author: user,
       authorId: userId,
 
-      text: inputMessage,
+      text:
+        droppedFiles.length > 0
+          ? "PATHIMAGE/" +
+            displayedConv?._id +
+            ":" +
+            droppedFiles.map((file) => file.name).join(",")
+          : inputMessage,
       seenBy: [user],
       date: new Date(),
       conversationId: displayedConv?._id,
     };
+    console.log("iciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+    console.log(messageData.text);
     setInputMessage("");
 
     postMessage(messageData);
@@ -572,6 +588,8 @@ function WindowConversation() {
   useEffect(() => {
     if (displayedConv) {
       fetchMsgIndex.current = 0;
+      setDroppedFiles([]);
+      setShowDragOverOverlay(false);
       setMessages([]);
       asyncFetchMsg();
 
@@ -629,8 +647,173 @@ function WindowConversation() {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isAtBottom, displayedConv]);
+
+  const handleDragOver = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!showDragOverOverlay) {
+        setShowDragOverOverlay(true);
+      }
+    },
+    []
+  );
+
+  const calculateTotalSize = (files: File[]): number => {
+    return files.reduce((totalSize, file) => totalSize + file.size, 0);
+  };
+
+  const handleDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const { files } = event.dataTransfer;
+      if (files) {
+        const newFiles = Array.from(files);
+        if (newFiles[0].name.includes(",")) {
+          alert("Veuillez ne pas utiliser des virgules dans le nom du fichier");
+        }
+
+        const totalSize = calculateTotalSize([...droppedFiles, ...newFiles]);
+        console.log(totalSize);
+        console.log(MAX_FILE_SIZE_BYTES);
+
+        if (totalSize <= MAX_FILE_SIZE_BYTES) {
+          setDroppedFiles((prevFiles) => [...prevFiles, ...newFiles]);
+          setShowDragOverOverlay(false);
+        } else {
+          alert(
+            "Le poids total des fichiers excèse la limite de " +
+              MAX_FILE_SIZE_BYTES / 1024 / 1024 +
+              " Mo.\n Poids actuel : " +
+              formatFileSize(totalSize) +
+              ".\n Votre fichier : " +
+              formatFileSize(newFiles[0].size)
+          );
+          setShowDragOverOverlay(false);
+        }
+      }
+    },
+    [droppedFiles]
+  );
+  const formatFileSize = (size: number): string => {
+    if (size === 0) return "0 o";
+
+    const units = ["o", "Ko", "Mo", "Go", "To"];
+    const digitGroups = Math.floor(Math.log(size) / Math.log(1024));
+
+    return `${(size / Math.pow(1024, digitGroups)).toFixed(2)} ${
+      units[digitGroups]
+    }`;
+  };
+
+  const FilePreview = () => {
+    return (
+      <div className="file-preview-container">
+        {droppedFiles.map((file, index) => (
+          <div key={index} className="file-preview-item">
+            <div
+              className="delete-file"
+              onClick={() =>
+                setDroppedFiles((prev) => prev.filter((_, i) => i !== index))
+              }
+            >
+              <Close
+                color={"red"}
+                title={"Supprimer"}
+                height="1.5rem"
+                width="1.5rem"
+              />
+            </div>
+            {file.type.startsWith("image/") ? (
+              <img
+                src={URL.createObjectURL(file)}
+                alt={`Preview ${file.name}`}
+                className="file-preview-image"
+              />
+            ) : (
+              <div className="file-icon">
+                <img
+                  src="/file-icon.png"
+                  alt={`File Icon`}
+                  className="file-icon-img"
+                />
+                <div className="file-name">{file.name}</div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    console.log(files);
+    if (files) {
+      setDroppedFiles((prevFiles) => [...prevFiles, ...Array.from(files)]);
+    }
+  };
+
+  const openFileInput = (e: React.MouseEvent) => {
+    if (inputFileRef.current) {
+      inputFileRef.current.click();
+    }
+  };
+
+  const uploadFiles = async () => {
+    if (droppedFiles.length < 1) {
+      return;
+    }
+    const filesFormData = new FormData();
+    for (const file of droppedFiles) {
+      filesFormData.append("files", file);
+    }
+    console.log(droppedFiles);
+    console.log(filesFormData);
+
+    try {
+      const response = await fetch(
+        RESTAPIUri + "/file/upload/" + displayedConv?._id,
+        {
+          method: "POST",
+
+          body: filesFormData,
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Error uploading files");
+      }
+      const data = await response.json();
+      console.log(data);
+      setDroppedFiles([]);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+
+  const sendFile = async () => {
+    await uploadFiles();
+    console.log("fichiers envoyés");
+    await sendMessage();
+    console.log("msg envoyé");
+  };
   return (
-    <div className="WindowConversation">
+    <div
+      className="WindowConversation"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {showDragOverOverlay && (
+        <div className="drag-overlay">
+          <span>Déposer un fichier</span>{" "}
+        </div>
+      )}
       <div className="conversation-header">
         <div className="conversation-member-info">
           {displayedConv ? (
@@ -910,6 +1093,7 @@ function WindowConversation() {
           {!inputMessage && (
             <>
               <ImagesOutline
+                onClick={openFileInput}
                 title="Joindre un fichier"
                 color={"#00000"}
                 height="3vh"
@@ -917,12 +1101,14 @@ function WindowConversation() {
                 style={{ transform: "rotate(270deg)" }}
               />
               <ImagesOutline
+                onClick={() => console.log(droppedFiles)}
                 color={"#00000"}
                 height="3vh"
                 width="3vh"
                 style={{ transform: "rotate(270deg)" }}
               />
               <ImagesOutline
+                onClick={uploadFiles}
                 color={"#00000"}
                 height="3vh"
                 width="3vh"
@@ -933,8 +1119,20 @@ function WindowConversation() {
         </div>
         <div
           className="message-input"
-          style={inputMessage ? { width: "95%" } : {}}
+          style={inputMessage ? { flex: "auto" } : {}}
         >
+          <div className="display-file-zone">
+            <input
+              type="file"
+              ref={inputFileRef}
+              style={{ display: "none" }}
+              multiple
+              onChange={handleFileChange}
+            />
+
+            {FilePreview()}
+          </div>
+
           <input
             type="text"
             className="send-message"
@@ -950,13 +1148,17 @@ function WindowConversation() {
           />
         </div>
         <div className="like-icon">
-          {inputMessage ? (
+          {inputMessage || droppedFiles.length > 0 ? (
             <Send
               color={"#00000"}
               height="3vh"
               width="3vh"
               onClick={() =>
-                displayedConv ? sendMessage() : createConversation()
+                droppedFiles
+                  ? sendFile()
+                  : displayedConv
+                  ? sendMessage()
+                  : createConversation()
               }
             />
           ) : (
