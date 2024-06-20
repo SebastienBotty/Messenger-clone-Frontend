@@ -671,32 +671,45 @@ function WindowConversation() {
       const { files } = event.dataTransfer;
       if (files) {
         const newFiles = Array.from(files);
-        if (newFiles[0].name.includes(",")) {
-          alert("Veuillez ne pas utiliser des virgules dans le nom du fichier");
-        }
-
-        const totalSize = calculateTotalSize([...droppedFiles, ...newFiles]);
-        console.log(totalSize);
-        console.log(MAX_FILE_SIZE_BYTES);
-
-        if (totalSize <= MAX_FILE_SIZE_BYTES) {
-          setDroppedFiles((prevFiles) => [...prevFiles, ...newFiles]);
-          setShowDragOverOverlay(false);
-        } else {
-          alert(
-            "Le poids total des fichiers excèse la limite de " +
-              MAX_FILE_SIZE_BYTES / 1024 / 1024 +
-              " Mo.\n Poids actuel : " +
-              formatFileSize(totalSize) +
-              ".\n Votre fichier : " +
-              formatFileSize(newFiles[0].size)
-          );
-          setShowDragOverOverlay(false);
-        }
+        checkFiles(newFiles);
       }
     },
     [droppedFiles]
   );
+
+  const checkFiles = (files: File[]) => {
+    for (const file of files) {
+      if (file.name.includes(",")) {
+        alert(
+          "Veuillez ne pas utiliser des virgules dans le nom du fichier \n " +
+            file.name
+        );
+        setShowDragOverOverlay(false);
+        continue;
+      }
+
+      const totalSize = calculateTotalSize([...droppedFiles, file]);
+      console.log(totalSize);
+      console.log(MAX_FILE_SIZE_BYTES);
+
+      if (totalSize <= MAX_FILE_SIZE_BYTES) {
+        setDroppedFiles((prevFiles) => [...prevFiles, file]);
+        setShowDragOverOverlay(false);
+      } else {
+        alert(
+          "Le poids total des fichiers excède la limite de " +
+            MAX_FILE_SIZE_BYTES / 1024 / 1024 +
+            " Mo.\n Poids actuel : " +
+            formatFileSize(totalSize) +
+            ".\n " +
+            file.name +
+            " : " +
+            formatFileSize(file.size)
+        );
+        setShowDragOverOverlay(false);
+      }
+    }
+  };
   const formatFileSize = (size: number): string => {
     if (size === 0) return "0 o";
 
@@ -750,9 +763,9 @@ function WindowConversation() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    console.log(files);
     if (files) {
-      setDroppedFiles((prevFiles) => [...prevFiles, ...Array.from(files)]);
+      const filesArr = Array.from(files);
+      checkFiles(filesArr);
     }
   };
 
@@ -779,6 +792,9 @@ function WindowConversation() {
         {
           method: "POST",
 
+          headers: {
+            authorization: `Bearer ${ApiToken()}`,
+          },
           body: filesFormData,
         }
       );
@@ -1108,7 +1124,6 @@ function WindowConversation() {
                 style={{ transform: "rotate(270deg)" }}
               />
               <ImagesOutline
-                onClick={uploadFiles}
                 color={"#00000"}
                 height="3vh"
                 width="3vh"
@@ -1121,18 +1136,16 @@ function WindowConversation() {
           className="message-input"
           style={inputMessage ? { flex: "auto" } : {}}
         >
-          <div className="display-file-zone">
-            <input
-              type="file"
-              ref={inputFileRef}
-              style={{ display: "none" }}
-              multiple
-              onChange={handleFileChange}
-            />
-
-            {FilePreview()}
-          </div>
-
+          {droppedFiles.length > 0 && (
+            <div className="display-file-zone">{FilePreview()}</div>
+          )}
+          <input
+            type="file"
+            ref={inputFileRef}
+            style={{ display: "none" }}
+            multiple
+            onChange={handleFileChange}
+          />
           <input
             type="text"
             className="send-message"
