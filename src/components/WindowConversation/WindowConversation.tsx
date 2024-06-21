@@ -1163,9 +1163,6 @@ function WindowConversation() {
           className="message-input"
           style={inputMessage ? { flex: "auto" } : {}}
         >
-          {droppedFiles.length > 0 && (
-            <div className="display-file-zone">{filePreview()}</div>
-          )}
           <input
             type="file"
             ref={inputFileRef}
@@ -1173,19 +1170,23 @@ function WindowConversation() {
             multiple
             onChange={handleFileChange}
           />
-          <input
-            type="text"
-            className="send-message"
-            placeholder="Aa"
-            value={inputMessage}
-            onKeyDown={handleKeyDown}
-            ref={inputMessageRef}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setInputMessage(e.target.value)
-            }
-            onFocus={() => emitUserWrittingToSocket(true)}
-            onBlur={() => emitUserWrittingToSocket(false)}
-          />
+          {droppedFiles.length > 0 ? (
+            <div>{filePreview()}</div>
+          ) : (
+            <input
+              type="text"
+              className="send-message"
+              placeholder="Aa"
+              value={inputMessage}
+              onKeyDown={handleKeyDown}
+              ref={inputMessageRef}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setInputMessage(e.target.value)
+              }
+              onFocus={() => emitUserWrittingToSocket(true)}
+              onBlur={() => emitUserWrittingToSocket(false)}
+            />
+          )}
         </div>
         <div className="like-icon">
           {inputMessage || droppedFiles.length > 0 ? (
