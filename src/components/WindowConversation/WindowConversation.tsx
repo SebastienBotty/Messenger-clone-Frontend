@@ -682,10 +682,17 @@ function WindowConversation() {
 
   const checkFiles = (files: File[]) => {
     const badFileNames: string[] = [];
+    const alreadyDroppedFiles: string[] = [];
     for (const file of files) {
       if (file.name.includes(",") || file.name.includes("-")) {
         badFileNames.push(file.name);
         setShowDragOverOverlay(false);
+        continue;
+      }
+
+      if (droppedFiles.some((f) => f.name === file.name)) {
+        setShowDragOverOverlay(false);
+        alreadyDroppedFiles.push(file.name);
         continue;
       }
 
@@ -717,6 +724,12 @@ function WindowConversation() {
       alert(
         "Veuillez ne pas utiliser de virgule ni de tiret dans le nom du fichier: \n " +
           badFileNames.join("\n")
+      );
+    }
+    if (alreadyDroppedFiles.length > 0) {
+      alert(
+        "Le(s) fichier(s) suivant(s) est(sont) déjà dans la liste: \n " +
+          alreadyDroppedFiles.join("\n")
       );
     }
   };
