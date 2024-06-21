@@ -37,6 +37,9 @@ import TypingDots from "../TypingDots/TypingdDots";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
 import { socket } from "../../socket";
+
+import AsyncMsg from "./AsyncMsg";
+
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
 
@@ -403,18 +406,17 @@ function WindowConversation() {
     debouncedFetchUsers(e.target.value);
   };
 
-  const sendMessage = () => {
+  const sendMessage = (fileNames?: string[]) => {
     const messageData = {
       author: user,
       authorId: userId,
 
-      text:
-        droppedFiles.length > 0
-          ? "PATHIMAGE/" +
-            displayedConv?._id +
-            ":" +
-            droppedFiles.map((file) => file.name).join(",")
-          : inputMessage,
+      text: fileNames
+        ? "PATHIMAGE/" +
+          displayedConv?._id +
+          ":" +
+          fileNames.map((name) => name).join(",")
+        : inputMessage,
       seenBy: [user],
       date: new Date(),
       conversationId: displayedConv?._id,
@@ -648,6 +650,7 @@ function WindowConversation() {
     }
   }, [messages, isAtBottom, displayedConv]);
 
+  // Files Management ----------------------------------------------------------------------------------------------
   const handleDragOver = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
@@ -678,12 +681,10 @@ function WindowConversation() {
   );
 
   const checkFiles = (files: File[]) => {
+    const badFileNames: string[] = [];
     for (const file of files) {
-      if (file.name.includes(",")) {
-        alert(
-          "Veuillez ne pas utiliser des virgules dans le nom du fichier \n " +
-            file.name
-        );
+      if (file.name.includes(",") || file.name.includes("-")) {
+        badFileNames.push(file.name);
         setShowDragOverOverlay(false);
         continue;
       }
@@ -709,6 +710,15 @@ function WindowConversation() {
         setShowDragOverOverlay(false);
       }
     }
+    if (inputFileRef.current) {
+      inputFileRef.current.value = ""; // Reset le champ de saisi
+    }
+    if (badFileNames.length > 0) {
+      alert(
+        "Veuillez ne pas utiliser de virgule ni de tiret dans le nom du fichier: \n " +
+          badFileNames.join("\n")
+      );
+    }
   };
   const formatFileSize = (size: number): string => {
     if (size === 0) return "0 o";
@@ -721,16 +731,20 @@ function WindowConversation() {
     }`;
   };
 
-  const FilePreview = () => {
+  const deleteSelectedFile = (index: number) => {
+    setDroppedFiles((prev) => prev.filter((_, i) => i !== index));
+    if (inputFileRef.current) {
+      inputFileRef.current.value = "";
+    }
+  };
+  const filePreview = () => {
     return (
       <div className="file-preview-container">
         {droppedFiles.map((file, index) => (
           <div key={index} className="file-preview-item">
             <div
               className="delete-file"
-              onClick={() =>
-                setDroppedFiles((prev) => prev.filter((_, i) => i !== index))
-              }
+              onClick={() => deleteSelectedFile(index)}
             >
               <Close
                 color={"red"}
@@ -803,7 +817,11 @@ function WindowConversation() {
       }
       const data = await response.json();
       console.log(data);
+      if (inputFileRef.current) {
+        inputFileRef.current.value = "";
+      }
       setDroppedFiles([]);
+      return data;
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -814,9 +832,9 @@ function WindowConversation() {
   };
 
   const sendFile = async () => {
-    await uploadFiles();
+    const fileNamesTimeStamped = await uploadFiles();
     console.log("fichiers envoyés");
-    await sendMessage();
+    await sendMessage(fileNamesTimeStamped.fileNames);
     console.log("msg envoyé");
   };
   return (
@@ -1010,7 +1028,10 @@ function WindowConversation() {
                       className="message"
                       ref={lastMessage ? messagesEndRef : null}
                     >
-                      {message.text}
+                      <AsyncMsg
+                        text={message?.text}
+                        convId={displayedConv?._id}
+                      />
                     </div>
                   </div>
                   <div className="seen-by">
@@ -1052,7 +1073,10 @@ function WindowConversation() {
                       className="message"
                       ref={lastMessage ? messagesEndRef : null}
                     >
-                      {message.text}
+                      <AsyncMsg
+                        text={message?.text}
+                        convId={displayedConv?._id}
+                      />
                     </div>
                   </div>
                   <div className="seen-by">
@@ -1076,7 +1100,10 @@ function WindowConversation() {
                     ref={lastMessage ? messagesEndRef : null}
                     onClick={() => console.log(message)}
                   >
-                    {message.text}
+                    <AsyncMsg
+                      text={message?.text}
+                      convId={displayedConv?._id}
+                    />
                   </div>
                 </div>
                 <div className="seen-by">
@@ -1137,7 +1164,7 @@ function WindowConversation() {
           style={inputMessage ? { flex: "auto" } : {}}
         >
           {droppedFiles.length > 0 && (
-            <div className="display-file-zone">{FilePreview()}</div>
+            <div className="display-file-zone">{filePreview()}</div>
           )}
           <input
             type="file"

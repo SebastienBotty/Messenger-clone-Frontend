@@ -1,0 +1,4 @@
+.msg-file-container {
+  display: flex;
+  flex-wrap: wrap;
+}

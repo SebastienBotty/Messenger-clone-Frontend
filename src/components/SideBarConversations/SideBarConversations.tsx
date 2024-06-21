@@ -302,10 +302,18 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
             >
               {conversation.isGroupConversation
                 ? (conversation.lastMessage.author === userData?.userName
-                    ? "vous"
+                    ? "Vous"
                     : conversation.lastMessage.author) +
                   ": " +
-                  conversation.lastMessage.text
+                  (conversation.lastMessage.text.startsWith(
+                    "PATHIMAGE/" + conversation._id
+                  )
+                    ? " Fichier joint"
+                    : conversation.lastMessage.text)
+                : conversation.lastMessage.text.startsWith(
+                    "PATHIMAGE/" + conversation._id
+                  )
+                ? " Fichier joint"
                 : conversation.lastMessage.text}
             </div>
             - {timeSince(conversation.lastMessage.date)}

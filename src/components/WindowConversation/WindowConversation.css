@@ -364,6 +364,7 @@
 
 .file-name {
   width: 4rem;
+  font-size: small;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
