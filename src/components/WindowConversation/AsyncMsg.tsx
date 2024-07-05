@@ -2,6 +2,8 @@ import React, { ReactNode, useEffect, useState } from "react";
 
 import "./AsyncMsg.css";
 import { ApiToken } from "../../localStorage";
+import ImageVizualizer from "../ImageVizualizer/ImageVizualizer";
+import { useShowImgVisualizerContext } from "../../screens/userLoggedIn/userLoggedIn";
 
 interface AsyncMessageProps {
   text: string;
@@ -10,6 +12,8 @@ interface AsyncMessageProps {
 function AsyncMsg({ text, convId }: AsyncMessageProps) {
   const [content, setContent] = useState<ReactNode | null>(null);
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
+  const { showImgVisualizer, setShowImgVisualizer } =
+    useShowImgVisualizerContext();
 
   const fetchFilesUrl = async (fileNamesStr: string) => {
     try {
@@ -56,7 +60,11 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
           if (file.type === "image") {
             tempContent.push(
               <div className="file-preview-item">
-                <img src={file.previewUrl} alt={file.fileName} />
+                <img
+                  onClick={() => setShowImgVisualizer(true)}
+                  src={file.previewUrl}
+                  alt={file.fileName}
+                />
               </div>
             );
           } else {
@@ -86,6 +94,10 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
     return <span>Loading...</span>;
   }
 
-  return <div className="msg-file-container">{content}</div>;
+  return (
+    <>
+      <div className="msg-file-container">{content}</div>
+    </>
+  );
 }
 export default AsyncMsg;

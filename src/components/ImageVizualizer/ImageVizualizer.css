@@ -1,0 +1,79 @@
+.ImageVisualizer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  backdrop-filter: blur(15px); /* Blur effect */
+  z-index: 200;
+}
+
+.close-visualizer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 201;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+.slider {
+  display: flex;
+  height: 100vh;
+}
+.image-visualiser-container {
+  width: 90vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+  /*backdrop-filter: blur(15px); /* Blur effect */
+  /*-webkit-backdrop-filter: blur(20px); /* For Safari */
+}
+.image-visualiser-container img {
+  height: auto;
+  max-height: 100%;
+  width: auto;
+  max-width: 100%;
+}
+
+.arrow {
+  width: 5vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.1); /* Dark overlay */
+  transition: opacity 0.5s ease;
+  cursor: pointer;
+}
+
+.thumbnails-container {
+  height: 7.5vh;
+  overflow: hidden;
+  width: 100vw;
+  position: absolute;
+  bottom: 0;
+}
+
+.thumbnails-container .content {
+  height: 100%;
+  position: absolute;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  overflow-x: hidden;
+  transition: transform 0.5s ease;
+}
+
+.thumbnails-container .content > * {
+  cursor: pointer;
+  filter: brightness(0.4);
+  width: 4rem;
+  height: auto;
+  max-height: 7.5vh;
+  border-radius: 1.25rem;
+}
+
+.thumbnails-container .content > *:hover {
+  filter: brightness(1);
+}

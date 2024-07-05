@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import NavBar from "../../components/NavBar/NavBar";
 import WindowConversation from "../../components/WindowConversation/WindowConversation";
 import SideBarConversations from "../../components/SideBarConversations/SideBarConversations";
+import ImageVizualizer from "../../components/ImageVizualizer/ImageVizualizer";
 import {
   NavBarProps,
   ConversationType,
@@ -9,6 +10,7 @@ import {
   UserDataType,
   MostRecentContextType,
   TriggerContextType,
+  ShowImgVisualizerContextType,
 } from "../../typescript/types";
 import { socket } from "../../socket";
 import { useLocation } from "react-router-dom";
@@ -22,6 +24,8 @@ const DisplayedConvContext = createContext<ConversationContextType | undefined>(
 const MostRecentConvContext = createContext<MostRecentContextType | undefined>(
   undefined
 );
+
+const ShowImgVisualizerContext = createContext<ShowImgVisualizerContextType | undefined>(undefined);
 
 const TriggerContext = createContext<TriggerContextType | undefined>(undefined);
 export const UserContext = createContext<UserDataType | null>(null);
@@ -38,6 +42,7 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
     null
   );
   const [trigger, setTrigger] = useState<boolean | null>(false);
+  const [showImgVisualizer, setShowImgVisualizer] = useState<boolean | null>(false);
   const [showConversationWindow, setShowConversationWindow] =
     useState<boolean>(false);
 
@@ -92,7 +97,11 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
 
   return (
     <UserContext.Provider value={user}>
+       <ShowImgVisualizerContext.Provider
+                    value={{ showImgVisualizer, setShowImgVisualizer }}
+                  >
       <div className="userLoggedIn">
+        {showImgVisualizer && <ImageVizualizer />}
         <NavBar handleSignOut={handleSignOut} />
         <div className="content">
           <TriggerContext.Provider value={{ trigger, setTrigger }}>
@@ -105,12 +114,18 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
                 <SideBarConversations
                   setShowConversationWindow={setShowConversationWindow}
                 />
-                {showConversationWindow && <WindowConversation />}
+
+                {showConversationWindow && (
+                  
+                    <WindowConversation />
+                )}
+              
               </DisplayedConvContext.Provider>
             </MostRecentConvContext.Provider>
           </TriggerContext.Provider>
         </div>
       </div>
+      </ShowImgVisualizerContext.Provider>
     </UserContext.Provider>
   );
 }
@@ -137,6 +152,18 @@ export const useTriggerContext = () => {
   const context = useContext(TriggerContext);
   if (context === undefined) {
     throw new Error("userTriggerContext must be used within a MyProvider");
+  }
+  return context;
+};
+
+export const useShowImgVisualizerContext = () => {
+  const context = useContext(ShowImgVisualizerContext);
+  console.log("Context:");
+  console.log(context);
+  if (context === undefined) {
+    throw new Error(
+      "useShowImgVisualizerContext must be used within a MyProvider "
+    );
   }
   return context;
 };

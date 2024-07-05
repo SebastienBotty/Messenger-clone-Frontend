@@ -5,6 +5,10 @@
   gap: 0.25rem;
 }
 
+.msg-file-container .file-preview-item img {
+  cursor: pointer;
+}
+
 a {
   color: black;
 }

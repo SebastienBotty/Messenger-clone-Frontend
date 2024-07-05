@@ -26,6 +26,11 @@ export type TriggerContextType = {
   trigger: boolean | null;
   setTrigger: React.Dispatch<React.SetStateAction<boolean | null>>;
 };
+
+export type ShowImgVisualizerContextType = {
+  showImgVisualizer: boolean | null;
+  setShowImgVisualizer: React.Dispatch<React.SetStateAction<boolean | null>>;
+};
 export type MessageType = {
   author: string | undefined;
   authorId?: string;
