@@ -63,7 +63,7 @@ function WindowConversation() {
   const firstMessageRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollViewRef = useRef<HTMLDivElement | null>(null);
-  const inputMessageRef = useRef<HTMLInputElement>(null);
+  const inputMessageRef = useRef<HTMLTextAreaElement>(null);
   const user = useContext(UserContext)?.userName;
   const userId = useContext(UserContext)?._id;
 
@@ -440,8 +440,21 @@ function WindowConversation() {
     postMessage(messageData);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && inputMessage.trim() != "") {
+  const sendLike = () => {
+    const messageData = {
+      author: user,
+      authorId: userId,
+      text: "👍",
+      seenBy: [user],
+      date: new Date(),
+      conversationId: displayedConv?._id,
+    };
+    postMessage(messageData);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && inputMessage.trim() != "" && !event.shiftKey) {
+      event.preventDefault();
       if (displayedConv) {
         sendMessage();
       } else {
@@ -1198,14 +1211,14 @@ function WindowConversation() {
           {droppedFiles.length > 0 ? (
             <div>{filePreview()}</div>
           ) : (
-            <input
-              type="text"
+            <textarea
               className="send-message"
               placeholder="Aa"
               value={inputMessage}
+              rows={3}
               onKeyDown={handleKeyDown}
               ref={inputMessageRef}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setInputMessage(e.target.value)
               }
               onFocus={() => emitUserWrittingToSocket(true)}
@@ -1228,12 +1241,12 @@ function WindowConversation() {
               }
             />
           ) : (
-            <ThumbsUp
-              color={"#00000"}
-              title="Envoyer un j'aime"
-              height="3vh"
-              width="3vh"
-            />
+            <div
+              style={{ cursor: "pointer", fontSize: "1.5rem" }}
+              onClick={() => sendLike()}
+            >
+              👍
+            </div>
           )}
         </div>
       </div>
