@@ -11,6 +11,9 @@ import {
   MostRecentContextType,
   TriggerContextType,
   ShowImgVisualizerContextType,
+  ImgVisualizerInitialImgType,
+  ImgS3DataType,
+  RecentConversationsContextType,
 } from "../../typescript/types";
 import { socket } from "../../socket";
 import { useLocation } from "react-router-dom";
@@ -25,7 +28,17 @@ const MostRecentConvContext = createContext<MostRecentContextType | undefined>(
   undefined
 );
 
-const ShowImgVisualizerContext = createContext<ShowImgVisualizerContextType | undefined>(undefined);
+const ShowImgVisualizerContext = createContext<
+  ShowImgVisualizerContextType | undefined
+>(undefined);
+
+const ImgVisualizerInitialImgContext = createContext<
+  ImgVisualizerInitialImgType | undefined
+>(undefined);
+
+const RecentConversationsContext = createContext<
+  RecentConversationsContextType | undefined
+>(undefined);
 
 const TriggerContext = createContext<TriggerContextType | undefined>(undefined);
 export const UserContext = createContext<UserDataType | null>(null);
@@ -42,9 +55,16 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
     null
   );
   const [trigger, setTrigger] = useState<boolean | null>(false);
-  const [showImgVisualizer, setShowImgVisualizer] = useState<boolean | null>(false);
+  const [showImgVisualizer, setShowImgVisualizer] = useState<boolean | null>(
+    false
+  );
+  const [imgData, setImgData] = useState<ImgS3DataType | null>(null);
   const [showConversationWindow, setShowConversationWindow] =
     useState<boolean>(false);
+
+  const [recentConversations, setRecentConversations] = useState<
+    ConversationType[] | null
+  >(null);
 
   const patchSocketId = async (socketId: string | undefined) => {
     try {
@@ -97,35 +117,39 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
 
   return (
     <UserContext.Provider value={user}>
-       <ShowImgVisualizerContext.Provider
-                    value={{ showImgVisualizer, setShowImgVisualizer }}
-                  >
-      <div className="userLoggedIn">
-        {showImgVisualizer && <ImageVizualizer />}
-        <NavBar handleSignOut={handleSignOut} />
-        <div className="content">
-          <TriggerContext.Provider value={{ trigger, setTrigger }}>
-            <MostRecentConvContext.Provider
-              value={{ mostRecentConv, setMostRecentConv }}
+      <DisplayedConvContext.Provider
+        value={{ displayedConv, setDisplayedConv }}
+      >
+        <RecentConversationsContext.Provider
+          value={{ recentConversations, setRecentConversations }}
+        >
+          <ShowImgVisualizerContext.Provider
+            value={{ showImgVisualizer, setShowImgVisualizer }}
+          >
+            <ImgVisualizerInitialImgContext.Provider
+              value={{ imgData, setImgData }}
             >
-              <DisplayedConvContext.Provider
-                value={{ displayedConv, setDisplayedConv }}
+              <MostRecentConvContext.Provider
+                value={{ mostRecentConv, setMostRecentConv }}
               >
-                <SideBarConversations
-                  setShowConversationWindow={setShowConversationWindow}
-                />
+                <div className="userLoggedIn">
+                  {showImgVisualizer && <ImageVizualizer />}
+                  <NavBar handleSignOut={handleSignOut} />
+                  <div className="content">
+                    <TriggerContext.Provider value={{ trigger, setTrigger }}>
+                      <SideBarConversations
+                        setShowConversationWindow={setShowConversationWindow}
+                      />
 
-                {showConversationWindow && (
-                  
-                    <WindowConversation />
-                )}
-              
-              </DisplayedConvContext.Provider>
-            </MostRecentConvContext.Provider>
-          </TriggerContext.Provider>
-        </div>
-      </div>
-      </ShowImgVisualizerContext.Provider>
+                      {showConversationWindow && <WindowConversation />}
+                    </TriggerContext.Provider>
+                  </div>
+                </div>
+              </MostRecentConvContext.Provider>
+            </ImgVisualizerInitialImgContext.Provider>
+          </ShowImgVisualizerContext.Provider>
+        </RecentConversationsContext.Provider>
+      </DisplayedConvContext.Provider>
     </UserContext.Provider>
   );
 }
@@ -156,10 +180,28 @@ export const useTriggerContext = () => {
   return context;
 };
 
+export const useImgVisualizerInitialImgContext = () => {
+  const context = useContext(ImgVisualizerInitialImgContext);
+  if (context === undefined) {
+    throw new Error(
+      "useImgVisualizerInitialImgContext must be used within a MyProvider "
+    );
+  }
+  return context;
+};
+
 export const useShowImgVisualizerContext = () => {
   const context = useContext(ShowImgVisualizerContext);
-  console.log("Context:");
-  console.log(context);
+  if (context === undefined) {
+    throw new Error(
+      "useShowImgVisualizerContext must be used within a MyProvider "
+    );
+  }
+  return context;
+};
+
+export const useRecentConversationContext = () => {
+  const context = useContext(RecentConversationsContext);
   if (context === undefined) {
     throw new Error(
       "useShowImgVisualizerContext must be used within a MyProvider "

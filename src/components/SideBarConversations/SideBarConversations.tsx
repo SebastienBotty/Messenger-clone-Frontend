@@ -14,6 +14,7 @@ import {
   UserContext,
   useMostRecentConvContext,
   useTriggerContext,
+  useRecentConversationContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
 
 import { socket } from "../../socket";
@@ -22,6 +23,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const userData = useContext(UserContext);
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
+  const { recentConversations, setRecentConversations } =
+    useRecentConversationContext();
   const { trigger, setTrigger } = useTriggerContext();
   const RESTAPIUri: string | undefined = process.env.REACT_APP_REST_API_URI;
   const [searchConversationInput, setSearchConversationInput] =
@@ -137,6 +140,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       const test = await fetchConversationLastMsg(jsonData);
       setDisplayedConv(test[0]);
       setConversations((prev) => [...test, ...prev]);
+      set5LatestConversation(test);
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -257,6 +261,30 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     }
   };
 
+  const set5LatestConversation = (
+    arrConversations: ConversationType[]
+  ): void => {
+    let sortedConvArr = [...arrConversations].sort((a, b) => {
+      return (
+        new Date(b.lastMessage.date).getTime() -
+        new Date(a.lastMessage.date).getTime()
+      );
+    });
+    console.log(sortedConvArr.slice(0, 5).reverse());
+    setRecentConversations(sortedConvArr.slice(0, 5));
+  };
+
+  const update5LatestConversations = (conversation: ConversationType): void => {
+    if (recentConversations) {
+      let recentConvs = [...recentConversations];
+      recentConvs.push(conversation);
+      recentConvs.shift();
+      console.log("UPDATE 5 LATEST CONVERSATIONS  RECENT CONVERSATIONS");
+      console.log(recentConvs);
+      setRecentConversations(recentConvs);
+    }
+  };
+
   useEffect(() => {
     fetchConversationsId();
     return () => {};
@@ -374,6 +402,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   useEffect(() => {
     if (mostRecentConv) {
       editConvLastMsg(mostRecentConv);
+      update5LatestConversations(mostRecentConv);
     }
     return () => {};
   }, [mostRecentConv, trigger]);

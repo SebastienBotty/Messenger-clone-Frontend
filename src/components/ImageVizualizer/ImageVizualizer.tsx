@@ -1,107 +1,84 @@
 import React from "react";
 import "./ImageVizualizer.css";
 import { useRef, useState, useEffect } from "react";
+import { ApiToken } from "./../../localStorage";
 
 import {
   ArrowBackCircleOutline,
   ArrowForwardCircleOutline,
   CloseCircle,
+  DownloadOutline,
+  ExitOutline,
+  LogOutOutline,
 } from "react-ionicons";
-import { useShowImgVisualizerContext } from "../../screens/userLoggedIn/userLoggedIn";
+import {
+  useShowImgVisualizerContext,
+  useImgVisualizerInitialImgContext,
+} from "../../screens/userLoggedIn/userLoggedIn";
+import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn";
+import Modal from "..//Modal/Modal";
 
 type SelectedImageType = {
   src: string;
   index: number;
 };
+
+type thumbnailsImgType = {
+  name: string;
+  src: string;
+};
 function ImageVizualizer() {
   const thumbnailsRef = useRef<HTMLDivElement>(null);
-  const { showImgVisualizer, setShowImgVisualizer } = useShowImgVisualizerContext();
-  const [images, setImages] = useState<string[]>([
-    "449156081_1527924744490084_5349935796791350274_n.jpg",
-    "téléchargement.jfif",
-    "/images.jfif",
-    "449156081_1527924744490084_5349935796791350274_n.jpg",
-    "/images.jfif",
-    "Screenshot_1.png",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "449156081_1527924744490084_5349935796791350274_n.jpg",
-    "téléchargement.jfif",
-    "449156081_1527924744490084_5349935796791350274_n.jpg",
-    "Screenshot_1.png",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "449156081_1527924744490084_5349935796791350274_n.jpg",
-    "téléchargement.jfif",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "449156081_1527924744490084_5349935796791350274_n.jpg",
-    "Screenshot_1.png",
-    "/images.jfif",
-    "Screenshot_1.png",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "/images.jfif",
-    "Screenshot_1.png",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "/images.jfif",
-    "Screenshot_1.png",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "/images.jfif",
-    "449156081_1527924744490084_5349935796791350274_n.jpg",
-    "/images.jfif",
-    "Screenshot_1.png",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "/images.jfif",
-    "téléchargement.jfif",
-    "/images.jfif",
-    "téléchargement.jfif",
-  ]); // TODO()
-  const [selectedImg, setSelectedImg] = useState<SelectedImageType>({
-    src: "/images.jfif",
-    index: 10,
-  });
-
+  const { showImgVisualizer, setShowImgVisualizer } =
+    useShowImgVisualizerContext();
+  const { imgData, setImgData } = useImgVisualizerInitialImgContext();
+  const RESTAPIuri = process.env.REACT_APP_REST_API_URI;
+  const { displayedConv } = useDisplayedConvContext();
+  const [images, setImages] = useState<thumbnailsImgType[]>([]);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  /*  const [selectedImg, setSelectedImg] = useState<SelectedImageType>(()=>{
+    if (imgData) {
+      return { src: imgData.src, index: 11 };
+  }else{
+    return { src: images[0], index: 0 };
+  }}); */
+  //const [selectedImg, setSelectedImg] = useState<SelectedImageType>({src: imgData?imgData.src:images[0].src, index: images.indexOf(imgData?imgData:images[0])});
+  const [selectedImg, setSelectedImg] = useState<SelectedImageType | null>(
+    null
+  );
   const [translateValue, setTranslateValue] = useState<number>(0);
   const [mouseMoved, setMouseMoved] = useState<boolean>(false);
   let timeoutId: NodeJS.Timeout | null = null;
 
   const handleImgClick = (image: SelectedImageType) => {
-    let indexDifference: number = image.index - selectedImg.index;
-    if (thumbnailsRef.current) {
-      console.log("précedent: " + selectedImg.index);
+    if (selectedImg !== null) {
+      let indexDifference: number = image.index - selectedImg.index;
+      if (thumbnailsRef.current) {
+        console.log("précedent: " + selectedImg.index);
 
-      console.log("new :" + image.index);
-      console.log(indexDifference);
-      if (indexDifference > 0) {
-        // slide left
-        thumbnailsRef.current.style.transform = `translateX(${
-          translateValue + 4 * -indexDifference
-        }rem)`;
-        setTranslateValue((prev) => prev + 4 * -indexDifference);
-      } else if (indexDifference < 0) {
-        // slide left
+        console.log("new :" + image.index);
+        console.log(indexDifference);
+        if (indexDifference > 0) {
+          // slide left
+          thumbnailsRef.current.style.transform = `translateX(${
+            translateValue + 4 * -indexDifference
+          }rem)`;
+          setTranslateValue((prev) => prev + 4 * -indexDifference);
+        } else if (indexDifference < 0) {
+          // slide left
 
-        thumbnailsRef.current.style.transform = `translateX(${
-          translateValue + 4 * -indexDifference
-        }rem)`;
-        setTranslateValue((prev) => prev + 4 * -indexDifference);
+          thumbnailsRef.current.style.transform = `translateX(${
+            translateValue + 4 * -indexDifference
+          }rem)`;
+          setTranslateValue((prev) => prev + 4 * -indexDifference);
+        }
+        setSelectedImg(image);
       }
-      setSelectedImg(image);
     }
   };
 
   const slideCarousel = (side: boolean) => {
-    if (thumbnailsRef.current) {
+    if (thumbnailsRef.current && selectedImg !== null) {
       if (side && selectedImg.index !== images.length - 1) {
         console.log("slide right");
         thumbnailsRef.current.style.transform = `translateX(${
@@ -109,7 +86,11 @@ function ImageVizualizer() {
         }rem)`;
         setTranslateValue((prev) => prev - 5);
         setSelectedImg((prev) => {
-          return { src: images[prev.index + 1], index: prev.index + 1 };
+          if (prev !== null) {
+            return { src: images[prev.index + 1].src, index: prev.index + 1 };
+          } else {
+            return { src: images[0].src, index: 0 };
+          }
         });
       } else if (!side && selectedImg.index !== 0) {
         console.log("slide left");
@@ -118,7 +99,14 @@ function ImageVizualizer() {
         }rem)`;
         setTranslateValue((prev) => prev + 5);
         setSelectedImg((prev) => {
-          return { src: images[prev.index - 1], index: prev.index - 1 };
+          if (prev !== null) {
+            return { src: images[prev.index - 1].src, index: prev.index - 1 };
+          } else {
+            return {
+              src: images[images.length - 1].src,
+              index: images.length - 1,
+            };
+          }
         });
       }
     }
@@ -138,21 +126,80 @@ function ImageVizualizer() {
     setShowImgVisualizer(false);
   };
 
+  const openTransferModal = (): void => {
+    setShowModal(true);
+  };
+
+  const closeTransferModal = (): void => {
+    setShowModal(false);
+  };
+
   useEffect(() => {
+    const fetchImages = async () => {
+      console.log(displayedConv?._id);
+      if (displayedConv && imgData) {
+        try {
+          const response = await fetch(
+            RESTAPIuri +
+              "/file/conversationId/" +
+              displayedConv._id +
+              "/getConversationImages?fileName=" +
+              imgData.name
+          );
+          if (!response.ok) {
+            throw new Error(response.statusText);
+          }
+          const jsonData = await response.json();
+          console.log(jsonData);
+          setImages(jsonData);
+          setSelectedImg({
+            src: imgData.src,
+            index: Math.ceil(jsonData.length / 2),
+          });
+        } catch (error) {
+          if (error instanceof Error) {
+            console.error(error.message);
+          } else {
+            console.error("An unknown error occurred");
+          }
+        }
+      }
+    };
+    setSelectedImg({ src: imgData ? imgData.src : images[0].src, index: -1 });
+
+    fetchImages();
     document.addEventListener("mousemove", handleMouseMove);
+
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
+  useEffect(() => {
+    setImgData(null);
+    setImages([]);
+    return () => {};
+  }, [displayedConv]);
+
+  useEffect(() => {
+    if (selectedImg !== null) {
+      console.log(selectedImg);
+    }
+
+    return () => {};
+  }, [selectedImg]);
+
   return (
     <div
       className="ImageVisualizer"
       style={{
-        backgroundImage: `url(${selectedImg.src})`,
+        backgroundImage: { selectedImg }
+          ? `url(${selectedImg?.src})`
+          : `url(${images[0].src})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
+      //onClick={() => console.log(selectedImg)}
     >
       <div className="close-visualizer">
         {" "}
@@ -171,7 +218,27 @@ function ImageVizualizer() {
           backdropFilter: "blur(15px)" /* Blur effect */,
         }}
       >
-        {" "}
+        <div className="top-right">
+          <div className="transfer-button" onClick={openTransferModal}>
+            <LogOutOutline
+              color={"#FFFFFF"}
+              title={"Transférer"}
+              height="2rem"
+              width="2rem"
+              style={{ rotate: "-90deg" }}
+            />
+          </div>
+          <div>
+            <a href={selectedImg?.src} download={selectedImg?.src}>
+              <DownloadOutline
+                color={"#FFFFFF"}
+                title={"Télécharger"}
+                height="2rem"
+                width="2rem"
+              />
+            </a>
+          </div>
+        </div>
         <div
           className="arrow"
           id="left-arrow"
@@ -186,7 +253,7 @@ function ImageVizualizer() {
           />
         </div>
         <div className="image-visualiser-container">
-          <img src={selectedImg.src} />
+          {selectedImg !== null && <img src={selectedImg.src} />}
         </div>
         <div
           className="arrow"
@@ -202,24 +269,29 @@ function ImageVizualizer() {
           />{" "}
         </div>
         <div className="thumbnails-container">
-          <div className="content" ref={thumbnailsRef}>
-            {images.map((image, index) => {
-              return (
-                <img
-                  src={image}
-                  onClick={() => handleImgClick({ src: image, index })}
-                  key={index + "-" + image}
-                  style={
-                    index === selectedImg.index
-                      ? { filter: "brightness(1)" }
-                      : {}
-                  }
-                ></img>
-              );
-            })}
-          </div>
+          {selectedImg !== null && (
+            <div className="content" ref={thumbnailsRef}>
+              {images.map((image, index) => {
+                return (
+                  <img
+                    src={image.src}
+                    onClick={() => handleImgClick({ src: image.src, index })}
+                    key={index + "-" + image}
+                    style={
+                      index === selectedImg.index
+                        ? { filter: "brightness(1)" }
+                        : {}
+                    }
+                  ></img>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
+      {showModal && (
+        <Modal closeModal={closeTransferModal} selectedImg={selectedImg?.src} />
+      )}
     </div>
   );
 }

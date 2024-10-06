@@ -328,7 +328,11 @@ function WindowConversation() {
       ].substring(
         0,
         3
-      )} ${previousDate.getFullYear()}, ${previousDate.getHours()}:${previousDate.getMinutes()}`;
+      )} ${previousDate.getFullYear()}, ${previousDate.getHours()}:${
+        previousDate.getMinutes() < 10
+          ? "0" + previousDate.getMinutes()
+          : previousDate.getMinutes()
+      }`;
       return formattedDate;
     } else if (previousDate.getDate() < currentDate.getDate()) {
       const formattedDate = `${dayNames[previousDate.getDay()].substring(
@@ -361,7 +365,7 @@ function WindowConversation() {
     }
   };
   const debouncedFetchUsers = useCallback(
-    _.debounce(async (searchQuery) => {
+    _.debounce(async (searchQuery: string) => {
       console.log("))))))))");
       console.log(searchQuery);
       if (searchQuery.length > 2) {

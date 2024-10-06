@@ -31,6 +31,24 @@ export type ShowImgVisualizerContextType = {
   showImgVisualizer: boolean | null;
   setShowImgVisualizer: React.Dispatch<React.SetStateAction<boolean | null>>;
 };
+
+export type ImgS3DataType = {
+  src: string;
+  name: string;
+  convId?: string;
+};
+export type ImgVisualizerInitialImgType = {
+  imgData: ImgS3DataType | null;
+  setImgData: React.Dispatch<React.SetStateAction<ImgS3DataType | null>>;
+};
+
+export type RecentConversationsContextType = {
+  recentConversations: ConversationType[] | null;
+  setRecentConversations: React.Dispatch<
+    React.SetStateAction<ConversationType[] | null>
+  >;
+};
+
 export type MessageType = {
   author: string | undefined;
   authorId?: string;

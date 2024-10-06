@@ -3,7 +3,7 @@ import React, { ReactNode, useEffect, useState } from "react";
 import "./AsyncMsg.css";
 import { ApiToken } from "../../localStorage";
 import ImageVizualizer from "../ImageVizualizer/ImageVizualizer";
-import { useShowImgVisualizerContext } from "../../screens/userLoggedIn/userLoggedIn";
+import { useShowImgVisualizerContext,useImgVisualizerInitialImgContext } from "../../screens/userLoggedIn/userLoggedIn";
 
 interface AsyncMessageProps {
   text: string;
@@ -14,6 +14,7 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const { showImgVisualizer, setShowImgVisualizer } =
     useShowImgVisualizerContext();
+  const { imgData, setImgData } = useImgVisualizerInitialImgContext();
 
   const fetchFilesUrl = async (fileNamesStr: string) => {
     try {
@@ -47,6 +48,14 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
     }
   };
 
+  const handleImgClick = (fileUrl: string,fileName:string) => {
+    if (convId){
+      setImgData({src:fileUrl,name:fileName, convId:convId});
+
+    }
+    setShowImgVisualizer(true);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       if (!text.startsWith("PATHIMAGE/" + convId + ":")) {
@@ -61,8 +70,8 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
             tempContent.push(
               <div className="file-preview-item">
                 <img
-                  onClick={() => setShowImgVisualizer(true)}
-                  src={file.previewUrl}
+                  onClick={() => handleImgClick(file.url,file.fileName)}
+                  src={file.url}
                   alt={file.fileName}
                 />
               </div>
@@ -72,7 +81,7 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
               <div>
                 {" "}
                 <a
-                  href={file.downloadUrl}
+                  href={file.url}
                   download={file.fileName.split("-")[1]}
                 >
                   <img src="/file-icon.png" alt={file.fileName} />
