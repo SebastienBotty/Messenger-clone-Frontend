@@ -292,13 +292,17 @@ function WindowConversation() {
     const isMoreThan15Minutes =
       differenceInMilliseconds > fifteenMinutesInMilliseconds;
 
-    const hours = String(currentDate.getHours());
-    let minutes: string = "";
-    if (currentDate.getMinutes() < 10) {
-      minutes = "0" + String(currentDate.getMinutes());
-    } else {
-      minutes = String(currentDate.getMinutes());
-    }
+    let hours: string = String(
+      currentDate.getHours() < 10
+        ? "0" + currentDate.getHours()
+        : currentDate.getHours()
+    );
+
+    let minutes: string = String(
+      currentDate.getMinutes() < 10
+        ? "0" + currentDate.getMinutes()
+        : currentDate.getMinutes()
+    );
 
     return {
       isMoreThan15Minutes,
