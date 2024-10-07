@@ -1,9 +1,12 @@
 import React, { ReactNode, useEffect, useState } from "react";
 
 import "./AsyncMsg.css";
-import { ApiToken } from "../../localStorage";
-import ImageVizualizer from "../ImageVizualizer/ImageVizualizer";
-import { useShowImgVisualizerContext,useImgVisualizerInitialImgContext } from "../../screens/userLoggedIn/userLoggedIn";
+import { ApiToken } from "../../../localStorage";
+import ImageVizualizer from "../../ImageVizualizer/ImageVizualizer";
+import {
+  useShowImgVisualizerContext,
+  useImgVisualizerInitialImgContext,
+} from "../../../screens/userLoggedIn/userLoggedIn";
 
 interface AsyncMessageProps {
   text: string;
@@ -48,10 +51,9 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
     }
   };
 
-  const handleImgClick = (fileUrl: string,fileName:string) => {
-    if (convId){
-      setImgData({src:fileUrl,name:fileName, convId:convId});
-
+  const handleImgClick = (fileUrl: string, fileName: string) => {
+    if (convId) {
+      setImgData({ src: fileUrl, name: fileName, convId: convId });
     }
     setShowImgVisualizer(true);
   };
@@ -70,7 +72,7 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
             tempContent.push(
               <div className="file-preview-item">
                 <img
-                  onClick={() => handleImgClick(file.url,file.fileName)}
+                  onClick={() => handleImgClick(file.url, file.fileName)}
                   src={file.url}
                   alt={file.fileName}
                 />
@@ -80,10 +82,7 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
             tempContent.push(
               <div>
                 {" "}
-                <a
-                  href={file.url}
-                  download={file.fileName.split("-")[1]}
-                >
+                <a href={file.url} download={file.fileName.split("-")[1]}>
                   <img src="/file-icon.png" alt={file.fileName} />
                   <div className="file-name">{file.fileName.split("-")[1]}</div>
                 </a>
