@@ -1,0 +1,72 @@
+/*--------------------------HEader-*/
+.search-message-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-message-container {
+  padding: 0.25rem 1rem;
+}
+
+.icon-button-back {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.icon-button-back:hover {
+  background-color: #f2f2f2;
+}
+
+.icon-button-back > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/*------------------------SEARCHBAR----------------*/
+
+.searchbar-message {
+  display: flex;
+  width: 100%;
+}
+.searchbar-message form {
+  width: 100%;
+  display: flex;
+}
+.searchbar-message-label {
+  background-color: #f0f2f5;
+  border-radius: 2rem 0 0 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  border: 1px solid #f0f2f5;
+  padding-left: 0.5rem;
+  width: 10%;
+}
+
+#search-message {
+  font-size: medium;
+  background-color: #f0f2f5;
+  border-radius: 0 2rem 2rem 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  height: 2rem;
+  flex-grow: 1;
+}
+
+.search-message-list {
+  margin-top: 1rem;
+}
+
+.info-msg {
+  text-align: center;
+  margin-top: 5rem;
+  font-size: small;
+}

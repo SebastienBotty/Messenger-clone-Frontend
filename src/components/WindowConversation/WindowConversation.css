@@ -3,7 +3,22 @@
   height: calc(100vh - 4vh + 1px);
   position: relative;
   display: flex;
-  flex-direction: column;
+}
+.conversation-container {
+  width: 100%;
+  height: 100%;
+}
+.conversation-details {
+  width: 0;
+  height: 100%;
+}
+
+.expanded {
+  width: 30vw;
+}
+
+.retracted {
+  width: calc(100vw - 30vw);
 }
 
 .drag-overlay {
@@ -184,7 +199,7 @@
 /*----------------------------------------------------------------Body*/
 
 .conversation-body {
-  max-height: 80vh;
+  height: 80vh;
   overflow-y: scroll;
   flex: 1;
 }
@@ -331,10 +346,9 @@
   transition: flex 0.3s ease-in;
   margin: 0 0.5rem;
   display: flex;
-  justify-content: end;
+  align-items: center;
   max-height: 18vh;
-  flex: 0 0 auto;
-  flex-direction: column;
+  flex: 1 1 auto;
 }
 
 .display-file-zone {
@@ -421,6 +435,7 @@ input.send-message:hover {
 }
 
 .like-icon {
+  flex: 0 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;

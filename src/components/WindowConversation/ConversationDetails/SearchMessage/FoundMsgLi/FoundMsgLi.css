@@ -1,0 +1,48 @@
+li.found-msg {
+  list-style-type: none;
+  display: flex;
+  padding: 1rem 0.25rem;
+  border-radius: 10px;
+  height: 2.5rem;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+li.found-msg:hover {
+  background-color: #f2f2f2;
+  cursor: pointer;
+}
+
+.found-msg-user-img {
+  width: 3rem;
+}
+.found-msg-user-img-container {
+  height: 3rem;
+  width: 3rem;
+  background-color: red;
+  border-radius: 50%;
+}
+.found-msg-content {
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.25rem;
+  width: calc(100% - 3rem);
+}
+.found-msg-username {
+  font-weight: bold;
+}
+.found-msg-details {
+  display: flex;
+  width: 100%;
+}
+
+.found-msg-text {
+  width: 70%;
+}
+
+.found-msg-time-since {
+  display: block;
+  color: gray;
+  width: 30%;
+}

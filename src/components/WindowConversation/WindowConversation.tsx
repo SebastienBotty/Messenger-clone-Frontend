@@ -39,7 +39,8 @@ import _ from "lodash";
 import { ApiToken } from "../../localStorage";
 import { socket } from "../../socket";
 
-import AsyncMsg from "./AsyncMsg";
+import AsyncMsg from "./AsyncMsg/AsyncMsg";
+import ConversationDetails from "./ConversationDetails/ConversationDetails";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -81,6 +82,8 @@ function WindowConversation() {
   const fetchMsgIndex = useRef(0);
   const limitFetchMsg: number = 20;
   const [messages, setMessages] = useState<MessageType[]>([]);
+
+  const [showConvDetails, setShowConvDetails] = useState<boolean>(false); //Displays conversation details
 
   const fetchMessages = async () => {
     const response = await fetch(
@@ -881,374 +884,392 @@ function WindowConversation() {
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      {showDragOverOverlay && (
-        <div className="drag-overlay">
-          <span>Déposer un fichier</span>{" "}
-        </div>
-      )}
-      <div className="conversation-header">
-        <div className="conversation-member-info">
-          {displayedConv ? (
-            <>
-              <div className="img-container">
-                <img src={image} />
-              </div>
-              <div className="conversation-member-info-text-container">
-                <div className="conversation-member-name">
-                  {displayedConv?.members
-                    .filter((item) => item !== user)
-                    .join(", ")}
-                </div>
-                <div className="online-since">En ligne depuis X</div>
-              </div>
-            </>
-          ) : (
-            <div className="create-conversation-add-members">
-              <label htmlFor="add-members-input">A : </label>
-              <div className="added-members-container">
-                {addedMembers.map((addedMember) => {
-                  return (
-                    <div className="member" key={addedMember}>
-                      <span>{addedMember} </span>
-                      <div
-                        id="create-conversation-delete-member"
-                        onClick={() =>
-                          setAddedMembers((prev) =>
-                            prev.filter((item) => item !== addedMember)
-                          )
-                        }
-                      >
-                        <Close
-                          color={"#0084ff"}
-                          title={"Supprimer"}
-                          height="1.25rem"
-                          width="1.25rem"
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="search-user">
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  id="add-members-input"
-                  name="add-members-input"
-                  onChange={(e) => searchUser(e)}
-                  value={searchUserInput}
-                />
-                <div
-                  className="dropdown-search-list"
-                  id={searchUserInput.length > 2 ? "visible" : ""}
-                >
-                  {usersPrediction.length > 0 ? (
-                    usersPrediction.map((userPrediction) => {
-                      if (
-                        !addedMembers.includes(userPrediction.userName) &&
-                        userPrediction.userName !== user
-                      ) {
-                        return (
-                          <li
-                            key={userPrediction._id}
-                            onClick={() => handleSearch(userPrediction)}
-                          >
-                            <div className="user-profile-pic">
-                              <img src={image} />
-                            </div>
-                            <span> {userPrediction.userName}</span>
-                          </li>
-                        );
-                      }
-                    })
-                  ) : (
-                    <li className="user-profile-pic">
-                      <div className="no-user-found">
-                        <span>Aucun utilisateur trouvé</span>
-                      </div>
-                    </li>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        {displayedConv && (
-          <div className="conversation-buttons">
-            <Call
-              color={"#00000"}
-              title="Passer un appel vocal"
-              height="3vh"
-              width="3vh"
-            />
-            <Videocam
-              color={"#00000"}
-              title="Lancer un appel vidéo"
-              height="3vh"
-              width="3vh"
-            />
-            <InformationCircle
-              color={"#00000"}
-              title="Informations sur la conversation"
-              height="3vh"
-              width="3vh"
-            />
+      <div
+        className={`conversation-container ${
+          showConvDetails ? "retracted" : ""
+        }`}
+      >
+        {showDragOverOverlay && (
+          <div className="drag-overlay">
+            <span>Déposer un fichier</span>{" "}
           </div>
         )}
-      </div>
-      <div
-        className="conversation-body"
-        ref={scrollViewRef}
-        onScroll={handleScroll}
-      >
-        {displayedConv && (
-          <>
-            <div className="load-more-messages">
-              <span onClick={() => fetchMessages()}>
-                Charger plus de message
-              </span>
-            </div>
-            <div
-              className="button-go-to-last-message"
-              style={isAtBottom ? { display: "none" } : { display: "block" }}
-            >
-              <button
-                onClick={() =>
-                  scrollViewRef.current?.scrollTo({
-                    top: scrollViewRef.current.scrollHeight,
-                  })
-                }
-              >
-                <ArrowDown
-                  color={"#00000"}
-                  title="Informations sur la conversation"
-                  height="3vh"
-                  width="3vh"
-                />
-              </button>
-            </div>
-          </>
-        )}
-
-        {messages
-          .sort((a, b) => {
-            return new Date(a.date).getTime() - new Date(b.date).getTime();
-          })
-          .map((message, index) => {
-            let checkMsgTime: Date15minDifference = {
-              isMoreThan15Minutes: false,
-              hours: "0",
-              minutes: "0",
-              date: new Date(),
-            };
-            if (index > 0) {
-              checkMsgTime = checkPreviousMsgTime(index);
-            }
-            const firstMessage = index === 0;
-            const lastMessage = index === messages.length - 1;
-            const currentMsg = index;
-
-            if (message?.author === user) {
-              return (
-                <div
-                  key={message.author + "-" + index}
-                  onClick={() => console.log(message)}
-                  ref={firstMessage ? firstMessageRef : null}
-                >
-                  {checkMsgTime.isMoreThan15Minutes && (
-                    <div className="message-container" id="Time-center-display">
-                      {compareNowToDate(checkMsgTime.date) ||
-                        checkMsgTime.hours + " : " + checkMsgTime.minutes}
-                    </div>
-                  )}
-                  <div className="message-container" id="message-me">
-                    <div
-                      className="message"
-                      ref={lastMessage ? messagesEndRef : null}
-                    >
-                      <AsyncMsg
-                        text={message?.text}
-                        convId={displayedConv?._id}
-                      />
-                    </div>
-                  </div>
-                  <div className="seen-by">
-                    {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                      if (message._id === lastMsgSeen.messageId) {
-                        return <div>{lastMsgSeen.username}</div>;
-                      }
-                    })}
-                  </div>
-                </div>
-              );
-            }
-            if (messages[currentMsg + 1]?.author === message?.author) {
-              return (
-                <div
-                  key={message.author + "-" + index}
-                  onClick={() => {
-                    const test = new Date(message.date);
-                    console.log(test.getTime());
-                  }}
-                >
-                  {checkMsgTime.isMoreThan15Minutes && (
-                    <div className="message-container" id="Time-center-display">
-                      {compareNowToDate(checkMsgTime.date) ||
-                        checkMsgTime.hours + " : " + checkMsgTime.minutes}
-                    </div>
-                  )}
-                  <div className="message-author-name">
-                    {messages[currentMsg]?.author !==
-                      messages[currentMsg - 1]?.author &&
-                      displayedConv?.isGroupConversation && (
-                        <div className="message-author">{message.author}</div>
-                      )}
-                  </div>
-
-                  <div className="message-container" id="message-others">
-                    <div className="img-container"> </div>
-                    <div
-                      className="message"
-                      ref={lastMessage ? messagesEndRef : null}
-                    >
-                      <AsyncMsg
-                        text={message?.text}
-                        convId={displayedConv?._id}
-                      />
-                    </div>
-                  </div>
-                  <div className="seen-by">
-                    {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                      if (message._id === lastMsgSeen.messageId) {
-                        return <div>{lastMsgSeen.username}</div>;
-                      }
-                    })}
-                  </div>
-                </div>
-              );
-            }
-            return (
+        <div className="conversation-header">
+          <div className="conversation-member-info">
+            {displayedConv ? (
               <>
-                <div className="message-container" id="message-others">
-                  <div className="img-container">
-                    <img src={image} />
-                  </div>
-                  <div
-                    className="message"
-                    ref={lastMessage ? messagesEndRef : null}
-                    onClick={() => console.log(message)}
-                  >
-                    <AsyncMsg
-                      text={message?.text}
-                      convId={displayedConv?._id}
-                    />
-                  </div>
+                <div className="img-container">
+                  <img src={image} />
                 </div>
-                <div className="seen-by">
-                  {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                    if (message._id === lastMsgSeen.messageId) {
-                      return <div>{lastMsgSeen.username}</div>;
-                    }
-                  })}
+                <div className="conversation-member-info-text-container">
+                  <div className="conversation-member-name">
+                    {displayedConv?.members
+                      .filter((item) => item !== user)
+                      .join(", ")}
+                  </div>
+                  <div className="online-since">En ligne depuis X</div>
                 </div>
               </>
-            );
-          })}
-        <div className="conversation-body-bottom" style={{ display: "flex" }}>
-          {convMembersTyping.length > 0 && (
-            <div className="typing-users">
-              <TypingDots /> {displayMembersTyping()}
+            ) : (
+              <div className="create-conversation-add-members">
+                <label htmlFor="add-members-input">A : </label>
+                <div className="added-members-container">
+                  {addedMembers.map((addedMember) => {
+                    return (
+                      <div className="member" key={addedMember}>
+                        <span>{addedMember} </span>
+                        <div
+                          id="create-conversation-delete-member"
+                          onClick={() =>
+                            setAddedMembers((prev) =>
+                              prev.filter((item) => item !== addedMember)
+                            )
+                          }
+                        >
+                          <Close
+                            color={"#0084ff"}
+                            title={"Supprimer"}
+                            height="1.25rem"
+                            width="1.25rem"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="search-user">
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    id="add-members-input"
+                    name="add-members-input"
+                    onChange={(e) => searchUser(e)}
+                    value={searchUserInput}
+                  />
+                  <div
+                    className="dropdown-search-list"
+                    id={searchUserInput.length > 2 ? "visible" : ""}
+                  >
+                    {usersPrediction.length > 0 ? (
+                      usersPrediction.map((userPrediction) => {
+                        if (
+                          !addedMembers.includes(userPrediction.userName) &&
+                          userPrediction.userName !== user
+                        ) {
+                          return (
+                            <li
+                              key={userPrediction._id}
+                              onClick={() => handleSearch(userPrediction)}
+                            >
+                              <div className="user-profile-pic">
+                                <img src={image} />
+                              </div>
+                              <span> {userPrediction.userName}</span>
+                            </li>
+                          );
+                        }
+                      })
+                    ) : (
+                      <li className="user-profile-pic">
+                        <div className="no-user-found">
+                          <span>Aucun utilisateur trouvé</span>
+                        </div>
+                      </li>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          {displayedConv && (
+            <div className="conversation-buttons">
+              <Call
+                color={"#00000"}
+                title="Passer un appel vocal"
+                height="3vh"
+                width="3vh"
+              />
+              <Videocam
+                color={"#00000"}
+                title="Lancer un appel vidéo"
+                height="3vh"
+                width="3vh"
+              />
+              <InformationCircle
+                color={"#00000"}
+                title="Informations sur la conversation"
+                height="3vh"
+                width="3vh"
+                onClick={() => setShowConvDetails(!showConvDetails)}
+              />
             </div>
-          )}
-        </div>
-      </div>
-      <div className="conversation-footer">
-        <div className="icons">
-          <AddCircle
-            color={"#00000"}
-            title="Ouvrir plus d'actions"
-            height="3vh"
-            width="3vh"
-            style={{ marginRight: "0.5rem" }}
-          />
-          {!inputMessage && (
-            <>
-              <ImagesOutline
-                onClick={openFileInput}
-                title="Joindre un fichier"
-                color={"#00000"}
-                height="3vh"
-                width="3vh"
-                style={{ transform: "rotate(270deg)" }}
-              />
-              <ImagesOutline
-                onClick={() => console.log(droppedFiles)}
-                color={"#00000"}
-                height="3vh"
-                width="3vh"
-                style={{ transform: "rotate(270deg)" }}
-              />
-              <ImagesOutline
-                color={"#00000"}
-                height="3vh"
-                width="3vh"
-                style={{ transform: "rotate(270deg)" }}
-              />
-            </>
           )}
         </div>
         <div
-          className="message-input"
-          style={inputMessage ? { flex: "auto" } : {}}
+          className="conversation-body"
+          ref={scrollViewRef}
+          onScroll={handleScroll}
         >
-          <input
-            type="file"
-            ref={inputFileRef}
-            style={{ display: "none" }}
-            multiple
-            onChange={handleFileChange}
-          />
-          {droppedFiles.length > 0 ? (
-            <div>{filePreview()}</div>
-          ) : (
-            <textarea
-              className="send-message"
-              placeholder="Aa"
-              value={inputMessage}
-              rows={3}
-              onKeyDown={handleKeyDown}
-              ref={inputMessageRef}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setInputMessage(e.target.value)
-              }
-              onFocus={() => emitUserWrittingToSocket(true)}
-              onBlur={() => emitUserWrittingToSocket(false)}
-            />
+          {displayedConv && (
+            <>
+              <div className="load-more-messages">
+                <span onClick={() => fetchMessages()}>
+                  Charger plus de message
+                </span>
+              </div>
+              <div
+                className="button-go-to-last-message"
+                style={isAtBottom ? { display: "none" } : { display: "block" }}
+              >
+                <button
+                  onClick={() =>
+                    scrollViewRef.current?.scrollTo({
+                      top: scrollViewRef.current.scrollHeight,
+                    })
+                  }
+                >
+                  <ArrowDown
+                    color={"#00000"}
+                    title="Informations sur la conversation"
+                    height="3vh"
+                    width="3vh"
+                  />
+                </button>
+              </div>
+            </>
           )}
+
+          {messages
+            .sort((a, b) => {
+              return new Date(a.date).getTime() - new Date(b.date).getTime();
+            })
+            .map((message, index) => {
+              let checkMsgTime: Date15minDifference = {
+                isMoreThan15Minutes: false,
+                hours: "0",
+                minutes: "0",
+                date: new Date(),
+              };
+              if (index > 0) {
+                checkMsgTime = checkPreviousMsgTime(index);
+              }
+              const firstMessage = index === 0;
+              const lastMessage = index === messages.length - 1;
+              const currentMsg = index;
+
+              if (message?.author === user) {
+                return (
+                  <div
+                    key={message.author + "-" + index}
+                    onClick={() => console.log(message)}
+                    ref={firstMessage ? firstMessageRef : null}
+                  >
+                    {checkMsgTime.isMoreThan15Minutes && (
+                      <div
+                        className="message-container"
+                        id="Time-center-display"
+                      >
+                        {compareNowToDate(checkMsgTime.date) ||
+                          checkMsgTime.hours + " : " + checkMsgTime.minutes}
+                      </div>
+                    )}
+                    <div className="message-container" id="message-me">
+                      <div
+                        className="message"
+                        ref={lastMessage ? messagesEndRef : null}
+                      >
+                        <AsyncMsg
+                          text={message?.text}
+                          convId={displayedConv?._id}
+                        />
+                      </div>
+                    </div>
+                    <div className="seen-by">
+                      {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                        if (message._id === lastMsgSeen.messageId) {
+                          return <div>{lastMsgSeen.username}</div>;
+                        }
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+              if (messages[currentMsg + 1]?.author === message?.author) {
+                return (
+                  <div
+                    key={message.author + "-" + index}
+                    onClick={() => {
+                      const test = new Date(message.date);
+                      console.log(test.getTime());
+                    }}
+                  >
+                    {checkMsgTime.isMoreThan15Minutes && (
+                      <div
+                        className="message-container"
+                        id="Time-center-display"
+                      >
+                        {compareNowToDate(checkMsgTime.date) ||
+                          checkMsgTime.hours + " : " + checkMsgTime.minutes}
+                      </div>
+                    )}
+                    <div className="message-author-name">
+                      {messages[currentMsg]?.author !==
+                        messages[currentMsg - 1]?.author &&
+                        displayedConv?.isGroupConversation && (
+                          <div className="message-author">{message.author}</div>
+                        )}
+                    </div>
+
+                    <div className="message-container" id="message-others">
+                      <div className="img-container"> </div>
+                      <div
+                        className="message"
+                        ref={lastMessage ? messagesEndRef : null}
+                      >
+                        <AsyncMsg
+                          text={message?.text}
+                          convId={displayedConv?._id}
+                        />
+                      </div>
+                    </div>
+                    <div className="seen-by">
+                      {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                        if (message._id === lastMsgSeen.messageId) {
+                          return <div>{lastMsgSeen.username}</div>;
+                        }
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <>
+                  <div className="message-container" id="message-others">
+                    <div className="img-container">
+                      <img src={image} />
+                    </div>
+                    <div
+                      className="message"
+                      ref={lastMessage ? messagesEndRef : null}
+                      onClick={() => console.log(message)}
+                    >
+                      <AsyncMsg
+                        text={message?.text}
+                        convId={displayedConv?._id}
+                      />
+                    </div>
+                  </div>
+                  <div className="seen-by">
+                    {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                      if (message._id === lastMsgSeen.messageId) {
+                        return <div>{lastMsgSeen.username}</div>;
+                      }
+                    })}
+                  </div>
+                </>
+              );
+            })}
+          <div className="conversation-body-bottom" style={{ display: "flex" }}>
+            {convMembersTyping.length > 0 && (
+              <div className="typing-users">
+                <TypingDots /> {displayMembersTyping()}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="like-icon">
-          {inputMessage || droppedFiles.length > 0 ? (
-            <Send
+        <div className="conversation-footer">
+          <div className="icons">
+            <AddCircle
               color={"#00000"}
+              title="Ouvrir plus d'actions"
               height="3vh"
               width="3vh"
-              onClick={() =>
-                droppedFiles
-                  ? sendFile()
-                  : displayedConv
-                  ? sendMessage()
-                  : createConversation()
-              }
+              style={{ marginRight: "0.5rem" }}
             />
-          ) : (
-            <div
-              style={{ cursor: "pointer", fontSize: "1.5rem" }}
-              onClick={() => sendLike()}
-            >
-              👍
-            </div>
-          )}
+            {!inputMessage && (
+              <>
+                <ImagesOutline
+                  onClick={openFileInput}
+                  title="Joindre un fichier"
+                  color={"#00000"}
+                  height="3vh"
+                  width="3vh"
+                  style={{ transform: "rotate(270deg)" }}
+                />
+                <ImagesOutline
+                  onClick={() => console.log(droppedFiles)}
+                  color={"#00000"}
+                  height="3vh"
+                  width="3vh"
+                  style={{ transform: "rotate(270deg)" }}
+                />
+                <ImagesOutline
+                  color={"#00000"}
+                  height="3vh"
+                  width="3vh"
+                  style={{ transform: "rotate(270deg)" }}
+                />
+              </>
+            )}
+          </div>
+          <div
+            className="message-input"
+            style={inputMessage ? { flex: "auto" } : {}}
+          >
+            <input
+              type="file"
+              ref={inputFileRef}
+              style={{ display: "none" }}
+              multiple
+              onChange={handleFileChange}
+            />
+            {droppedFiles.length > 0 ? (
+              <div>{filePreview()}</div>
+            ) : (
+              <textarea
+                className="send-message"
+                placeholder="Aa"
+                value={inputMessage}
+                rows={3}
+                onKeyDown={handleKeyDown}
+                ref={inputMessageRef}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  setInputMessage(e.target.value)
+                }
+                onFocus={() => emitUserWrittingToSocket(true)}
+                onBlur={() => emitUserWrittingToSocket(false)}
+              />
+            )}
+          </div>
+          <div className="like-icon">
+            {inputMessage || droppedFiles.length > 0 ? (
+              <Send
+                color={"#00000"}
+                height="3vh"
+                width="3vh"
+                onClick={() =>
+                  droppedFiles
+                    ? sendFile()
+                    : displayedConv
+                    ? sendMessage()
+                    : createConversation()
+                }
+              />
+            ) : (
+              <div
+                style={{ cursor: "pointer", fontSize: "1.5rem" }}
+                onClick={() => sendLike()}
+              >
+                👍
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+      <div
+        className={`conversation-details ${showConvDetails ? "expanded" : ""}`}
+      >
+        <ConversationDetails />
       </div>
     </div>
   );
