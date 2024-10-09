@@ -134,7 +134,10 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
               >
                 <div className="userLoggedIn">
                   {showImgVisualizer && <ImageVizualizer />}
-                  <NavBar handleSignOut={handleSignOut} />
+                  <div className="page-header">
+                    {" "}
+                    <NavBar handleSignOut={handleSignOut} />
+                  </div>
                   <div className="content">
                     <TriggerContext.Provider value={{ trigger, setTrigger }}>
                       <SideBarConversations

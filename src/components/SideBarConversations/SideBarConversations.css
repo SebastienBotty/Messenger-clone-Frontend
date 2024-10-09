@@ -1,18 +1,15 @@
 .SideBarConversations {
   width: 21vw;
-  min-width: 21vw;
-  max-width: 21vw;
-  overflow: none;
-  height: calc(100vh - 5vh);
+  height: 100%;
 }
 /*--------------------------------------------HEADER--------------------------------------*/
 .sideBar-header {
-  height: 17.5vh;
+  height: 20%;
   border: 1px solid #e5e5e5;
 }
 
 .first-line {
-  padding-top: 0.25rem;
+  padding-top: 0.5rem;
   display: flex;
 }
 
@@ -60,7 +57,7 @@
   justify-content: center;
   align-items: center;
   padding-top: 1rem;
-  height: 2rem;
+  height: 2.5rem;
   position: relative;
 }
 #search-conversations {
@@ -68,14 +65,14 @@
   background-color: #f0f2f5;
   border-radius: 0 2rem 2rem 0;
   width: 80%;
-  height: 100%;
+  height: 2rem;
   border: none;
   outline: none;
 }
 .search-conversations-label {
   background-color: #f0f2f5;
   border-radius: 2rem 0 0 2rem;
-  height: 100%;
+  height: 2rem;
   display: flex;
   align-items: center;
   border: 1px solid #f0f2f5;
@@ -103,7 +100,7 @@
 }
 
 .third-line {
-  padding-top: 0.75rem;
+  padding-top: 1.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -134,10 +131,9 @@
 }
 /*--------------------------------------------CONVERSATIONS--------------------------------------*/
 .conversations-container {
-  height: calc(100% - 17.5vh);
+  height: calc(80% - 1px);
   overflow-y: scroll;
   width: 100%;
-  margin-top: 0.5rem;
 }
 .conversation {
   display: flex;

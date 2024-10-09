@@ -1,12 +1,14 @@
 .WindowConversation {
   width: calc(100vw - 21vw + 1px);
-  height: calc(100vh - 4vh + 1px);
-  position: relative;
+  height: 100%;
+  border-left: 1px solid #e6e6e6;
   display: flex;
 }
 .conversation-container {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 .conversation-details {
   width: 0;
@@ -37,10 +39,10 @@
 
 /*--------------------------------------------HEADER--------------------------------------*/
 .conversation-header {
-  height: 7.5vh;
+  height: 7.5%;
   width: 100%;
   display: flex;
-  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 5px -1px rgba(0, 0, 0, 0.2);
 }
 
 .conversation-member-info {
@@ -199,7 +201,7 @@
 /*----------------------------------------------------------------Body*/
 
 .conversation-body {
-  height: 80vh;
+  height: 85%;
   overflow-y: scroll;
   flex: 1;
 }
@@ -313,10 +315,8 @@
 
 /*---------------------------------------------------------------FOOTER---------------------*/
 .conversation-footer {
-  min-height: 6vh;
-  max-height: 18vh;
   display: flex;
-  flex: 0 0 auto;
+  height: 7.5%;
   justify-content: space-between;
   padding: 0.5rem 0;
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);

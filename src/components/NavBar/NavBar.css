@@ -1,8 +1,8 @@
 .NavBar {
-  height: 5vh;
-  background-color: aqua;
+  height: 100%;
   display: flex;
   justify-content: end;
+  box-shadow: 0 5px 5px -5px rgba(0, 0, 0, 0.2);
 }
 
 .navBar-right-buttons {
