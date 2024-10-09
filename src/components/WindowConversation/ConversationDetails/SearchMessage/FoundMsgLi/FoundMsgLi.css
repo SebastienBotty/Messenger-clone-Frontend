@@ -42,6 +42,7 @@ li.found-msg:hover {
 }
 
 .found-msg-time-since {
+  text-align: end;
   display: block;
   color: gray;
   width: 30%;

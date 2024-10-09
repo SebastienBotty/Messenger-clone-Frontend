@@ -662,11 +662,14 @@ function WindowConversation() {
           );
         }
       });
+      //Close conversatoin details every time a new conversation is selected
+      setShowConvDetails(false);
     } else if (searchInputRef.current) {
       setMessages([]);
       searchInputRef.current.focus();
       setAddedMembers([]);
     }
+
     return () => {
       socket.off("message");
     };

@@ -1,10 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./ConversationDetails.css";
 import { SearchOutline } from "react-ionicons";
 import SearchMessage from "./SearchMessage/SearchMessage";
 
+import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
+
 function ConversationDetails() {
   const [showSearchWordComp, setShowSearchWordComp] = useState<boolean>(false);
+  const { displayedConv } = useDisplayedConvContext();
+
+  useEffect(() => {
+    setShowSearchWordComp(false); // Close search message when conv is changed
+    return () => {};
+  }, [displayedConv]);
   return (
     <div className="conversation-details-container">
       {showSearchWordComp ? (
