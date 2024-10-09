@@ -27,6 +27,11 @@ export type TriggerContextType = {
   setTrigger: React.Dispatch<React.SetStateAction<boolean | null>>;
 };
 
+export type MessagesContextType = {
+  messages: MessageType[];
+  setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
+};
+
 export type ShowImgVisualizerContextType = {
   showImgVisualizer: boolean | null;
   setShowImgVisualizer: React.Dispatch<React.SetStateAction<boolean | null>>;

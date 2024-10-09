@@ -89,16 +89,18 @@ function SearchMessage({
   return (
     <div className="search-message-container">
       <div className="search-message-header">
-        <div className="icon-button-back">
+        <div
+          className="icon-button-back"
+          onClick={() => {
+            setShowSearchWordComp(false);
+          }}
+        >
           {" "}
           <ArrowBackOutline
             color={"#00000"}
             title="Retour"
             height="1.75rem"
             width="1.75rem"
-            onClick={() => {
-              setShowSearchWordComp(false);
-            }}
           />
         </div>
 
