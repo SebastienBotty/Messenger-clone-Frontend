@@ -1,12 +1,12 @@
+.search-message-container > * {
+  margin: 0 1rem;
+}
+
 /*--------------------------HEader-*/
 .search-message-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.search-message-container {
-  padding: 0.25rem 1rem;
 }
 
 .icon-button-back {
@@ -33,7 +33,7 @@
 
 .searchbar-message {
   display: flex;
-  width: 100%;
+  width: auto;
 }
 .searchbar-message form {
   width: 100%;
@@ -47,7 +47,7 @@
   align-items: center;
   border: 1px solid #f0f2f5;
   padding-left: 0.5rem;
-  width: 10%;
+  width: 7.5%;
 }
 
 #search-message {

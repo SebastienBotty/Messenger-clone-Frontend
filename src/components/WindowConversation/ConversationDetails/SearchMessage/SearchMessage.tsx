@@ -109,15 +109,18 @@ function SearchMessage({
 
       <div className="searchbar-message">
         <form onSubmit={(e) => handleSubmit(e)}>
-          <label
-            htmlFor="search-conversations"
-            className="searchbar-message-label"
-          >
-            <SearchOutline color={"#00000"} height="1.5rem" width="1.5rem" />
+          <label htmlFor="search-message" className="searchbar-message-label">
+            <SearchOutline
+              color={"#00000"}
+              height="1.5rem"
+              width="1.5rem"
+              style={{ backGroundColor: "#green" }}
+            />
           </label>
           <input
             className="message-searchbar-input"
             id="search-message"
+            name="search-message"
             type="text"
             placeholder="Rechercher un mot"
             ref={searchInputRef}

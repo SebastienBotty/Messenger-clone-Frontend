@@ -1283,7 +1283,7 @@ function WindowConversation() {
             showConvDetails ? "expanded" : ""
           }`}
         >
-          <ConversationDetails />
+          {showConvDetails && <ConversationDetails />}
         </div>
       </MessagesContext.Provider>
     </div>

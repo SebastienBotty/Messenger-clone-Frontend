@@ -1,3 +1,11 @@
+.conversation-details-container > * {
+  width: 100%;
+}
+
+.conversation-photo {
+  background-color: red;
+}
+
 .icon-button {
   display: flex;
   justify-content: center;
