@@ -1,5 +1,10 @@
 import "./App.css";
-import React, { useState, useLayoutEffect, createContext } from "react";
+import React, {
+  useState,
+  useLayoutEffect,
+  createContext,
+  useEffect,
+} from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { auth } from "./firebase";
 import { User } from "firebase/auth";
@@ -64,6 +69,12 @@ function App() {
   const handleSignOut = (): void => {
     auth.signOut();
   };
+
+  useEffect(() => {
+    document.title = "!Messenger";
+
+    return () => {};
+  }, []);
 
   if (!isAuthChecked) {
     // La vérification de la connexion n'est pas encore terminée
