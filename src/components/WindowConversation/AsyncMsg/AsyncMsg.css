@@ -4,7 +4,10 @@
   row-gap: 0.25rem;
   gap: 0.25rem;
 }
-
+.msg-file-container .file-preview-item {
+  box-sizing: unset;
+  padding: 0.5rem 0.25rem;
+}
 .msg-file-container .file-preview-item img {
   cursor: pointer;
 }

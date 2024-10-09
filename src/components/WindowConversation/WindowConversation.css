@@ -9,6 +9,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 .conversation-details {
   width: 0;
@@ -296,7 +297,6 @@
   bottom: 0;
   margin-bottom: 7.5rem;
   left: 50%;
-  transform: translateX(-75%); /* Centre l'élément horizontalement */
   width: fit-content;
   cursor: pointer;
   border-radius: 50%;
