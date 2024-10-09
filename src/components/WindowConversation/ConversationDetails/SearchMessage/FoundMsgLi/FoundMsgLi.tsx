@@ -115,35 +115,25 @@ function FoundMsgLi({
   };
 
   return (
-    <>
-      <li key={key} className="found-msg" onClick={() => handleMsgClick(msg)}>
-        <div className="found-msg-user-img">
-          <div className="found-msg-user-img-container"></div>
-        </div>
-        <div className="found-msg-content">
-          <div className="found-msg-username">{msg.author}</div>
-          <div className="found-msg-details">
-            <div className="found-msg-text">
-              <div className="trunc-text">
-                {" "}
-                {extractSurroundingText(msg.text, word)}
-              </div>
-            </div>
-            <div className="found-msg-time-since">
-              - {timeSince(new Date(msg.date))}
+    <li key={key} className="found-msg" onClick={() => handleMsgClick(msg)}>
+      <div className="found-msg-user-img">
+        <div className="found-msg-user-img-container"></div>
+      </div>
+      <div className="found-msg-content">
+        <div className="found-msg-username">{msg.author}</div>
+        <div className="found-msg-details">
+          <div className="found-msg-text">
+            <div className="trunc-text">
+              {" "}
+              {extractSurroundingText(msg.text, word)}
             </div>
           </div>
+          <div className="found-msg-time-since">
+            - {timeSince(new Date(msg.date))}
+          </div>
         </div>
-      </li>
-      <button
-        onClick={() => {
-          console.log(messages);
-        }}
-      >
-        ClICK
-      </button>
-      <button onClick={() => setMessages([])}>CLICK AUSSI</button>
-    </>
+      </div>
+    </li>
   );
 }
 
