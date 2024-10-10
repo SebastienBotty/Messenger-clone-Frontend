@@ -56,8 +56,8 @@
 
 .conversation-member-info .img-container img {
   border-radius: 50%; /* Rend l'image ronde */
-  width: 3rem; /* Définit la largeur de l'image */
-  height: 3rem;
+  width: 2.5rem; /* Définit la largeur de l'image */
+  height: 2.5rem;
 }
 .conversation-member-name {
   font-size: large;
