@@ -45,9 +45,21 @@
   height: 2rem;
   display: flex;
   align-items: center;
+  justify-content: center;
   border: 1px solid #f0f2f5;
   padding-left: 0.5rem;
-  width: 7.5%;
+  width: 10%;
+}
+
+.searchbar-message-label .search-icon-container {
+  width: 75;
+  height: 75%;
+  background-color: red;
+}
+
+.searchbar-message-label .search-icon-container svg {
+  width: 100%;
+  height: 100%;
 }
 
 #search-message {
@@ -55,10 +67,10 @@
   background-color: #f0f2f5;
   border-radius: 0 2rem 2rem 0;
   height: 100%;
+  width: 90%;
   border: none;
   outline: none;
   height: 2rem;
-  flex-grow: 1;
 }
 
 .search-message-list {

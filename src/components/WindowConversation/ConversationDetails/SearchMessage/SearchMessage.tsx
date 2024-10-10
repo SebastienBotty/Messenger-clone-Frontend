@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import "./SearchMessage.css";
-import { SearchOutline, ArrowBackOutline } from "react-ionicons";
+import { Search, ArrowBackOutline } from "react-ionicons";
 import { MessageType } from "../../../../typescript/types";
 import {
   UserContext,
@@ -110,12 +110,10 @@ function SearchMessage({
       <div className="searchbar-message">
         <form onSubmit={(e) => handleSubmit(e)}>
           <label htmlFor="search-message" className="searchbar-message-label">
-            <SearchOutline
-              color={"#00000"}
-              height="1.5rem"
-              width="1.5rem"
-              style={{ backGroundColor: "#green" }}
-            />
+            <div className="search-icon-container">
+              {" "}
+              <Search color={"#65676b"} />
+            </div>
           </label>
           <input
             className="message-searchbar-input"

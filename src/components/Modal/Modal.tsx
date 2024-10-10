@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from "react";
 import "./Modal.css";
-import { SearchOutline, CloseCircle } from "react-ionicons";
+import { SearchOutline, Close } from "react-ionicons";
 import {
   UserContext,
   useRecentConversationContext,
@@ -46,7 +46,9 @@ function Modal({
 
   const handleSearchInputValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchConversationInput(e.target.value);
-    debouncedFetConversations(e.target.value);
+    if (e.target.value.length > 2) {
+      debouncedFetConversations(e.target.value);
+    }
   };
 
   const searchConversationWithUser = async (searchQuery: string) => {
@@ -88,13 +90,10 @@ function Modal({
     _.debounce(async (searchQuery: string) => {
       console.log("))))))))");
       console.log(searchQuery);
-      if (searchQuery.length > 2) {
-        let conversations = await searchConversationWithUser(searchQuery);
-        console.log(conversations);
-        setConversationsList(conversations.sort(sortConversationList));
-      } else {
-        return false;
-      }
+
+      let conversations = await searchConversationWithUser(searchQuery);
+      console.log(conversations);
+      setConversationsList(conversations.sort(sortConversationList));
     }, 300),
     []
   );
@@ -140,12 +139,12 @@ function Modal({
                 <h2>Transférer</h2>
               </div>
               <div className="modal-close-button">
-                <CloseCircle
+                <Close
                   onClick={closeModal}
-                  color={"#D8DADF"}
+                  color="black"
                   title={"Fermer"}
-                  height="2.5rem"
-                  width="2.5rem"
+                  height="2rem"
+                  width="2rem"
                 />
               </div>
             </div>
@@ -155,11 +154,10 @@ function Modal({
                   htmlFor="search-conversations"
                   className="modal-search-conversations-label"
                 >
-                  <SearchOutline
-                    color={"#00000"}
-                    height="1.5rem"
-                    width="1.5rem"
-                  />
+                  <div className="modal-search-icon-container">
+                    {" "}
+                    <SearchOutline color={"#65676b"} />
+                  </div>
                 </label>
                 <input
                   className="modal-search-conversations"
@@ -172,13 +170,14 @@ function Modal({
                 />
               </div>
               <div className="conversations-list">
-                {searchConversationInput.trim().length > 2 ? (
+                {JSON.stringify(recentConversations) ===
+                JSON.stringify(conversationsList) ? (
                   <>
-                    <h3 style={{ marginLeft: "2.5rem" }}>Conversations</h3>
+                    <h3 style={{ marginLeft: "2.5rem" }}>Récent</h3>
                   </>
                 ) : (
                   <>
-                    <h3 style={{ marginLeft: "2.5rem" }}>Récent</h3>
+                    <h3 style={{ marginLeft: "2.5rem" }}>Conversations</h3>
                   </>
                 )}
                 {conversationsList.length > 0 &&
