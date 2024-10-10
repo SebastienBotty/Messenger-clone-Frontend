@@ -3,7 +3,7 @@ import {
   Close,
   CreateOutline,
   EllipsisHorizontal,
-  SearchOutline,
+  Search,
 } from "react-ionicons";
 import { ConversationType, SideBarPropsType } from "../../typescript/types";
 import "./SideBarConversations.css";
@@ -405,7 +405,10 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
             htmlFor="search-conversations"
             className="search-conversations-label"
           >
-            <SearchOutline color={"#00000"} height="1.5rem" width="1.5rem" />
+            <div className="test">
+              {" "}
+              <Search color={"#65676b"} />
+            </div>
           </label>
           <input
             className="search-conversations"
