@@ -418,11 +418,14 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
             }
           />
           {searchConversationInput && (
-            <div
-              id="search-input-cross"
-              onClick={() => setSearchConversationInput("")}
-            >
-              <Close color={"#9B7575"} height="1.25rem" width="1.25rem" />
+            <div className="search-input-cross-container">
+              {" "}
+              <div
+                id="search-input-cross"
+                onClick={() => setSearchConversationInput("")}
+              >
+                <Close color={"#9B7575"} height="1.5rem" width="1.5rem" />
+              </div>
             </div>
           )}
         </div>

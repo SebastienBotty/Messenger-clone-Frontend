@@ -73,16 +73,22 @@
   background-color: #f0f2f5;
   border-radius: 2rem 0 0 2rem;
   height: 2rem;
+  width: 10%;
   display: flex;
   align-items: center;
   border: 1px solid #f0f2f5;
   padding-left: 0.25rem;
 }
-#search-input-cross {
+
+.search-input-cross-container {
   position: absolute;
-  right: 0;
-  margin-right: 2rem;
-  cursor: pointer;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  width: 90%;
+  height: 2rem;
+  border-radius: 2rem;
+  pointer-events: none;
 }
 
 #search-input-cross > * {
@@ -94,6 +100,7 @@
   cursor: pointer;
   color: green;
   background-color: #f0f2f5;
+  pointer-events: all;
 }
 #search-input-cross > *:hover {
   background-color: #e4e6eb;
