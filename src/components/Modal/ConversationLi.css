@@ -22,10 +22,16 @@
   background-color: #ebf5ff;
   color: #0084ff;
   border-radius: 0.25rem;
-  cursor: pointer;
   border: none;
+  height: 2.5rem;
+  width: 6rem;
+}
+
+.modal-send-btn:disabled {
+  cursor: not-allowed !important;
 }
 
 .modal-send-btn:hover {
   background-color: #dfe9f2;
+  cursor: pointer;
 }

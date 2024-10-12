@@ -46,9 +46,7 @@ function Modal({
 
   const handleSearchInputValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchConversationInput(e.target.value);
-    if (e.target.value.length > 2) {
-      debouncedFetConversations(e.target.value);
-    }
+    debouncedFetConversations(e.target.value);
   };
 
   const searchConversationWithUser = async (searchQuery: string) => {
@@ -90,10 +88,11 @@ function Modal({
     _.debounce(async (searchQuery: string) => {
       console.log("))))))))");
       console.log(searchQuery);
-
-      let conversations = await searchConversationWithUser(searchQuery);
-      console.log(conversations);
-      setConversationsList(conversations.sort(sortConversationList));
+      if (searchQuery.length > 2) {
+        let conversations = await searchConversationWithUser(searchQuery);
+        console.log(conversations);
+        setConversationsList(conversations.sort(sortConversationList));
+      }
     }, 300),
     []
   );
@@ -170,14 +169,13 @@ function Modal({
                 />
               </div>
               <div className="conversations-list">
-                {JSON.stringify(recentConversations) ===
-                JSON.stringify(conversationsList) ? (
+                {searchConversationInput.trim().length > 2 ? (
                   <>
-                    <h3 style={{ marginLeft: "2.5rem" }}>Récent</h3>
+                    <h3 style={{ marginLeft: "2.5rem" }}>Conversations</h3>
                   </>
                 ) : (
                   <>
-                    <h3 style={{ marginLeft: "2.5rem" }}>Conversations</h3>
+                    <h3 style={{ marginLeft: "2.5rem" }}>Récent</h3>
                   </>
                 )}
                 {conversationsList.length > 0 &&

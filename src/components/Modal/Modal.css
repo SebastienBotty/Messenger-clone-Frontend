@@ -20,12 +20,12 @@
   z-index: 203;
   height: 75%;
   width: 30vw;
-  background-color: #ffffff;
   border-radius: 0.5rem;
+  background-color: #ffffff;
 }
 
 .modal-content-inner {
-  height: auto;
+  height: 100%;
   position: relative;
 }
 .modal-close-button {
@@ -60,6 +60,7 @@
   align-items: center;
   border-bottom: 1px solid black;
   padding: 1rem;
+  height: 10%;
 }
 
 .modal-title-text {
@@ -67,7 +68,7 @@
   margin-right: auto;
 }
 .modal-search-section {
-  margin: 1rem;
+  height: 90%;
 }
 
 .modal-search-conversations-label {
@@ -97,11 +98,13 @@
   width: 90%;
 }
 .modal-searchbar {
+  height: 10%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .conversations-list {
-  margin-top: 2.5rem;
+  height: 80%;
+  overflow-y: auto;
 }
