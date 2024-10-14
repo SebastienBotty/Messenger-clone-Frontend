@@ -20,7 +20,7 @@ li.found-msg:hover {
 .found-msg-user-img-container {
   height: 3rem;
   width: 3rem;
-  background-color: red;
+  background-color: aqua;
   border-radius: 50%;
 }
 .found-msg-content {

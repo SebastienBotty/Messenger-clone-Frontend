@@ -1,9 +1,57 @@
-.conversation-details-container > * {
+.conversation-details {
+  height: 100%;
+  overflow-y: auto;
+}
+.conversation-details > * {
   width: 100%;
 }
+/*-------------------------------HEADER--------------------------*/
+.conversation-details-container {
+  height: 100%;
+}
 
-.conversation-photo {
-  background-color: red;
+.conversation-details-header {
+  height: 40%;
+  display: flex;
+  row-gap: 0.5rem;
+  flex-direction: column;
+  align-items: center;
+}
+
+.conversation-photo-img-container {
+  margin-top: 1rem;
+  background-color: aqua;
+  border-radius: 50%;
+  height: 5.5rem;
+  width: 5.5rem;
+}
+.conversation-title {
+  font-size: large;
+  font-weight: 600;
+}
+.user-online {
+  height: 2rem;
+}
+
+.conversations-details-buttons {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.conversations-details-buttons > .conv-btn-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 5rem;
+  height: 5rem;
+}
+.conversations-details-buttons > .conv-btn-actions > span {
+  font-size: small;
+  width: 100%;
+  text-align: center;
 }
 
 .icon-button {
@@ -25,4 +73,9 @@
 
 .icon-button:hover {
   background-color: #d7d9dd;
+}
+
+.conversations-details-body {
+  height: 60%;
+  border: 1px solid yellow;
 }
