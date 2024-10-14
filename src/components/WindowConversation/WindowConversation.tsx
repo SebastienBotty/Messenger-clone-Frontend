@@ -105,7 +105,8 @@ function WindowConversation() {
     console.log(fetchMsgIndex.current);
     try {
       if (!response.ok) {
-        throw new Error("Erreur lor du fetch");
+        const jsonData = await response.json();
+        throw new Error(jsonData.message);
       }
       const jsonData = await response.json();
       console.log("iciiiiiiiiiiiiiiiiiiiiii");
