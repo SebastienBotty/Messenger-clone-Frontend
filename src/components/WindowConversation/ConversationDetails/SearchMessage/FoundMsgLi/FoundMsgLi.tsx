@@ -23,7 +23,7 @@ function FoundMsgLi({
   const { messages, setMessages } = useMessagesContext();
 
   const extractSurroundingText = (phrase: string, mot: string): JSX.Element => {
-    const indexMot = phrase.indexOf(mot);
+    const indexMot = phrase.search(new RegExp(mot, "i"));
 
     // Si le mot n'est pas trouvé, retourne la phrase originale
     if (indexMot === -1) {
@@ -46,7 +46,7 @@ function FoundMsgLi({
 
     // Combiner et retourner la chaîne complète
     return (
-      <span>
+      <span className="surrounding-text">
         {beforeText}
         <strong>{mot}</strong>
         {afterText}
