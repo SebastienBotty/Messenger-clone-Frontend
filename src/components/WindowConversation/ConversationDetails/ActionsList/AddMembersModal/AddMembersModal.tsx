@@ -100,6 +100,53 @@ function AddMembersModal({
   const isUserAdded = (userId: string) => {
     return addedMembers.some((obj) => obj._id === userId);
   };
+
+  const handleAddMembers = async (
+    arrMembers: UserDataType[],
+    conversationId: string | undefined,
+    userUsername: string | undefined,
+    userId: string | undefined
+  ) => {
+    console.log(arrMembers, conversationId, userUsername, userId);
+    if (!conversationId || !userUsername || !userId || arrMembers.length < 1)
+      return;
+    try {
+      const response = await fetch(RESTAPIUri + "/conversation/addMembers", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: "Bearer " + ApiToken(),
+        },
+        body: JSON.stringify({
+          addedUsers: arrMembers,
+          conversationId: conversationId,
+          adderUsername: userUsername,
+          adderUserId: userId,
+        }),
+      });
+
+      if (!response.ok) {
+        const jsonData = await response.json();
+        throw new Error(jsonData.message);
+      }
+      const jsonData = await response.json();
+
+      console.log(jsonData);
+      setAddedMembers([]); //________________________________________________TODO: UPDATE CONVERSATION SIDEBAR & SEND TO SOCKETS
+      setDisplayedConv((prev) => {
+        if (prev) {
+          return { ...prev, members: jsonData.members };
+        }
+        return prev;
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
   return (
     <div className="modal">
       <div className="modal-overlay">
@@ -185,6 +232,23 @@ function AddMembersModal({
                     </div>
                   </div>
                 ))}
+              </div>
+              <div className="confirm-btn-container">
+                {" "}
+                <button
+                  className="confirm-add-members-btn"
+                  disabled={addedMembers.length === 0}
+                  onClick={() => {
+                    handleAddMembers(
+                      addedMembers,
+                      displayedConv?._id,
+                      user?.userName,
+                      user?._id
+                    );
+                  }}
+                >
+                  Ajouter des personnes
+                </button>
               </div>
             </div>
           </div>
