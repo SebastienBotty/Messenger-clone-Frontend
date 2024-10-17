@@ -95,7 +95,7 @@ export function ConvMembersLi({
       conversationId,
       removerUsername,
       removerUserId,
-      removerUsername
+      removedUsername
     );
     if (leave) {
       setDisplayedConv((prev) => {
