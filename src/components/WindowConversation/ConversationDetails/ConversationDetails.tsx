@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./ConversationDetails.css";
 import { Search, Notifications, NotificationsOff } from "react-ionicons";
 import SearchMessage from "./SearchMessage/SearchMessage";
 
 import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
+import { UserContext } from "../../../screens/userLoggedIn/userLoggedIn";
 import ActionsList from "./ActionsList/ActionsList";
 
 function ConversationDetails() {
   const [showSearchWordComp, setShowSearchWordComp] = useState<boolean>(false);
   const { displayedConv } = useDisplayedConvContext();
   const [notifications, setNotifications] = useState<boolean>(true);
-
+  const user = useContext(UserContext);
   useEffect(() => {
     setShowSearchWordComp(false); // Close search message when conv is changed
     return () => {};
@@ -30,7 +31,15 @@ function ConversationDetails() {
         <div className="conversation-details-container">
           <div className="conversation-details-header">
             <div className="conversation-photo-img-container">Img</div>
-            <div className="conversation-title">Titre</div>
+            <div className="conversation-title">
+              {displayedConv?.isGroupConversation
+                ? displayedConv?.members
+                    .filter((item) => item !== user?.userName)
+                    .join(", ")
+                : displayedConv?.members.filter(
+                    (item) => item !== user?.userName
+                  )}
+            </div>
             <span className="user-online">
               {displayedConv?.isGroupConversation ? "" : "Online"}
             </span>
