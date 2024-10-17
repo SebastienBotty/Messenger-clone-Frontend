@@ -670,7 +670,6 @@ function WindowConversation() {
       searchInputRef.current.focus();
       setAddedMembers([]);
     }
-    setShowConvDetails(false);
 
     return () => {
       socket.off("message");
