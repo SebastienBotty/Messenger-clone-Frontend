@@ -11,7 +11,7 @@
 }
 
 .conversation-details-header {
-  height: 40%;
+  height: 30%;
   display: flex;
   row-gap: 0.5rem;
   flex-direction: column;
@@ -22,8 +22,8 @@
   margin-top: 1rem;
   background-color: aqua;
   border-radius: 50%;
-  height: 5.5rem;
-  width: 5.5rem;
+  height: 5rem;
+  width: 5rem;
 }
 .conversation-title {
   font-size: large;
@@ -34,7 +34,6 @@
 }
 
 .conversations-details-buttons {
-  margin-top: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
