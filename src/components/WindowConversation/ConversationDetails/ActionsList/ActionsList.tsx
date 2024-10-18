@@ -23,7 +23,9 @@ function ActionsList() {
       <ul className="ul-actions-category">
         <li className="category-title" onClick={() => setActive1(!active1)}>
           <div className="title-text">Personnaliser la discussion</div>
-          <div className="title-arrow-icon">
+          <div
+            className={active1 ? "title-arrow-icon active" : "title-arrow-icon"}
+          >
             <ChevronDownOutline color={"#00000"} />
           </div>
         </li>
@@ -52,7 +54,12 @@ function ActionsList() {
         <ul className="ul-actions-category">
           <li className="category-title" onClick={() => setActive2(!active2)}>
             <div className="title-text">Membres de la discussion</div>
-            <div className="title-arrow-icon">
+            <div
+              className={
+                active2 ? "title-arrow-icon active" : "title-arrow-icon"
+              }
+            >
+              {" "}
               <ChevronDownOutline color={"#00000"} />
             </div>
           </li>
@@ -75,7 +82,10 @@ function ActionsList() {
       <ul className="ul-actions-category">
         <li className="category-title" onClick={() => setActive3(!active3)}>
           <div className="title-text">Fichiers et contenus multimédia</div>
-          <div className="title-arrow-icon">
+          <div
+            className={active3 ? "title-arrow-icon active" : "title-arrow-icon"}
+          >
+            {" "}
             <ChevronDownOutline color={"#00000"} />
           </div>
         </li>
@@ -97,7 +107,10 @@ function ActionsList() {
       <ul className="ul-actions-category">
         <li className="category-title" onClick={() => setActive4(!active4)}>
           <div className="title-text">Confidentialité et assistance</div>
-          <div className="title-arrow-icon">
+          <div
+            className={active4 ? "title-arrow-icon active" : "title-arrow-icon"}
+          >
+            {" "}
             <ChevronDownOutline color={"#00000"} />
           </div>
         </li>

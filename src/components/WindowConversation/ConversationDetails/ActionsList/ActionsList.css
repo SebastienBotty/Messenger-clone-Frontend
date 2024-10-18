@@ -33,6 +33,9 @@ ul.ul-actions-category {
   justify-content: center;
   align-items: center;
 }
+.title-arrow-icon.active > * {
+  transform: rotate(180deg);
+}
 .title-arrow-icon > * {
   display: flex;
   justify-content: center;
