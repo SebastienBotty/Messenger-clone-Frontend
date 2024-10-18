@@ -424,6 +424,8 @@ function WindowConversation() {
   };
 
   const sendMessage = (fileNames?: string[]) => {
+    const trimmedString = inputMessage.replace(/^\s+|\s+$/g, "");
+
     const messageData = {
       author: user,
       authorId: userId,
@@ -433,7 +435,7 @@ function WindowConversation() {
           displayedConv?._id +
           ":" +
           fileNames.map((name) => name).join(",")
-        : inputMessage,
+        : trimmedString,
       seenBy: [user],
       date: new Date(),
       conversationId: displayedConv?._id,
