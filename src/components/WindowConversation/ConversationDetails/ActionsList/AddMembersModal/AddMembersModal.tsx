@@ -16,7 +16,6 @@ import {
   SearchOutline,
 } from "react-ionicons";
 import { ApiToken } from "../../../../../localStorage";
-import _ from "lodash";
 
 function AddMembersModal({
   showAddMembersModal,
@@ -139,6 +138,7 @@ function AddMembersModal({
         }
         return prev;
       });
+      setShowAddMembersModal(false);
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
