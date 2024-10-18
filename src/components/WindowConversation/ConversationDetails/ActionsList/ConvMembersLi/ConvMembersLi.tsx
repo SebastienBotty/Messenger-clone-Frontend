@@ -11,7 +11,15 @@ import {
   ExitOutline,
   PersonRemoveOutline,
   ShieldCheckmarkOutline,
+  ShieldOutline,
 } from "react-ionicons";
+
+import ConfirmationModal from "../../../../Utiles/ConfirmationModal/ConfirmationModal";
+import {
+  removeAdmin,
+  removeMember,
+  setAdmin,
+} from "../../../../Utiles/ConfirmationModal/ConfirmationMessage";
 import { ApiToken } from "../../../../../localStorage";
 
 export function ConvMembersLi({
@@ -26,10 +34,23 @@ export function ConvMembersLi({
   const [showModal, setShowModal] = useState(false);
   const showModalRef = useRef(showModal);
   const user = useContext(UserContext);
+  const [showConfirmationModal, setShowConfirmationModal] =
+    useState<boolean>(false);
+  const [confirmationModalAction, setConfirmationModalAction] = useState<{
+    title: string;
+    text: string;
+    action: () => void;
+    closeModal: () => void;
+  }>({
+    title: "",
+    text: "",
+    action: () => {},
+    closeModal: () => setShowConfirmationModal(false),
+  });
 
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
-  const handleLeaveClick = async (
+  /*  const handleLeaveClick = async (
     conversationId: string,
     username: string,
     userId: string
@@ -46,7 +67,7 @@ export function ConvMembersLi({
         return prev;
       });
     }
-  };
+  }; */
   const leaveConv = async (
     conversationId: string,
     username: string,
@@ -85,7 +106,7 @@ export function ConvMembersLi({
     }
   };
 
-  const handleRemoveUserClick = async (
+  /*  const handleRemoveUserClick = async (
     conversationId: string,
     removerUsername: string,
     removerUserId: string,
@@ -98,6 +119,7 @@ export function ConvMembersLi({
       removedUsername
     );
     if (leave) {
+      console.log(leave);
       setDisplayedConv((prev) => {
         if (prev) {
           return {
@@ -108,7 +130,7 @@ export function ConvMembersLi({
         return prev;
       });
     }
-  };
+  }; */
   const removeUser = async (
     conversationId: string,
     removerUsername: string,
@@ -134,8 +156,18 @@ export function ConvMembersLi({
         throw new Error(errorMsg.message);
       }
       const jsonData = await response.json();
-      console.log(jsonData.members);
-      return jsonData.members;
+      setShowConfirmationModal(false);
+      setDisplayedConv((prev) => {
+        if (prev) {
+          return {
+            ...prev,
+            members: jsonData,
+          };
+        }
+        return prev;
+      });
+      console.log(jsonData);
+      return jsonData;
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -144,6 +176,148 @@ export function ConvMembersLi({
       }
       return false;
     }
+  };
+
+  const setUserAdmin = async (
+    conversationId: string | undefined,
+    addedUsername: string,
+    userId: string | undefined,
+    username: string | undefined
+  ) => {
+    if (!conversationId || !addedUsername || !userId || !username) return;
+    console.log("allo");
+    try {
+      const response = await fetch(RESTAPIUri + "/conversation/setAdmin", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + ApiToken(),
+        },
+        body: JSON.stringify({
+          conversationId,
+          addedUsername,
+          userId,
+          username,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorMsg = await response.json();
+        throw new Error(errorMsg.message);
+      }
+      const jsonData = await response.json();
+      console.log(jsonData);
+      setShowConfirmationModal(false);
+      setDisplayedConv((prev) => {
+        if (prev) {
+          return {
+            ...prev,
+            admin: jsonData,
+          };
+        }
+        return prev;
+      });
+      return jsonData;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+      return false;
+    }
+  };
+
+  const removeUserAdmin = async (
+    conversationId: string,
+    removerUsername: string,
+    removerUserId: string,
+    removedUsername: string
+  ): Promise<void> => {
+    console.log(
+      conversationId,
+      removerUsername,
+      removedUsername,
+      removerUserId
+    );
+    try {
+      const response = await fetch(RESTAPIUri + "/conversation/removeAdmin", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + ApiToken(),
+        },
+        body: JSON.stringify({
+          conversationId: conversationId,
+          username: removerUsername,
+          removerUserId: removerUserId,
+
+          removedUsername: removedUsername,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorMsg = await response.json();
+        throw new Error(errorMsg.message);
+      }
+
+      const jsonData = await response.json();
+      setDisplayedConv((prev) => {
+        if (prev) {
+          return {
+            ...prev,
+            admin: jsonData,
+          };
+        }
+        return prev;
+      });
+      setShowConfirmationModal(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+  const handleActions = (action: string, member: string): boolean => {
+    if (!displayedConv || !user) return false;
+    console.log("called" + action + " " + member);
+    setShowModal(false);
+    switch (action) {
+      case "setAdmin":
+        setShowConfirmationModal(true);
+        setConfirmationModalAction({
+          title: setAdmin.title,
+          text: setAdmin.text,
+          action: () =>
+            setUserAdmin(displayedConv._id, member, user._id, user.userName),
+          closeModal: () => setShowConfirmationModal(false),
+        });
+        break;
+      case "removeAdmin":
+        setShowConfirmationModal(true);
+
+        setConfirmationModalAction({
+          title: removeAdmin.title,
+          text: removeAdmin.text,
+          action: () =>
+            removeUserAdmin(displayedConv._id, user.userName, user._id, member),
+          closeModal: () => setShowConfirmationModal(false),
+        });
+        break;
+      case "removeMember":
+        setShowConfirmationModal(true);
+        setConfirmationModalAction({
+          title: removeMember.title,
+          text: removeMember.text,
+          action: () =>
+            removeUser(displayedConv._id, user.userName, user._id, member),
+          closeModal: () => setShowConfirmationModal(false),
+        });
+    }
+
+    return true;
   };
 
   useEffect(() => {
@@ -174,6 +348,10 @@ export function ConvMembersLi({
 
   if (members) {
     members.sort((a, b) => {
+      if (displayedConv.admin[0] === a && displayedConv.admin[0] !== b)
+        return -1;
+      if (displayedConv.admin[0] === b && displayedConv.admin[0] !== a)
+        return 1;
       if (displayedConv.admin.includes(a) && !displayedConv.admin.includes(b))
         return -1;
       if (!displayedConv.admin.includes(a) && displayedConv.admin.includes(b))
@@ -192,7 +370,9 @@ export function ConvMembersLi({
           <span className="members-name">{member}</span>
           <span className="members-role">
             {displayedConv.admin.includes(member)
-              ? "Créateur du groupe"
+              ? displayedConv.admin[0] === member
+                ? "Super Admin"
+                : "Admin"
               : "Membre"}
           </span>
         </div>
@@ -248,12 +428,29 @@ export function ConvMembersLi({
                     </div>
                     Bloquer
                   </li>
-                  {user?.userName &&
-                    displayedConv.admin.includes(user.userName) && (
-                      <>
-                        {" "}
-                        <li className="separation-bar"></li>
-                        <li className="li-members-options">
+                  {user.userName && displayedConv.admin[0] == user.userName && (
+                    <>
+                      {" "}
+                      <li className="separation-bar"></li>
+                      {displayedConv.admin.includes(member) ? (
+                        <li
+                          className="li-members-options"
+                          onClick={() => handleActions("removeAdmin", member)}
+                        >
+                          <div className="members-options-icon">
+                            <ShieldOutline
+                              color={"#00000"}
+                              height={"1.75rem"}
+                              width={"1.75rem"}
+                            />
+                          </div>
+                          Retirer l'admin
+                        </li>
+                      ) : (
+                        <li
+                          className="li-members-options"
+                          onClick={() => handleActions("setAdmin", member)}
+                        >
                           <div className="members-options-icon">
                             <ShieldCheckmarkOutline
                               color={"#00000"}
@@ -263,33 +460,40 @@ export function ConvMembersLi({
                           </div>
                           Nommer admin
                         </li>
-                        <li
-                          className="li-members-options"
-                          onClick={() => {
-                            handleRemoveUserClick(
-                              displayedConv._id,
-                              user.userName,
-                              user._id,
-                              member
-                            );
-                          }}
-                        >
-                          <div className="members-options-icon">
-                            <PersonRemoveOutline
-                              color={"#00000"}
-                              height={"1.75rem"}
-                              width={"1.75rem"}
-                            />
-                          </div>
-                          Supprimer le membre
-                        </li>
-                      </>
+                      )}{" "}
+                    </>
+                  )}
+                  {displayedConv.admin.includes(user.userName) &&
+                    !displayedConv.admin.includes(member) && (
+                      <li
+                        className="li-members-options"
+                        onClick={() => {
+                          handleActions("removeMember", member);
+                        }}
+                      >
+                        <div className="members-options-icon">
+                          <PersonRemoveOutline
+                            color={"#00000"}
+                            height={"1.75rem"}
+                            width={"1.75rem"}
+                          />
+                        </div>
+                        Supprimer le membre
+                      </li>
                     )}
                 </ul>
               </div>
             ))}
         </div>
       </li>
+      {showConfirmationModal && (
+        <ConfirmationModal
+          title={confirmationModalAction.title}
+          text={confirmationModalAction.text}
+          action={confirmationModalAction.action}
+          closeModal={confirmationModalAction.closeModal}
+        />
+      )}
     </div>
   );
 }
