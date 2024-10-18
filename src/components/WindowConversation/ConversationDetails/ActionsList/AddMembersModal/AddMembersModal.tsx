@@ -1,4 +1,10 @@
-import React, { useState, useContext, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useContext,
+  useRef,
+  useCallback,
+  useEffect,
+} from "react";
 import {
   useDisplayedConvContext,
   UserContext,
@@ -148,6 +154,14 @@ function AddMembersModal({
       }
     }
   };
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+
+    return () => {};
+  }, []);
+
   return (
     <div className="modal">
       <div className="modal-overlay">
