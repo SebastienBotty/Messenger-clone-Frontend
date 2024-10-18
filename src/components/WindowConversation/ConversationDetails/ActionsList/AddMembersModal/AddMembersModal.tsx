@@ -16,6 +16,7 @@ import {
   SearchOutline,
 } from "react-ionicons";
 import { ApiToken } from "../../../../../localStorage";
+import _ from "lodash";
 
 function AddMembersModal({
   showAddMembersModal,
