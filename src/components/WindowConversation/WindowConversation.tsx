@@ -101,8 +101,8 @@ function WindowConversation() {
         headers: { authorization: `Bearer ${ApiToken()}` },
       }
     );
-    console.log(limitFetchMsg);
-    console.log(fetchMsgIndex.current);
+    //console.log(limitFetchMsg);
+    //console.log(fetchMsgIndex.current);
     try {
       if (!response.ok) {
         const jsonData = await response.json();
@@ -116,6 +116,13 @@ function WindowConversation() {
       if (firstMessageRef.current) {
         firstMessageRef.current.scrollIntoView({ behavior: "smooth" });
       }
+
+      /*  jsonData.filter((msg: MessageType) => {
+        if (msg.text === "Ideein-removeUser-Alex") {
+          console.log("ici");
+          console.log(jsonData);
+        }
+      }); */
       return jsonData;
     } catch (error) {
       if (error instanceof Error) {
@@ -149,7 +156,7 @@ function WindowConversation() {
           //if no msg has been seen by this member, fetches the last message he has seen
 
           if (tempArray.every((item) => item.username !== member)) {
-            console.log("PLUS DE 15 MESSAGES");
+            //console.log("PLUS DE 15 MESSAGES");
             const lastMsgIdSeenByUser = await fetchLastMsgIdSeenByUser(member);
             if (!lastMsgIdSeenByUser) {
               break;
@@ -213,7 +220,7 @@ function WindowConversation() {
       }
 
       const jsonData = await response.json();
-      console.log(jsonData);
+      //console.log(jsonData);
       if (jsonData === false) {
         postConversation();
       } else {
@@ -247,7 +254,7 @@ function WindowConversation() {
         throw new Error("Erreur lors du POST conversations");
       }
       const jsonData = await response.json();
-      console.log(jsonData);
+      //console.log(jsonData);
       if (jsonData._id) {
         const messageData = {
           author: user,
@@ -258,15 +265,15 @@ function WindowConversation() {
           conversationId: jsonData._id,
         };
         setInputMessage("");
-        console.log(" CONVERSATION DANS POST CONVERSATION");
-        console.log(jsonData);
+        //console.log(" CONVERSATION DANS POST CONVERSATION");
+        //console.log(jsonData);
         postMessage(messageData, jsonData);
         setDisplayedConv(jsonData);
         setAddedMembers([]);
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.log(error.message);
+        //console.log(error.message);
       } else {
         console.error("An unknown error occurred");
       }
@@ -280,7 +287,7 @@ function WindowConversation() {
       isPrivateConvExisting(); //if he doesn't already have a private (not a group where ppl left and they are only 2 left) conversation with the selected person.
       //If not, creates the conversation, if yes,displays the conversation
     } else {
-      console.log("pas assez de membre");
+      //console.log("pas assez de membre");
     }
   };
 
@@ -375,8 +382,8 @@ function WindowConversation() {
   };
   const debouncedFetchUsers = useCallback(
     _.debounce(async (searchQuery: string) => {
-      console.log("))))))))");
-      console.log(searchQuery);
+      //console.log("))))))))");
+      //console.log(searchQuery);
       if (searchQuery.length > 2) {
         try {
           const response = await fetch(
@@ -389,7 +396,7 @@ function WindowConversation() {
             throw new Error("Erreur lors de la recherche d'utilisateur");
           }
           const jsonData = await response.json();
-          console.log(jsonData);
+          //console.log(jsonData);
           setUsersPrediction(jsonData);
           return jsonData;
         } catch (error) {
@@ -408,7 +415,7 @@ function WindowConversation() {
 
   const handleSearch = (user: UserDataType) => {
     if (addedMembers.includes(user.userName)) {
-      console.log("User déja ajouté");
+      //console.log("User déja ajouté");
       setSearchUserInput("");
     } else {
       addMember(user.userName);
@@ -440,8 +447,8 @@ function WindowConversation() {
       date: new Date(),
       conversationId: displayedConv?._id,
     };
-    console.log("iciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
-    console.log(messageData.text);
+    //console.log("iciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+    //console.log(messageData.text);
     setInputMessage("");
 
     postMessage(messageData);
@@ -530,8 +537,8 @@ function WindowConversation() {
         }
       );
       const jsonData = await response.json();
-      console.log("ICI SOCKET");
-      console.log(jsonData);
+      //console.log("ICI SOCKET");
+      //console.log(jsonData);
 
       return jsonData;
     } catch (error) {
@@ -557,8 +564,8 @@ function WindowConversation() {
             messages[messages.length - 1],
           ]
         : [convMembersSocket, messageData, conversation];
-    console.log(messages[messages.length - 1]);
-    console.log(socketData);
+    //console.log(messages[messages.length - 1]);
+    //console.log(socketData);
     socket.emit("message", socketData);
   };
   const emitSeenMsgToSocket = async (
@@ -731,8 +738,8 @@ function WindowConversation() {
       }
 
       const totalSize = calculateTotalSize([...droppedFiles, file]);
-      console.log(totalSize);
-      console.log(MAX_FILE_SIZE_BYTES);
+      //console.log(totalSize);
+      //console.log(MAX_FILE_SIZE_BYTES);
 
       if (totalSize <= MAX_FILE_SIZE_BYTES) {
         setDroppedFiles((prevFiles) => [...prevFiles, file]);
@@ -844,8 +851,8 @@ function WindowConversation() {
     for (const file of droppedFiles) {
       filesFormData.append("files", file);
     }
-    console.log(droppedFiles);
-    console.log(filesFormData);
+    //console.log(droppedFiles);
+    //console.log(filesFormData);
 
     try {
       const response = await fetch(
@@ -863,7 +870,7 @@ function WindowConversation() {
         throw new Error("Error uploading files");
       }
       const data = await response.json();
-      console.log(data);
+      //console.log(data);
       if (inputFileRef.current) {
         inputFileRef.current.value = "";
       }
@@ -880,9 +887,9 @@ function WindowConversation() {
 
   const sendFile = async () => {
     const fileNamesTimeStamped = await uploadFiles();
-    console.log("fichiers envoyés");
+    //console.log("fichiers envoyés");
     await sendMessage(fileNamesTimeStamped.fileNames);
-    console.log("msg envoyé");
+    //console.log("msg envoyé");
   };
   return (
     <div

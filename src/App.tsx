@@ -24,9 +24,9 @@ function App() {
 
   useLayoutEffect(() => {
     const fetchUserData = async (firebaseUser: User) => {
-      console.log("USER");
-      console.log(firebaseUser);
-      console.log(firebaseUser.email);
+      //console.log("USER");
+      //console.log(firebaseUser);
+      //console.log(firebaseUser.email);
       try {
         const response = await fetch(
           RESTAPIUri + "/user/mail/" + firebaseUser.email
@@ -35,11 +35,11 @@ function App() {
           throw new Error("Erreur lors du fetch");
         }
         const jsonData = await response.json();
-        console.log("JSON DATA SET ");
-        console.log(jsonData);
+        //console.log("JSON DATA SET ");
+        //console.log(jsonData);
         setUserData(jsonData[0]);
         localStorage.setItem("ApiToken", JSON.stringify(jsonData[1].ApiToken));
-        console.log(localStorage.getItem("ApiToken"));
+        //console.log(localStorage.getItem("ApiToken"));
         navigate("/MyMessages", { state: jsonData[0] });
       } catch (error: unknown) {
         if (error instanceof Error) {
@@ -56,7 +56,7 @@ function App() {
       console.log(user); */
       if (user !== null) {
         fetchUserData(user);
-        console.log(user);
+        //console.log(user);
       } else {
         setUserData(null);
         navigate("/");

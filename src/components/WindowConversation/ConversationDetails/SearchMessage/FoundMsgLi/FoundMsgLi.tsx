@@ -58,7 +58,6 @@ function FoundMsgLi({
     const beforeAndAfterMsg = await fetchMessagesBeforeAndAfter(msg);
 
     if (beforeAndAfterMsg) {
-      console.log("oui");
       const messagesAround = [
         ...beforeAndAfterMsg[0].reverse(),
         msg,
