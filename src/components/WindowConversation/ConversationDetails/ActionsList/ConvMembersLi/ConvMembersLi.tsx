@@ -2,7 +2,9 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   useDisplayedConvContext,
   UserContext,
+  useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
+import { useMessagesContext } from "../../../../../constants/context";
 import "./ConvMembersLi.css";
 import {
   ChatbubbleOutline,
@@ -21,6 +23,8 @@ import {
   setAdmin,
 } from "../../../../Utiles/ConfirmationModal/ConfirmationMessage";
 import { ApiToken } from "../../../../../localStorage";
+import { ConversationType, MessageType } from "../../../../../typescript/types";
+import { socket } from "../../../../../socket";
 
 export function ConvMembersLi({
   member,
@@ -30,6 +34,8 @@ export function ConvMembersLi({
   key: string;
 }): JSX.Element {
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
+  const { messages, setMessages } = useMessagesContext();
   const btnRef = useRef<HTMLDivElement>(null);
   const [showModal, setShowModal] = useState(false);
   const showModalRef = useRef(showModal);
@@ -49,25 +55,6 @@ export function ConvMembersLi({
   });
 
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
-
-  /*  const handleLeaveClick = async (
-    conversationId: string,
-    username: string,
-    userId: string
-  ) => {
-    const leave = await leaveConv(conversationId, username, userId);
-    if (leave) {
-      setDisplayedConv((prev) => {
-        if (prev) {
-          return {
-            ...prev,
-            members: leave,
-          };
-        }
-        return prev;
-      });
-    }
-  }; */
   const leaveConv = async (
     conversationId: string,
     username: string,
@@ -94,7 +81,7 @@ export function ConvMembersLi({
         throw new Error(errorMsg.message);
       }
       const jsonData = await response.json();
-      console.log(jsonData.members);
+      //console.log(jsonData.members);
       return jsonData.members;
     } catch (error) {
       if (error instanceof Error) {
@@ -106,31 +93,6 @@ export function ConvMembersLi({
     }
   };
 
-  /*  const handleRemoveUserClick = async (
-    conversationId: string,
-    removerUsername: string,
-    removerUserId: string,
-    removedUsername: string
-  ) => {
-    const leave = await removeUser(
-      conversationId,
-      removerUsername,
-      removerUserId,
-      removedUsername
-    );
-    if (leave) {
-      console.log(leave);
-      setDisplayedConv((prev) => {
-        if (prev) {
-          return {
-            ...prev,
-            members: leave,
-          };
-        }
-        return prev;
-      });
-    }
-  }; */
   const removeUser = async (
     conversationId: string,
     removerUsername: string,
@@ -149,6 +111,7 @@ export function ConvMembersLi({
           removerUsername: removerUsername,
           removerUserId: removerUserId,
           removedUsername: removedUsername,
+          date: new Date(),
         }),
       });
       if (!response.ok) {
@@ -156,17 +119,16 @@ export function ConvMembersLi({
         throw new Error(errorMsg.message);
       }
       const jsonData = await response.json();
+      const updatedConv = jsonData.conversation;
+      updatedConv.lastMessage = jsonData.message;
       setShowConfirmationModal(false);
-      setDisplayedConv((prev) => {
-        if (prev) {
-          return {
-            ...prev,
-            members: jsonData,
-          };
-        }
-        return prev;
+      setDisplayedConv(updatedConv);
+      setMostRecentConv(updatedConv);
+      setMessages((prev) => {
+        return [...prev, jsonData.message];
       });
-      console.log(jsonData);
+      emitToSockets("membersChange", updatedConv); //--------------
+
       return jsonData;
     } catch (error) {
       if (error instanceof Error) {
@@ -185,7 +147,7 @@ export function ConvMembersLi({
     username: string | undefined
   ) => {
     if (!conversationId || !addedUsername || !userId || !username) return;
-    console.log("allo");
+    //console.log("allo");
     try {
       const response = await fetch(RESTAPIUri + "/conversation/setAdmin", {
         method: "PATCH",
@@ -206,7 +168,7 @@ export function ConvMembersLi({
         throw new Error(errorMsg.message);
       }
       const jsonData = await response.json();
-      console.log(jsonData);
+      //console.log(jsonData);
       setShowConfirmationModal(false);
       setDisplayedConv((prev) => {
         if (prev) {
@@ -234,12 +196,12 @@ export function ConvMembersLi({
     removerUserId: string,
     removedUsername: string
   ): Promise<void> => {
-    console.log(
+    /*  console.log(
       conversationId,
       removerUsername,
       removedUsername,
       removerUserId
-    );
+    ); */
     try {
       const response = await fetch(RESTAPIUri + "/conversation/removeAdmin", {
         method: "PATCH",
@@ -272,6 +234,7 @@ export function ConvMembersLi({
         return prev;
       });
       setShowConfirmationModal(false);
+      // emitToSockets(user?.userName, "removeAdmin", removedUsername);--------------------------------------------------------------------------
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -282,7 +245,7 @@ export function ConvMembersLi({
   };
   const handleActions = (action: string, member: string): boolean => {
     if (!displayedConv || !user) return false;
-    console.log("called" + action + " " + member);
+    //console.log("called" + action + " " + member);
     setShowModal(false);
     switch (action) {
       case "setAdmin":
@@ -320,6 +283,53 @@ export function ConvMembersLi({
     return true;
   };
 
+  const getUsersSocket = async (
+    conversation: ConversationType | null
+  ): Promise<{ userName: string; socketId: string }[] | false> => {
+    if (!conversation || !user) return false;
+
+    const convMembersStr = conversation.members
+      ?.filter((member) => member !== user.userName)
+      .join("-");
+    try {
+      const response = await fetch(
+        RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr,
+        {
+          headers: {
+            Authorization: "Bearer " + ApiToken(),
+          },
+        }
+      );
+      const jsonData = await response.json();
+      //console.log("ICI SOCKET");
+      //console.log(jsonData);
+
+      return jsonData;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+      return false;
+    }
+  };
+
+  const emitToSockets = async (eventName: string, data: any): Promise<void> => {
+    if (!displayedConv || !user) return;
+
+    const convMembersSocket = await getUsersSocket(displayedConv);
+    if (!convMembersSocket) return;
+
+    if (eventName === "membersChange") {
+      /*    console.log(
+        "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiicccccccccccccccccccccccccciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+      );
+      console.log([convMembersSocket, data.message, data.conversation]); */
+      socket.emit(eventName, [convMembersSocket, data]);
+    }
+  };
+
   useEffect(() => {
     showModalRef.current = showModal; // Toujours mettre à jour la référence avec la valeur actuelle de showModal
   }, [showModal]);
@@ -333,7 +343,7 @@ export function ConvMembersLi({
         !btnRef.current.contains(event.target as Node)
       ) {
         // Ici, tu peux gérer ce qui se passe (fermer modal, etc.)
-        console.log("Clic en dehors du bouton");
+        //console.log("Clic en dehors du bouton");
         setShowModal(false);
       }
     };
@@ -362,6 +372,9 @@ export function ConvMembersLi({
 
   return (
     <div style={{ position: "relative" }} key={key}>
+      <button onClick={() => console.log(messages)}>
+        CLICKEZ BANDE DE SALOPE
+      </button>
       <li className="li-members">
         <div className="li-members-img">
           <div className="li-members-img-container"></div>

@@ -86,7 +86,7 @@ function WindowConversation() {
 
   const [showConvDetails, setShowConvDetails] = useState<boolean>(false); //Displays conversation details
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (): Promise<MessageType[] | false> => {
     const response = await fetch(
       RESTAPIUri +
         "/message/userId/" +
@@ -101,18 +101,24 @@ function WindowConversation() {
         headers: { authorization: `Bearer ${ApiToken()}` },
       }
     );
-    //console.log(limitFetchMsg);
-    //console.log(fetchMsgIndex.current);
+    console.log(fetchMsgIndex.current);
     try {
       if (!response.ok) {
         const jsonData = await response.json();
         throw new Error(jsonData.message);
       }
-      const jsonData = await response.json();
-      console.log("iciiiiiiiiiiiiiiiiiiiiii");
-      console.log(jsonData);
-      setMessages((prev) => [...prev, ...jsonData]);
-      fetchMsgIndex.current += limitFetchMsg;
+      const jsonData: MessageType[] = await response.json();
+      //console.log("iciiiiiiiiiiiiiiiiiiiiii");
+      //console.log(messages, jsonData);
+      let messageTemp: MessageType[] = [];
+      if (fetchMsgIndex.current > 0) messageTemp = messages;
+      setMessages([]); //Again, had to to clear messages before adding new ones??? Probably an asynch shit or smt like that.
+      setTimeout(() => {
+        setMessages([...messageTemp, ...jsonData]);
+      }, 1);
+      if (jsonData.length > 0) {
+        fetchMsgIndex.current += jsonData.length;
+      }
       if (firstMessageRef.current) {
         firstMessageRef.current.scrollIntoView({ behavior: "smooth" });
       }
@@ -130,6 +136,7 @@ function WindowConversation() {
       } else {
         console.error("An unknown error occurred");
       }
+      return false;
     }
   };
 
@@ -370,7 +377,7 @@ function WindowConversation() {
     if (scrollViewRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollViewRef.current;
       // Vérifie si l'utilisateur est proche du bas
-      setIsAtBottom(scrollTop + clientHeight >= scrollHeight - 300);
+      setIsAtBottom(scrollTop + clientHeight >= scrollHeight - 600);
     }
   };
 
@@ -494,8 +501,8 @@ function WindowConversation() {
         throw new Error("Erreur lors du POST MEssage");
       }
       const jsonData = await response.json();
-      /*  console.log(jsonData);
-      console.log(displayedConv); */
+      //console.log(jsonData);
+      //console.log(displayedConv);
       setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
       //Reload the sideBar component to fetch the latest conversation
       setTrigger(!trigger);
@@ -622,16 +629,20 @@ function WindowConversation() {
 
   const asyncFetchMsg = async () => {
     const fetchedMessages = await fetchMessages();
-    lastMsgSeenByMembers(fetchedMessages);
+    if (!fetchedMessages || fetchedMessages.length === 0) return;
 
+    lastMsgSeenByMembers(fetchedMessages);
     emitSeenMsgToSocket(fetchedMessages[0], displayedConv);
   };
   useEffect(() => {
+    setInputMessage("");
     if (displayedConv) {
       fetchMsgIndex.current = 0;
       setDroppedFiles([]);
       setShowDragOverOverlay(false);
       setMessages([]);
+      console.log("MESSSSSSSAGE RESET");
+      console.log(displayedConv._id);
       asyncFetchMsg();
 
       socket.on("message", (data) => {
@@ -673,23 +684,37 @@ function WindowConversation() {
           );
         }
       });
+
+      socket.on("membersChange", (conversation: ConversationType) => {
+        console.log("members change écouté");
+        if (conversation._id === displayedConv?._id) {
+          console.log("c les meme");
+          setMessages((prev) => [...prev, conversation.lastMessage]);
+          emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
+        }
+      });
+
       //Close conversatoin details every time a new conversation is selected
     } else if (searchInputRef.current) {
       setMessages([]);
       searchInputRef.current.focus();
       setAddedMembers([]);
+      setShowConvDetails(false);
     }
 
     return () => {
       socket.off("message");
+      socket.off("seenMessage");
+      socket.off("typing");
+      socket.off("membersChange");
     };
-  }, [displayedConv]);
+  }, [displayedConv?._id]);
 
   useEffect(() => {
     if (isAtBottom && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView();
     }
-  }, [messages, isAtBottom, displayedConv]);
+  }, [messages, displayedConv?._id]);
 
   // Files Management ----------------------------------------------------------------------------------------------
   const handleDragOver = useCallback(

@@ -100,11 +100,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         throw new Error("Erreur lors du fetch");
       }
       const jsonData = await response.json();
-      console.log("CONVERSATIONS");
-      console.log(jsonData);
-      /* for (let x of jsonData) {
-        fetchConversationLastMsg(x);
-      } */
+      //console.log("CONVERSATIONS");
+      //console.log(jsonData);
       const test = await fetchConversationLastMsg(jsonData);
       setDisplayedConv(test[0]);
       setConversations((prev) => [...test, ...prev]);
@@ -157,7 +154,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   };
 
   const handleConversationClick = async (conversation: ConversationType) => {
-    console.log(conversation.lastMessage);
+    //console.log(conversation.lastMessage);
     if (conversation.lastMessage._id && userData?._id && userData?.userName) {
       setDisplayedConv(conversation);
 
@@ -190,7 +187,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         throw new Error("Erreur lors du PATCH markMessagesAsSeen");
       }
       const jsonData = await response.json();
-      console.log(jsonData);
+      //console.log(jsonData);
       return jsonData;
     } catch (error) {
       if (error instanceof Error) {
@@ -238,7 +235,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         new Date(a.lastMessage.date).getTime()
       );
     });
-    console.log(sortedConvArr.slice(0, 5).reverse());
+    //console.log(sortedConvArr.slice(0, 5).reverse());
     setRecentConversations(sortedConvArr.slice(0, 5));
   };
 
@@ -247,8 +244,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       let recentConvs = [...recentConversations];
       recentConvs.push(conversation);
       recentConvs.shift();
-      console.log("UPDATE 5 LATEST CONVERSATIONS  RECENT CONVERSATIONS");
-      console.log(recentConvs);
+      //console.log("UPDATE 5 LATEST CONVERSATIONS  RECENT CONVERSATIONS");
+      //console.log(recentConvs);
       setRecentConversations(recentConvs);
     }
   };
@@ -272,7 +269,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         className="conversation"
         onClick={() => {
           handleConversationClick(conversation);
-          console.log("ON CLICK CONV : " + conversation._id);
+          //console.log("ON CLICK CONV : " + conversation._id);
         }}
         id={
           conversation._id === displayedConv?._id ? "selected-conversation" : ""
@@ -342,10 +339,10 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   };
   useEffect(() => {
     socket.on("message", (data) => {
-      console.log("Message reçu");
-      console.log(data[0]);
-      console.log(data[1]);
-      console.log(data[2]);
+      //console.log("Message reçu");
+      //console.log(data[0]);
+      //console.log(data[1]);
+      //console.log(data[2]);
       if (data[2]) {
         if (
           moreThanOneMinBetween(new Date(data[0].date), new Date(data[2].date))
@@ -362,10 +359,21 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       setMostRecentConv(data[1]);
     });
 
+    socket.on("membersChange", (conversation: ConversationType) => {
+      if (!conversation || !conversation.lastMessage._id) return;
+      if (conversation._id === displayedConv?._id) {
+        console.log("MEMBERS CHANGE");
+        updateSeenConversation(conversation.lastMessage._id, conversation);
+        setDisplayedConv(conversation);
+        setMostRecentConv(conversation);
+      }
+    });
+
     return () => {
       socket.off("message");
+      socket.off("membersChange");
     };
-  }, [displayedConv]);
+  }, [displayedConv?._id]);
 
   useEffect(() => {
     if (mostRecentConv) {

@@ -8,6 +8,7 @@ import React, {
 import {
   useDisplayedConvContext,
   UserContext,
+  useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
 import "./AddMembersModal.css";
 import "../../../../Modal/Modal.css";
@@ -23,6 +24,8 @@ import {
 } from "react-ionicons";
 import { ApiToken } from "../../../../../localStorage";
 import _ from "lodash";
+import { socket } from "../../../../../socket";
+import { useMessagesContext } from "../../../../../constants/context";
 
 function AddMembersModal({
   showAddMembersModal,
@@ -33,6 +36,8 @@ function AddMembersModal({
 }) {
   const user = useContext(UserContext);
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { messages, setMessages } = useMessagesContext();
+  const { setMostRecentConv } = useMostRecentConvContext();
 
   const [searchConversationInput, setSearchConversationInput] =
     useState<string>("");
@@ -128,6 +133,7 @@ function AddMembersModal({
           conversationId: conversationId,
           adderUsername: userUsername,
           adderUserId: userId,
+          date: new Date(),
         }),
       });
 
@@ -138,14 +144,14 @@ function AddMembersModal({
       const jsonData = await response.json();
 
       console.log(jsonData);
-      setAddedMembers([]); //________________________________________________TODO: UPDATE CONVERSATION SIDEBAR & SEND TO SOCKETS
-      setDisplayedConv((prev) => {
-        if (prev) {
-          return { ...prev, members: jsonData.members };
-        }
-        return prev;
-      });
+      const updatedConv = jsonData.conversation;
+      updatedConv.lastMessage = jsonData.message;
+      setAddedMembers([]);
+      setDisplayedConv(updatedConv);
+      setMostRecentConv(updatedConv);
       setShowAddMembersModal(false);
+      setMessages((prev) => [...prev, jsonData.message]);
+      emitToSockets("membersChange", updatedConv);
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -153,6 +159,46 @@ function AddMembersModal({
         console.error("An unknown error occurred");
       }
     }
+  };
+
+  const getUsersSocket = async (
+    conversation: ConversationType | null
+  ): Promise<{ userName: string; socketId: string }[] | false> => {
+    if (!conversation || !user) return false;
+
+    const convMembersStr = conversation.members
+      ?.filter((member) => member !== user.userName)
+      .join("-");
+    try {
+      const response = await fetch(
+        RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr,
+        {
+          headers: {
+            Authorization: "Bearer " + ApiToken(),
+          },
+        }
+      );
+      const jsonData = await response.json();
+      //console.log("ICI SOCKET");
+      //console.log(jsonData);
+
+      return jsonData;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+      return false;
+    }
+  };
+
+  const emitToSockets = async (eventName: string, data: any): Promise<void> => {
+    if (!displayedConv || !user) return;
+
+    const convMembersSocket = await getUsersSocket(displayedConv);
+    if (!convMembersSocket) return;
+    socket.emit(eventName, [convMembersSocket, data]);
   };
   useEffect(() => {
     if (searchInputRef.current) {
