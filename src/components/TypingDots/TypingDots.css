@@ -2,11 +2,12 @@
   width: 1.75rem;
   height: 0.25rem;
   position: relative;
-  padding: 10px;
+  padding: 10px 0px;
   background: #e6e6e6;
   border-radius: 20px;
   display: flex;
   align-items: center;
+  justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ajout de la box-shadow */
 }
 
@@ -14,7 +15,9 @@
   float: left;
   width: 4px;
   height: 4px;
-  margin: 0 2px;
+  min-width: 4px;
+  min-height: 4px;
+  margin: 0 1px;
   background: #8d8c91;
   border-radius: 50%;
   opacity: 0;
