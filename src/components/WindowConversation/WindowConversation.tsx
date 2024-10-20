@@ -648,10 +648,18 @@ function WindowConversation() {
       socket.on("message", (data) => {
         const message = data[0];
         const convId = data[1]._id;
-
+        /*   console.log("MESSAGE RECU");
+        console.log(message); */
         if (convId === displayedConv?._id) {
           setMessages((prev) => [...prev, message]);
           emitSeenMsgToSocket(message, displayedConv);
+          setLastMsgSeenByConvMembers((prev) =>
+            prev.map((item) =>
+              item.username === message.seenBy[0]
+                ? { ...item, messageId: message._id }
+                : item
+            )
+          );
         }
       });
 
@@ -691,6 +699,13 @@ function WindowConversation() {
           console.log("c les meme");
           setMessages((prev) => [...prev, conversation.lastMessage]);
           emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
+          setLastMsgSeenByConvMembers((prev) =>
+            prev.map((item) =>
+              item.username === conversation.lastMessage.seenBy[0]
+                ? { ...item, messageId: conversation.lastMessage._id }
+                : item
+            )
+          );
         }
       });
 
