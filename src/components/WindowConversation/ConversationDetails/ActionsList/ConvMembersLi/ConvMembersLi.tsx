@@ -179,6 +179,8 @@ export function ConvMembersLi({
         }
         return prev;
       });
+      //console.log("emitting");
+      emitToSockets("adminChange", [jsonData, conversationId]);
       return jsonData;
     } catch (error) {
       if (error instanceof Error) {
@@ -234,7 +236,8 @@ export function ConvMembersLi({
         return prev;
       });
       setShowConfirmationModal(false);
-      // emitToSockets(user?.userName, "removeAdmin", removedUsername);--------------------------------------------------------------------------
+      //console.log("emitting");
+      emitToSockets("adminChange", [jsonData, conversationId]);
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -320,14 +323,7 @@ export function ConvMembersLi({
 
     const convMembersSocket = await getUsersSocket(displayedConv);
     if (!convMembersSocket) return;
-
-    if (eventName === "membersChange") {
-      /*    console.log(
-        "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiicccccccccccccccccccccccccciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
-      );
-      console.log([convMembersSocket, data.message, data.conversation]); */
-      socket.emit(eventName, [convMembersSocket, data]);
-    }
+    socket.emit(eventName, [convMembersSocket, data]);
   };
 
   useEffect(() => {

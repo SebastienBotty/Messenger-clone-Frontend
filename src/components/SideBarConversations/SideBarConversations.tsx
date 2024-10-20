@@ -369,9 +369,31 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       }
     });
 
+    socket.on("adminChange", (data) => {
+      // console.log("ADMIN CHANGE RECU");
+      const { adminArr, conversationId } = data;
+      //console.log("CONVERSATION VISE:" + conversationId);
+      //console.log("DISPLAYED CONV : " + displayedConv?._id);
+      conversations.forEach((conv) => {
+        if (conv._id === conversationId) {
+          // console.log("CONV TROUVEE");
+          conv.admin = adminArr;
+          if (displayedConv && displayedConv._id === conversationId) {
+            // console.log("DISPLAYED CONV TROUVEE" + displayedConv?._id);
+            //console.log("CONV VISE EGALE DISPLAYED CONV" + conversationId);
+            setDisplayedConv((prev) => {
+              if (prev) return { ...prev, admin: adminArr };
+              else return prev;
+            });
+          }
+        }
+      });
+    });
+
     return () => {
       socket.off("message");
       socket.off("membersChange");
+      socket.off("adminChange");
     };
   }, [displayedConv?._id]);
 
