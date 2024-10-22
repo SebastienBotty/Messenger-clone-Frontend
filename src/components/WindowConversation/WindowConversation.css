@@ -262,6 +262,7 @@
 #message-me .message {
   background-color: #0084ff;
   margin-right: 0.5rem;
+  color: white;
 }
 #message-others {
   display: flex;
