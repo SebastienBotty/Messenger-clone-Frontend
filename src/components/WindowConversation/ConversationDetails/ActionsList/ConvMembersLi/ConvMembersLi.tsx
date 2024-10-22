@@ -73,6 +73,7 @@ export function ConvMembersLi({
             conversationId: conversationId,
             username: username,
             userId: userId,
+            date: new Date(),
           }),
         }
       );
