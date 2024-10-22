@@ -17,11 +17,7 @@ import {
 } from "react-ionicons";
 
 import ConfirmationModal from "../../../../Utiles/ConfirmationModal/ConfirmationModal";
-import {
-  removeAdmin,
-  removeMember,
-  setAdmin,
-} from "../../../../Utiles/ConfirmationModal/ConfirmationMessage";
+import { confirmationMessage } from "../../../../../constants/ConfirmationMessage";
 import { ApiToken } from "../../../../../localStorage";
 import { ConversationType, MessageType } from "../../../../../typescript/types";
 import { socket } from "../../../../../socket";
@@ -255,8 +251,8 @@ export function ConvMembersLi({
       case "setAdmin":
         setShowConfirmationModal(true);
         setConfirmationModalAction({
-          title: setAdmin.title,
-          text: setAdmin.text,
+          title: confirmationMessage.setAdmin.title,
+          text: confirmationMessage.setAdmin.text,
           action: () =>
             setUserAdmin(displayedConv._id, member, user._id, user.userName),
           closeModal: () => setShowConfirmationModal(false),
@@ -266,8 +262,8 @@ export function ConvMembersLi({
         setShowConfirmationModal(true);
 
         setConfirmationModalAction({
-          title: removeAdmin.title,
-          text: removeAdmin.text,
+          title: confirmationMessage.removeAdmin.title,
+          text: confirmationMessage.removeAdmin.text,
           action: () =>
             removeUserAdmin(displayedConv._id, user.userName, user._id, member),
           closeModal: () => setShowConfirmationModal(false),
@@ -276,10 +272,19 @@ export function ConvMembersLi({
       case "removeMember":
         setShowConfirmationModal(true);
         setConfirmationModalAction({
-          title: removeMember.title,
-          text: removeMember.text,
+          title: confirmationMessage.removeMember.title,
+          text: confirmationMessage.removeMember.text,
           action: () =>
             removeUser(displayedConv._id, user.userName, user._id, member),
+          closeModal: () => setShowConfirmationModal(false),
+        });
+        break;
+      case "leaveConv":
+        setShowConfirmationModal(true);
+        setConfirmationModalAction({
+          title: confirmationMessage.leaveConv.title,
+          text: confirmationMessage.leaveConv.text,
+          action: () => leaveConv(displayedConv._id, member, user._id),
           closeModal: () => setShowConfirmationModal(false),
         });
     }
@@ -401,7 +406,7 @@ export function ConvMembersLi({
                   <li
                     className="li-members-options"
                     onClick={() => {
-                      leaveConv(displayedConv._id, user.userName, user._id);
+                      handleActions("leaveConv", user.userName);
                     }}
                   >
                     <div className="members-options-icon">
