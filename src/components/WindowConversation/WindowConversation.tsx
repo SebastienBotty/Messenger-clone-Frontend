@@ -1202,6 +1202,13 @@ function WindowConversation() {
                 }
                 return (
                   <>
+                    <div className="message-author-name">
+                      {messages[currentMsg]?.author !==
+                        messages[currentMsg - 1]?.author &&
+                        displayedConv?.isGroupConversation && (
+                          <div className="message-author">{message.author}</div>
+                        )}
+                    </div>
                     <div className="message-container" id="message-others">
                       <div className="img-container">
                         <img src={image} />
