@@ -1113,10 +1113,12 @@ function WindowConversation() {
                 const firstMessage = index === 0;
                 const lastMessage = index === messages.length - 1;
                 const currentMsg = index;
-                if (message.author === 'System/' + displayedConv?._id){
+                if (message.author === "System/" + displayedConv?._id) {
                   return (
-                    <div className="message-container"><ConvSystemMsg textProps={message.text} /></div>
-                  )
+                    <div className="message-container" id="message-system">
+                      <ConvSystemMsg textProps={message.text} />
+                    </div>
+                  );
                 }
                 if (message?.author === user) {
                   return (

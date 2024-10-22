@@ -18,6 +18,7 @@ import {
 } from "../../screens/userLoggedIn/userLoggedIn";
 import { timeSince } from "../../functions/time";
 import { socket } from "../../socket";
+import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const userData = useContext(UserContext);
@@ -293,21 +294,29 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                   : "unseen-conversation"
               }
             >
-              {conversation.isGroupConversation
-                ? (conversation.lastMessage.author === userData?.userName
-                    ? "Vous"
-                    : conversation.lastMessage.author) +
-                  ": " +
-                  (conversation.lastMessage.text.startsWith(
-                    "PATHIMAGE/" + conversation._id
-                  )
-                    ? " Fichier joint"
-                    : conversation.lastMessage.text)
-                : conversation.lastMessage.text.startsWith(
-                    "PATHIMAGE/" + conversation._id
-                  )
-                ? " Fichier joint"
-                : conversation.lastMessage.text}
+              {
+                //Kinda messy yeah
+              }
+              {conversation.lastMessage.author ===
+              "System/" + conversation._id ? (
+                <ConvSystemMsg textProps={conversation.lastMessage.text} />
+              ) : conversation.isGroupConversation ? (
+                (conversation.lastMessage.author === userData?.userName
+                  ? "Vous"
+                  : conversation.lastMessage.author) +
+                ": " +
+                (conversation.lastMessage.text.startsWith(
+                  "PATHIMAGE/" + conversation._id
+                )
+                  ? " Fichier joint"
+                  : conversation.lastMessage.text)
+              ) : conversation.lastMessage.text.startsWith(
+                  "PATHIMAGE/" + conversation._id
+                ) ? (
+                " Fichier joint"
+              ) : (
+                conversation.lastMessage.text
+              )}
             </div>
             - {timeSince(conversation.lastMessage.date)}
             {!conversation.lastMessage.seenBy.includes(userData?.userName) && (
