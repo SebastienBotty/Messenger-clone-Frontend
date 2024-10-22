@@ -374,9 +374,6 @@ export function ConvMembersLi({
 
   return (
     <div style={{ position: "relative" }} key={key}>
-      <button onClick={() => console.log(messages)}>
-        CLICKEZ BANDE DE SALOPE
-      </button>
       <li className="li-members">
         <div className="li-members-img">
           <div className="li-members-img-container"></div>
