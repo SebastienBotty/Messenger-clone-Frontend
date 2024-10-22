@@ -42,6 +42,7 @@ import { socket } from "../../socket";
 
 import AsyncMsg from "./AsyncMsg/AsyncMsg";
 import ConversationDetails from "./ConversationDetails/ConversationDetails";
+import ConvSystemMsg from "./ConvSystemMsg/ConvSystemMsg";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -1112,7 +1113,11 @@ function WindowConversation() {
                 const firstMessage = index === 0;
                 const lastMessage = index === messages.length - 1;
                 const currentMsg = index;
-
+                if (message.author === 'System/' + displayedConv?._id){
+                  return (
+                    <div className="message-container"><ConvSystemMsg textProps={message.text} /></div>
+                  )
+                }
                 if (message?.author === user) {
                   return (
                     <div

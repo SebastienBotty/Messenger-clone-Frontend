@@ -1,0 +1,10 @@
+.conv-system-msg {
+  padding-top: 0.5rem;
+  width: 25%;
+  margin: 0 auto;
+  text-align: center;
+  color: gray;
+  font-size: small;
+  max-height: 3rem;
+  overflow: hidden;
+}
