@@ -375,6 +375,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         updateSeenConversation(conversation.lastMessage._id, conversation);
         setDisplayedConv(conversation);
         setMostRecentConv(conversation);
+      } else {
+        setMostRecentConv(conversation);
       }
     });
 
