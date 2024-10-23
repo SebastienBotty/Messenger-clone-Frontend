@@ -6,8 +6,12 @@ export type ConversationType = {
   photo: string;
   lastMessage: MessageType;
   creationDate: Date;
+  removedMembers: RemovedMembersType[];
 };
-
+export type RemovedMembersType = {
+  username: string;
+  removedData: Date;
+};
 export type ConversationContextType = {
   displayedConv: ConversationType | null;
   setDisplayedConv: React.Dispatch<
