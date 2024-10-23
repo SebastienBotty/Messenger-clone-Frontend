@@ -1253,92 +1253,103 @@ function WindowConversation() {
             </div>
           </div>
           <div className="conversation-footer">
-            <div className="icons">
-              <AddCircle
-                color={"#00000"}
-                title="Ouvrir plus d'actions"
-                height="3vh"
-                width="3vh"
-                style={{ marginRight: "0.5rem" }}
-              />
-              {!inputMessage && (
-                <>
-                  <ImagesOutline
-                    onClick={openFileInput}
-                    title="Joindre un fichier"
+            {(user && displayedConv?.members.includes(user)) ||
+            displayedConv == null ? (
+              <>
+                <div className="icons">
+                  <AddCircle
                     color={"#00000"}
+                    title="Ouvrir plus d'actions"
                     height="3vh"
                     width="3vh"
-                    style={{ transform: "rotate(270deg)" }}
+                    style={{ marginRight: "0.5rem" }}
                   />
-                  <ImagesOutline
-                    onClick={() => console.log(droppedFiles)}
-                    color={"#00000"}
-                    height="3vh"
-                    width="3vh"
-                    style={{ transform: "rotate(270deg)" }}
-                  />
-                  <ImagesOutline
-                    color={"#00000"}
-                    height="3vh"
-                    width="3vh"
-                    style={{ transform: "rotate(270deg)" }}
-                  />
-                </>
-              )}
-            </div>
-            <div
-              className="message-input"
-              style={inputMessage ? { flex: "auto" } : {}}
-            >
-              <input
-                type="file"
-                ref={inputFileRef}
-                style={{ display: "none" }}
-                multiple
-                onChange={handleFileChange}
-              />
-              {droppedFiles.length > 0 ? (
-                <div>{filePreview()}</div>
-              ) : (
-                <textarea
-                  className="send-message"
-                  placeholder="Aa"
-                  value={inputMessage}
-                  rows={3}
-                  onKeyDown={handleKeyDown}
-                  ref={inputMessageRef}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setInputMessage(e.target.value)
-                  }
-                  onFocus={() => emitUserWrittingToSocket(true)}
-                  onBlur={() => emitUserWrittingToSocket(false)}
-                />
-              )}
-            </div>
-            <div className="like-icon">
-              {inputMessage || droppedFiles.length > 0 ? (
-                <Send
-                  color={"#00000"}
-                  height="3vh"
-                  width="3vh"
-                  onClick={() =>
-                    droppedFiles
-                      ? sendFile()
-                      : displayedConv
-                      ? sendMessage()
-                      : createConversation()
-                  }
-                />
-              ) : (
-                <div
-                  style={{ cursor: "pointer", fontSize: "1.5rem" }}
-                  onClick={() => sendLike()}
-                >
-                  👍
+                  {!inputMessage && (
+                    <>
+                      <ImagesOutline
+                        onClick={openFileInput}
+                        title="Joindre un fichier"
+                        color={"#00000"}
+                        height="3vh"
+                        width="3vh"
+                        style={{ transform: "rotate(270deg)" }}
+                      />
+                      <ImagesOutline
+                        onClick={() => console.log(droppedFiles)}
+                        color={"#00000"}
+                        height="3vh"
+                        width="3vh"
+                        style={{ transform: "rotate(270deg)" }}
+                      />
+                      <ImagesOutline
+                        color={"#00000"}
+                        height="3vh"
+                        width="3vh"
+                        style={{ transform: "rotate(270deg)" }}
+                      />
+                    </>
+                  )}
                 </div>
-              )}
-            </div>
+                <div
+                  className="message-input"
+                  style={inputMessage ? { flex: "auto" } : {}}
+                >
+                  <input
+                    type="file"
+                    ref={inputFileRef}
+                    style={{ display: "none" }}
+                    multiple
+                    onChange={handleFileChange}
+                  />
+                  {droppedFiles.length > 0 ? (
+                    <div>{filePreview()}</div>
+                  ) : (
+                    <textarea
+                      className="send-message"
+                      placeholder="Aa"
+                      value={inputMessage}
+                      rows={3}
+                      onKeyDown={handleKeyDown}
+                      ref={inputMessageRef}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                        setInputMessage(e.target.value)
+                      }
+                      onFocus={() => emitUserWrittingToSocket(true)}
+                      onBlur={() => emitUserWrittingToSocket(false)}
+                    />
+                  )}
+                </div>
+                <div className="like-icon">
+                  {inputMessage || droppedFiles.length > 0 ? (
+                    <Send
+                      color={"#00000"}
+                      height="3vh"
+                      width="3vh"
+                      onClick={() =>
+                        droppedFiles
+                          ? sendFile()
+                          : displayedConv
+                          ? sendMessage()
+                          : createConversation()
+                      }
+                    />
+                  ) : (
+                    <div
+                      style={{ cursor: "pointer", fontSize: "1.5rem" }}
+                      onClick={() => sendLike()}
+                    >
+                      👍
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="disabled-footer">
+                <div>
+                  Vous ne pouvez pas envoyer de message dans cette discussion
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div
