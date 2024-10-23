@@ -55,7 +55,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           }
         );
         if (!response.ok) {
-          throw new Error("Erreur lors du fetch");
+          const error = await response.json();
+          throw new Error(error.message);
         }
         const jsonData = await response.json();
         let conversationObject = conversation;
@@ -98,7 +99,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         }
       );
       if (!response.ok) {
-        throw new Error("Erreur lors du fetch");
+        const error = await response.json();
+        throw new Error(error.message);
       }
       const jsonData = await response.json();
       //console.log("CONVERSATIONS");
@@ -127,7 +129,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         }
       );
       if (!response.ok) {
-        throw new Error("Erreur lors du fetch");
+        const error = await response.json();
+        throw new Error(error.message);
       }
       const jsonData = await response.json();
       if (jsonData[0].conversations.length > 0) {
@@ -185,7 +188,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         }
       );
       if (!response.ok) {
-        throw new Error("Erreur lors du PATCH markMessagesAsSeen");
+        const error = await response.json();
+        throw new Error(error.message);
       }
       const jsonData = await response.json();
       //console.log(jsonData);
@@ -270,7 +274,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         className="conversation"
         onClick={() => {
           handleConversationClick(conversation);
-          //console.log("ON CLICK CONV : " + conversation._id);
+          console.log("ON CLICK CONV : ");
+          console.log(conversation);
         }}
         id={
           conversation._id === displayedConv?._id ? "selected-conversation" : ""
@@ -327,12 +332,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       </div>
     );
   };
-  /**
-   * Filters a conversation based on the search input.
-   *
-   * @param {ConversationType} conversation - The conversation to filter.
-   * @return {boolean} Returns true if the conversation's members contain the search input, false otherwise.
-   */
+
   const convFilterMember = (conversation: ConversationType) => {
     return conversation.members
       .join(",")
