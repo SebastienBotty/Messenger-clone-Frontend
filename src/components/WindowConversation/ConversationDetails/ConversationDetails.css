@@ -25,6 +25,12 @@
   height: 5rem;
   width: 5rem;
 }
+
+.conversation-photo-img-container > img {
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+}
 .conversation-title {
   font-size: large;
   font-weight: 600;
