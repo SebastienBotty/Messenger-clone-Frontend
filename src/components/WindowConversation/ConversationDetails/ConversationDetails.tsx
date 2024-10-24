@@ -30,7 +30,13 @@ function ConversationDetails() {
       ) : (
         <div className="conversation-details-container">
           <div className="conversation-details-header">
-            <div className="conversation-photo-img-container">Img</div>
+            <div className="conversation-photo-img-container">
+              {displayedConv?.customization.photo ? (
+                <img src={displayedConv?.customization.photo} />
+              ) : (
+                "Photo "
+              )}
+            </div>
             <div className="conversation-title">
               {displayedConv?.isGroupConversation
                 ? displayedConv?.members
