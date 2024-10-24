@@ -26,6 +26,6 @@ export const convMemberMsg = (
     case "leaveConversation":
       return `${agentName}quité la conversation.`;
     case "changeConversationPhoto":
-      return `${agentName}change la photo de la conversation.`;
+      return `${agentName}changé la photo de la conversation.`;
   }
 };
