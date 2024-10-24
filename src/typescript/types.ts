@@ -7,6 +7,12 @@ export type ConversationType = {
   lastMessage: MessageType;
   creationDate: Date;
   removedMembers: RemovedMembersType[];
+  customization: {
+    conversationName: string;
+    photo: string;
+    theme: string;
+    emoji: string;
+  };
 };
 export type RemovedMembersType = {
   username: string;

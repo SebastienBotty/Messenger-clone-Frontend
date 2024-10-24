@@ -1,55 +1,205 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import "./ActionsList.css";
-import { useDisplayedConvContext } from "../../../../screens/userLoggedIn/userLoggedIn";
+import {
+  useDisplayedConvContext,
+  UserContext,
+  useMostRecentConvContext,
+} from "../../../../screens/userLoggedIn/userLoggedIn";
 import { ConvMembersLi } from "./ConvMembersLi/ConvMembersLi";
+import imageCompression from "browser-image-compression";
 
-import { ChevronDownOutline, Disc, PersonAdd } from "react-ionicons";
+import { useMessagesContext } from "../../../../constants/context";
+
+import {
+  ChevronDownOutline,
+  Disc,
+  ImagesOutline,
+  PencilOutline,
+  PersonAdd,
+} from "react-ionicons";
 import AddMembersModal from "./AddMembersModal/AddMembersModal";
+import { ApiToken } from "../../../../localStorage";
+import LoadingSpinner from "../../../loadingSpinner/loadingSpinner";
+import { set } from "lodash";
 
 function ActionsList() {
-  const [active1, setActive1] = useState(false);
-  const [active2, setActive2] = useState(false);
-  const [active3, setActive3] = useState(false);
-  const [active4, setActive4] = useState(false);
+  const [active1, setActive1] = useState<boolean>(false);
+  const [active2, setActive2] = useState<boolean>(false);
+  const [active3, setActive3] = useState<boolean>(false);
+  const [active4, setActive4] = useState<boolean>(false);
+
+  const [changePhotoLoading, setChangePhotoLoading] = useState<boolean>(false);
+
+  const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const [showAddMembersModal, setShowAddMembersModal] =
     useState<boolean>(false);
 
-  const { displayedConv } = useDisplayedConvContext();
-  if (!displayedConv) return <></>;
+  const user = useContext(UserContext);
+  const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { setMostRecentConv } = useMostRecentConvContext();
+  const { setMessages } = useMessagesContext();
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleActionsClick = (actionName: string) => {
+    switch (actionName) {
+      case "changeConvName":
+    }
+  };
+
+  // Conversation Photo handling
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 10 MB
+
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        fileInputRef.current!.value = "";
+        alert("La taille de l'image ne doit pas depasser 2 Mo.");
+        return;
+      }
+      setChangePhotoLoading(true);
+      console.log(file.size);
+      const options = {
+        maxSizeMB: 1, // Taille maximale de l'image compressée en Mo
+        maxWidthOrHeight: 1920, // Largeur ou hauteur maximale
+        useWebWorker: true, // Utiliser un worker web pour le traitement
+      };
+
+      try {
+        const compressedFile = await imageCompression(file, options);
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (reader.result) {
+            const setBase64Image = reader.result as string;
+            console.log("Image en Base64:", reader.result);
+            const size = (setBase64Image.length / 1024).toFixed(2);
+            //console.log(size + "Ko");
+            postConvPhoto(setBase64Image);
+          }
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error("Erreur lors de la compression de l'image:", error);
+        setChangePhotoLoading(false);
+      }
+    } else {
+      console.log("no file");
+    }
+  };
+
+  const postConvPhoto = async (base64String: string) => {
+    console.log("ALLLLLLLLLLLLL");
+    try {
+      const response = await fetch(
+        `${RESTAPIUri}/conversation/changeConversationPhoto`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${ApiToken()}`,
+          },
+          body: JSON.stringify({
+            conversationId: displayedConv?._id,
+            photoStr: base64String,
+            userId: user?._id,
+            date: new Date(),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        setChangePhotoLoading(false);
+        throw new Error(error.message);
+      }
+
+      const jsonData = await response.json();
+      setDisplayedConv(jsonData.conversation);
+      setMostRecentConv(jsonData.conversation);
+      setMessages((prev) => {
+        return [...prev, jsonData.message];
+      });
+      setChangePhotoLoading(false);
+      console.log(jsonData);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {}
+  };
+
+  if (!displayedConv || !user) return <></>;
 
   return (
     <div className="actions-list">
-      <ul className="ul-actions-category">
-        <li className="category-title" onClick={() => setActive1(!active1)}>
-          <div className="title-text">Personnaliser la discussion</div>
-          <div
-            className={active1 ? "title-arrow-icon active" : "title-arrow-icon"}
-          >
-            <ChevronDownOutline color={"#00000"} />
-          </div>
-        </li>
-        <ul className={"actions-content" + (active1 ? " active" : "")}>
-          <li className="li-actions">
-            <div className="li-icon">
-              <Disc color={"#00000"} />
+      {displayedConv.admin.includes(user.userName) ||
+      !displayedConv.isGroupConversation ? (
+        <ul className="ul-actions-category">
+          <li className="category-title" onClick={() => setActive1(!active1)}>
+            <div className="title-text">Personnaliser la discussion</div>
+            <div
+              className={
+                active1 ? "title-arrow-icon active" : "title-arrow-icon"
+              }
+            >
+              <ChevronDownOutline color={"#00000"} />
             </div>
-            <span>Modifier le thème</span>
           </li>
-          <li className="li-actions">
-            <div className="li-icon">
-              <Disc color={"#00000"} />
-            </div>
-            <span>Modifier l'emoji</span>
-          </li>
-          <li className="li-actions">
-            <div className="li-icon">
-              <Disc color={"#00000"} />
-            </div>
-            <span>Modifier les pseudos</span>
-          </li>
+          <ul className={"actions-content" + (active1 ? " active" : "")}>
+            {displayedConv.isGroupConversation && (
+              <>
+                <li className="li-actions">
+                  <div className="li-icon">
+                    <PencilOutline color={"#00000"} />
+                  </div>
+                  <span>Modifier le nom de la discussion</span>
+                </li>
+                {changePhotoLoading ? (
+                  <li className="li-actions">
+                    <LoadingSpinner />
+                  </li>
+                ) : (
+                  <li
+                    className="li-actions"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <div className="li-icon">
+                      <ImagesOutline color={"#00000"} />
+                    </div>
+                    <span>Changer la photo</span>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="conversation-photo-file-input"
+                      onChange={handleImageChange}
+                      accept=".jpg, .jpeg, .png"
+                      multiple={false}
+                    />
+                  </li>
+                )}
+              </>
+            )}
+            <li className="li-actions">
+              <div className="li-icon">
+                <Disc color={displayedConv.customization.theme} />
+              </div>
+              <span>Modifier le thème</span>
+            </li>
+            <li className="li-actions">
+              <div className="li-icon">
+                <Disc color={"#00000"} />
+              </div>
+              <span>Modifier l'emoji</span>
+            </li>
+          </ul>{" "}
         </ul>
-      </ul>
+      ) : (
+        <></>
+      )}
       {displayedConv.isGroupConversation && (
         <ul className="ul-actions-category">
           <li className="category-title" onClick={() => setActive2(!active2)}>

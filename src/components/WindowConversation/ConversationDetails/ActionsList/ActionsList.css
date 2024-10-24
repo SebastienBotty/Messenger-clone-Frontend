@@ -70,3 +70,7 @@ li.li-actions {
 .active {
   display: block !important;
 }
+
+.conversation-photo-file-input {
+  display: none;
+}
