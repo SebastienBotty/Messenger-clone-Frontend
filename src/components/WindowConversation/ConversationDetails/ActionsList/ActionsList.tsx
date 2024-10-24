@@ -62,7 +62,7 @@ function ActionsList() {
         return;
       }
       setChangePhotoLoading(true);
-      console.log(file.size);
+      //console.log(file.size);
       const options = {
         maxSizeMB: 1, // Taille maximale de l'image compressée en Mo
         maxWidthOrHeight: 1920, // Largeur ou hauteur maximale
@@ -76,7 +76,7 @@ function ActionsList() {
         reader.onloadend = () => {
           if (reader.result) {
             const setBase64Image = reader.result as string;
-            console.log("Image en Base64:", reader.result);
+            //console.log("Image en Base64:", reader.result);
             const size = (setBase64Image.length / 1024).toFixed(2);
             //console.log(size + "Ko");
             postConvPhoto(setBase64Image);
@@ -93,7 +93,6 @@ function ActionsList() {
   };
 
   const postConvPhoto = async (base64String: string) => {
-    console.log("ALLLLLLLLLLLLL");
     try {
       const response = await fetch(
         `${RESTAPIUri}/conversation/changeConversationPhoto`,
@@ -125,7 +124,7 @@ function ActionsList() {
         return [...prev, jsonData.message];
       });
       setChangePhotoLoading(false);
-      console.log(jsonData);
+      //console.log(jsonData);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
