@@ -368,7 +368,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       setMostRecentConv(data[1]);
     });
 
-    socket.on("membersChange", (conversation: ConversationType) => {
+    socket.on("convUpdate", (conversation: ConversationType) => {
       if (!conversation || !conversation.lastMessage._id) return;
       if (conversation._id === displayedConv?._id) {
         console.log("MEMBERS CHANGE");
@@ -403,7 +403,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
 
     return () => {
       socket.off("message");
-      socket.off("membersChange");
+      socket.off("convUpdate");
       socket.off("adminChange");
     };
   }, [displayedConv?._id]);

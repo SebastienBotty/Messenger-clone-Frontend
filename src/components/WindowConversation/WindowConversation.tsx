@@ -694,7 +694,7 @@ function WindowConversation() {
         }
       });
 
-      socket.on("membersChange", (conversation: ConversationType) => {
+      socket.on("convUpdate", (conversation: ConversationType) => {
         console.log("members change écouté");
         if (conversation._id === displayedConv?._id) {
           console.log("c les meme");
@@ -722,7 +722,7 @@ function WindowConversation() {
       socket.off("message");
       socket.off("seenMessage");
       socket.off("typing");
-      socket.off("membersChange");
+      socket.off("convUpdate");
     };
   }, [displayedConv?._id]);
 
