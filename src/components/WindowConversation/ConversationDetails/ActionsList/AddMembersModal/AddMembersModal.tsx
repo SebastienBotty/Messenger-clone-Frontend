@@ -151,7 +151,7 @@ function AddMembersModal({
       setMostRecentConv(updatedConv);
       setShowAddMembersModal(false);
       setMessages((prev) => [...prev, jsonData.message]);
-      emitToSockets("membersChange", updatedConv);
+      //emitToSockets("convUpdate", updatedConv);
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);

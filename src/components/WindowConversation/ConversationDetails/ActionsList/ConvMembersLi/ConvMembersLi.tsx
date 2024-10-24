@@ -124,7 +124,7 @@ export function ConvMembersLi({
       setMessages((prev) => {
         return [...prev, jsonData.message];
       });
-      emitToSockets("membersChange", updatedConv); //--------------
+      //emitToSockets("convUpdate", updatedConv); //--------------
 
       return jsonData;
     } catch (error) {
