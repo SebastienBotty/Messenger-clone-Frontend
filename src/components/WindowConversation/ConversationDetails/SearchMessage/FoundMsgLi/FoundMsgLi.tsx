@@ -5,8 +5,10 @@ import { timeSince } from "../../../../../functions/time";
 import "./FoundMsgLi.css";
 import { ApiToken } from "../../../../../localStorage";
 import { UserContext } from "../../../../../screens/userLoggedIn/userLoggedIn";
-import { before } from "lodash";
-import { useMessagesContext } from "../../../../../constants/context";
+import {
+  useMessagesContext,
+  useSelectedFoundMsgIdContext,
+} from "../../../../../constants/context";
 
 function FoundMsgLi({
   msg,
@@ -21,6 +23,7 @@ function FoundMsgLi({
   const user = useContext(UserContext);
 
   const { messages, setMessages } = useMessagesContext();
+  const { setSelectedFoundMsgId } = useSelectedFoundMsgIdContext();
 
   const extractSurroundingText = (phrase: string, mot: string): JSX.Element => {
     const indexMot = phrase.search(new RegExp(mot, "i"));
@@ -55,8 +58,9 @@ function FoundMsgLi({
   };
 
   const handleMsgClick = async (msg: MessageType) => {
+    if (!msg._id) return;
     const beforeAndAfterMsg = await fetchMessagesBeforeAndAfter(msg);
-
+    setSelectedFoundMsgId(msg._id);
     if (beforeAndAfterMsg) {
       const messagesAround = [
         ...beforeAndAfterMsg[0].reverse(),

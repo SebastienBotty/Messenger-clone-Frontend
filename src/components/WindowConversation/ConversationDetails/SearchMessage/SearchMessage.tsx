@@ -9,7 +9,7 @@ import {
 
 import { ApiToken } from "../../../../localStorage";
 import FoundMsgLi from "./FoundMsgLi/FoundMsgLi";
-import { info } from "console";
+import { useSelectedFoundMsgIdContext } from "../../../../constants/context";
 
 function SearchMessage({
   setShowSearchWordComp,
@@ -25,6 +25,7 @@ function SearchMessage({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const user = useContext(UserContext);
   const { displayedConv } = useDisplayedConvContext();
+  const { setSelectedFoundMsgId } = useSelectedFoundMsgIdContext();
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const getMsgContainingWord = async () => {
@@ -83,7 +84,9 @@ function SearchMessage({
       searchInputRef.current.focus();
     }
 
-    return () => {};
+    return () => {
+      setSelectedFoundMsgId("");
+    };
   }, []);
 
   return (

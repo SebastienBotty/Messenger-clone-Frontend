@@ -8,19 +8,17 @@ import React, {
 import {
   MessageType,
   Date15minDifference,
-  dayNames,
-  monthNames,
   UserDataType,
   ConversationType,
   LastMsgSeenByMembersType,
 } from "../../typescript/types";
+import { dayNames, monthNames } from "../../constants/time";
 import {
   AddCircle,
   Call,
   Videocam,
   InformationCircle,
   ImagesOutline,
-  ThumbsUp,
   Send,
   Close,
   ArrowDown,
@@ -35,7 +33,10 @@ import {
   useTriggerContext,
   useShowImgVisualizerContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
-import { MessagesContext } from "../../constants/context";
+import {
+  MessagesContext,
+  SelectedFoundMsgIdContext,
+} from "../../constants/context";
 import TypingDots from "../TypingDots/TypingdDots";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
@@ -87,6 +88,8 @@ function WindowConversation() {
   const [messages, setMessages] = useState<MessageType[]>([]);
 
   const [showConvDetails, setShowConvDetails] = useState<boolean>(false); //Displays conversation details
+
+  const [selectedFoundMsgId, setSelectedFoundMsgId] = useState<string>(""); //Stocks the id of the message that was found by the search bar
 
   const fetchMessages = async (): Promise<MessageType[] | false> => {
     const response = await fetch(
@@ -1154,7 +1157,11 @@ function WindowConversation() {
                       )}
                       <div className="message-container" id="message-me">
                         <div
-                          className="message"
+                          className={`message ${
+                            selectedFoundMsgId === message._id
+                              ? "selectedFoundMsg"
+                              : ""
+                          }`}
                           ref={lastMessage ? messagesEndRef : null}
                         >
                           <AsyncMsg
@@ -1204,7 +1211,11 @@ function WindowConversation() {
                       <div className="message-container" id="message-others">
                         <div className="img-container"> </div>
                         <div
-                          className="message"
+                          className={`message ${
+                            selectedFoundMsgId === message._id
+                              ? "selectedFoundMsg"
+                              : ""
+                          }`}
                           ref={lastMessage ? messagesEndRef : null}
                         >
                           <AsyncMsg
@@ -1237,7 +1248,11 @@ function WindowConversation() {
                         <img src={image} />
                       </div>
                       <div
-                        className="message"
+                        className={`message ${
+                          selectedFoundMsgId === message._id
+                            ? "selectedFoundMsg"
+                            : ""
+                        }`}
                         ref={lastMessage ? messagesEndRef : null}
                         onClick={() => console.log(message)}
                       >
@@ -1373,9 +1388,17 @@ function WindowConversation() {
             showConvDetails ? "expanded" : ""
           }`}
         >
-          {showConvDetails && <ConversationDetails />}
+          {showConvDetails && (
+            <SelectedFoundMsgIdContext.Provider
+              value={{ selectedFoundMsgId, setSelectedFoundMsgId }}
+            >
+              <ConversationDetails />
+            </SelectedFoundMsgIdContext.Provider>
+          )}
         </div>
       </MessagesContext.Provider>
+
+      <button onClick={() => console.log(selectedFoundMsgId)}>CLIK ICI</button>
     </div>
   );
 }
