@@ -4,6 +4,7 @@ import {
   CreateOutline,
   EllipsisHorizontal,
   Search,
+  PeopleOutline,
 } from "react-ionicons";
 import { ConversationType, SideBarPropsType } from "../../typescript/types";
 import "./SideBarConversations.css";
@@ -282,7 +283,18 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         }
       >
         <div className="conversation-img-container">
-          <img src={conversation.photo} />
+          {conversation.isGroupConversation ? (
+            conversation.customization.photo?.length > 0 ? (
+              <img
+                src={conversation.customization.photo}
+                className="conversation-img"
+              />
+            ) : (
+              <PeopleOutline color="black" height="2.5rem" width="2.5rem" />
+            )
+          ) : (
+            <></>
+          )}
         </div>
         <div className="conversation-text-container">
           <div className="conversation-name">

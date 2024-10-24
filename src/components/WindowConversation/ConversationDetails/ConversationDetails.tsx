@@ -1,6 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import "./ConversationDetails.css";
-import { Search, Notifications, NotificationsOff } from "react-ionicons";
+import {
+  Search,
+  Notifications,
+  NotificationsOff,
+  PeopleOutline,
+} from "react-ionicons";
 import SearchMessage from "./SearchMessage/SearchMessage";
 
 import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
@@ -23,6 +28,9 @@ function ConversationDetails() {
     };
   }, []);
 
+  if (!displayedConv || !user) {
+    return <></>;
+  }
   return (
     <div className="conversation-details">
       {showSearchWordComp ? (
@@ -31,10 +39,17 @@ function ConversationDetails() {
         <div className="conversation-details-container">
           <div className="conversation-details-header">
             <div className="conversation-photo-img-container">
-              {displayedConv?.customization.photo ? (
-                <img src={displayedConv?.customization.photo} />
+              {displayedConv.isGroupConversation ? (
+                displayedConv.customization.photo?.length > 0 ? (
+                  <img
+                    src={displayedConv.customization.photo}
+                    className="conversation-img"
+                  />
+                ) : (
+                  <PeopleOutline color="black" height="3rem" width="3rem" />
+                )
               ) : (
-                "Photo "
+                <></>
               )}
             </div>
             <div className="conversation-title">

@@ -53,12 +53,25 @@
   gap: 0.75rem;
   margin-left: 0.75rem;
 }
+.img-container {
+  border-radius: 50%;
+  height: 3rem;
+  width: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 .conversation-member-info .img-container img {
   border-radius: 50%; /* Rend l'image ronde */
-  width: 2.5rem; /* Définit la largeur de l'image */
-  height: 2.5rem;
+  height: 100%;
+  width: 100%;
 }
+
+.img-container:has(svg) {
+  background-color: #f0f2f5;
+}
+
 .conversation-member-name {
   font-size: large;
   font-weight: 500;

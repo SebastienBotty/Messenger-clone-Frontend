@@ -174,8 +174,17 @@
 
 .conversation-img-container img {
   border-radius: 50%; /* Rend l'image ronde */
-  width: 3.5rem; /* Définit la largeur de l'image */
-  height: 3.5rem;
+  width: 3.5em; /* Définit la largeur de l'image */
+  height: 3.5em;
+}
+.conversation-img-container :has(svg) {
+  background-color: #f0f2f5;
+  border-radius: 50%;
+  width: 3.5em;
+  height: 3.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .conversation-text-container {

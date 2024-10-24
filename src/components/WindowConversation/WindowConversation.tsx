@@ -24,6 +24,7 @@ import {
   Send,
   Close,
   ArrowDown,
+  PeopleOutline,
 } from "react-ionicons";
 
 import "./WindowConversation.css";
@@ -954,7 +955,22 @@ function WindowConversation() {
               {displayedConv ? (
                 <>
                   <div className="img-container">
-                    <img src={image} />
+                    {displayedConv.isGroupConversation ? (
+                      displayedConv.customization.photo?.length > 0 ? (
+                        <img
+                          src={displayedConv.customization.photo}
+                          className="conversation-img"
+                        />
+                      ) : (
+                        <PeopleOutline
+                          color="black"
+                          height="2rem"
+                          width="2rem"
+                        />
+                      )
+                    ) : (
+                      <></>
+                    )}
                   </div>
                   <div className="conversation-member-info-text-container">
                     <div className="conversation-member-name">
