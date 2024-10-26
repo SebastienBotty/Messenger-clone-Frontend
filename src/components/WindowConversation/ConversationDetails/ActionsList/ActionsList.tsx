@@ -19,8 +19,7 @@ import {
 } from "react-ionicons";
 import AddMembersModal from "./AddMembersModal/AddMembersModal";
 import { ApiToken } from "../../../../localStorage";
-import LoadingSpinner from "../../../loadingSpinner/loadingSpinner";
-import { set } from "lodash";
+import LoadingSpinner from "../../../Utiles/loadingSpinner/loadingSpinner";
 
 function ActionsList() {
   const [active1, setActive1] = useState<boolean>(false);

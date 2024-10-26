@@ -37,7 +37,7 @@ import {
   MessagesContext,
   SelectedFoundMsgIdContext,
 } from "../../constants/context";
-import TypingDots from "../TypingDots/TypingdDots";
+import TypingDots from "../Utiles/TypingDots/TypingdDots";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
 import { socket } from "../../socket";
@@ -1397,8 +1397,6 @@ function WindowConversation() {
           )}
         </div>
       </MessagesContext.Provider>
-
-      <button onClick={() => console.log(selectedFoundMsgId)}>CLIK ICI</button>
     </div>
   );
 }
