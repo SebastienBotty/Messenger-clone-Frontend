@@ -8,6 +8,7 @@ import {
 import { ApiToken } from "../../localStorage";
 import { socket } from "../../socket";
 import { useMostRecentConvContext } from "../../screens/userLoggedIn/userLoggedIn";
+import { PeopleOutline } from "react-ionicons";
 
 function ConversationLi(props: {
   conversation: ConversationType;
@@ -134,11 +135,21 @@ function ConversationLi(props: {
       className="modal-transfer-conversation"
       key={conversation._id}
     >
-      <div className="modal-conversation-photo">photo</div>
+      <div className="modal-conversation-photo">
+        {conversation.customization.photo ? (
+          <img src={conversation.customization.photo} alt="" />
+        ) : (
+          <PeopleOutline height="2.5rem" width="2.5rem" />
+        )}
+      </div>
       <div className="modal-conversation-name">
-        {conversation.members
-          .filter((member: string) => member !== user?.userName)
-          .join(", ")}
+        {conversation.isGroupConversation
+          ? conversation.customization.conversationName
+            ? conversation.customization.conversationName
+            : conversation.members
+                .filter((item) => item !== user?.userName)
+                .join(", ")
+          : conversation.members.filter((item) => item !== user?.userName)}
       </div>
       <div className="modal-send-button">
         <button

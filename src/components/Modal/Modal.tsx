@@ -112,15 +112,17 @@ function Modal({
 
   useEffect(() => {
     if (recentConversations && searchConversationInput === "") {
-      console.log("RECENT CONVERSATIONS");
-      console.log(recentConversations);
       setConversationsList(recentConversations);
     }
+    return () => {};
+  }, [searchConversationInput]);
+
+  useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
     return () => {};
-  }, [searchConversationInput]);
+  }, []);
 
   if (!selectedImg) {
     alert("Veuillez selectionner une image");

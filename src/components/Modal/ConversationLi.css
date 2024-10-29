@@ -10,6 +10,19 @@
   display: flex;
   align-items: center;
 }
+
+.modal-conversation-photo > * {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 50%;
+  background-color: #f0f2f5;
+}
+.modal-conversation-photo > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .modal-conversation-name {
   flex: 3;
   display: flex;
