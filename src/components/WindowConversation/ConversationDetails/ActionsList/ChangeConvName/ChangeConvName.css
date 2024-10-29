@@ -1,0 +1,110 @@
+.change-conv-name-text {
+  text-align: center;
+}
+.change-conv-name {
+  height: 5rem;
+  width: 100%;
+  border-radius: 0.75rem;
+
+  border: 2px solid transparent;
+}
+
+.change-conv-name.focused {
+  border: 2px solid #007bff;
+}
+.change-conv-name-inner {
+  height: calc(100% - 0.5rem);
+  width: calc(100% - 0.5rem);
+  margin: 0.25rem;
+  border: 0.5px solid #ccc;
+  border-radius: 0.5rem;
+  position: relative;
+}
+.change-conv-name-inner:hover {
+  border: 0.5px solid black;
+}
+
+.conv-name-char-counter {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin-right: 0.5rem;
+  font-size: 0.75rem;
+  color: #999;
+  z-index: 200;
+}
+
+.input-container {
+  position: relative;
+  font-family: Arial, sans-serif;
+  width: calc(100% - 0.5rem);
+  margin: 0.5rem 0.25rem;
+}
+
+.text-input {
+  width: 100%;
+  padding: 10px;
+  padding-top: 18px; /* Espace pour le label */
+  border: none;
+  font-size: 16px;
+  outline: none;
+  display: flex;
+  align-items: center;
+}
+
+.input-label {
+  position: absolute;
+  top: calc(50% - 8px);
+  left: 12px;
+  color: #999;
+  font-size: 16px;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.text-input:focus + .input-label,
+.input-label.focused {
+  top: 0;
+  left: 8px;
+  font-size: 12px;
+  color: #007bff; /* Couleur du label en focus */
+  padding: 0 4px;
+}
+
+.change-conv-name-buttons {
+  height: 4rem;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.change-conv-name-error {
+  flex: 1;
+}
+
+.change-conv-name-btn {
+  height: 2.5rem;
+  width: 6rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+}
+
+.confirm-btn {
+  background-color: #0084ff;
+  color: #fff;
+}
+
+.confirm-btn:hover {
+  background-color: #0861f2;
+}
+
+.cancel-btn {
+  background-color: transparent;
+  color: #0084ff;
+}
+
+.cancel-btn:hover {
+  background-color: #f2f2f2;
+}

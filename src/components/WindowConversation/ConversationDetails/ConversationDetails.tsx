@@ -54,9 +54,11 @@ function ConversationDetails() {
             </div>
             <div className="conversation-title">
               {displayedConv?.isGroupConversation
-                ? displayedConv?.members
-                    .filter((item) => item !== user?.userName)
-                    .join(", ")
+                ? displayedConv?.customization.conversationName
+                  ? displayedConv?.customization.conversationName
+                  : displayedConv?.members
+                      .filter((item) => item !== user?.userName)
+                      .join(", ")
                 : displayedConv?.members.filter(
                     (item) => item !== user?.userName
                   )}

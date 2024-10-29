@@ -298,9 +298,15 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         </div>
         <div className="conversation-text-container">
           <div className="conversation-name">
-            {conversation.members
-              .filter((item) => item !== userData?.userName)
-              .join(", ")}
+            {conversation.isGroupConversation
+              ? conversation.customization.conversationName
+                ? conversation.customization.conversationName
+                : conversation.members
+                    .filter((item) => item !== userData?.userName)
+                    .join(", ")
+              : conversation.members.filter(
+                  (item) => item !== userData?.userName
+                )}
           </div>
           <div id="conversation-last-message">
             <div

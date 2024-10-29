@@ -5,7 +5,6 @@ export const convMemberMsg = (
   target?: string
 ) => {
   const agentName = agent === username ? "Vous avez " : agent + " a ";
-
   if (target && target?.split(",").length > 2) {
     target =
       target?.split(",")[0] +
@@ -27,5 +26,7 @@ export const convMemberMsg = (
       return `${agentName}quité la conversation.`;
     case "changeConversationPhoto":
       return `${agentName}changé la photo de la conversation.`;
+    case "changeConversationName":
+      return `${agentName}a nommé la conversation. ${target}`; // Not a real "target", just used it to show the new name
   }
 };

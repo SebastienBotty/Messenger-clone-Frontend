@@ -977,9 +977,15 @@ function WindowConversation() {
                   </div>
                   <div className="conversation-member-info-text-container">
                     <div className="conversation-member-name">
-                      {displayedConv?.members
-                        .filter((item) => item !== user)
-                        .join(", ")}
+                      {displayedConv?.isGroupConversation
+                        ? displayedConv?.customization.conversationName
+                          ? displayedConv?.customization.conversationName
+                          : displayedConv?.members
+                              .filter((item) => item !== user)
+                              .join(", ")
+                        : displayedConv?.members.filter(
+                            (item) => item !== user
+                          )}
                     </div>
                     <div className="online-since">En ligne depuis X</div>
                   </div>

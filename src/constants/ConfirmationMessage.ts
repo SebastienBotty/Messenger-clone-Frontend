@@ -15,4 +15,8 @@ export const confirmationMessage = {
     title: "Quitter la conversation",
     text: "Voulez-vous quitter cette conversation ?",
   },
+  changeConvName: {
+    title: "Changer le nom de la conversation",
+    text: "Lorsque vous modifiez le nom d'une discussion de groupe, il est modifié pour tout le monde.",
+  },
 };

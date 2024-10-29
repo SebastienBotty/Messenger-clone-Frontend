@@ -10,11 +10,10 @@ export default function ConfirmationModal({
   closeModal,
 }: {
   title: string;
-  text: string;
+  text: string | JSX.Element;
   action: () => void;
   closeModal: () => void;
 }) {
-  console.log("openined");
   return (
     <div className="modal">
       <div className="modal-overlay">
@@ -36,20 +35,22 @@ export default function ConfirmationModal({
               </div>
             </div>
             <div className="modal-confirmation-text">{text}</div>
-            <div className="modal-confirmation-action">
-              <button
-                className="cancel-button confirmation-modal-btn"
-                onClick={closeModal}
-              >
-                Annuler
-              </button>
-              <button
-                className="confirm-button confirmation-modal-btn"
-                onClick={action}
-              >
-                Confirmer
-              </button>
-            </div>
+            {typeof text === "string" && (
+              <div className="modal-confirmation-action">
+                <button
+                  className="cancel-button confirmation-modal-btn"
+                  onClick={closeModal}
+                >
+                  Annuler
+                </button>
+                <button
+                  className="confirm-button confirmation-modal-btn"
+                  onClick={action}
+                >
+                  Confirmer
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

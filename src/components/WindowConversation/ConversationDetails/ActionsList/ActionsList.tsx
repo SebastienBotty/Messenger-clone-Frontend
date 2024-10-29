@@ -20,19 +20,35 @@ import {
 import AddMembersModal from "./AddMembersModal/AddMembersModal";
 import { ApiToken } from "../../../../localStorage";
 import LoadingSpinner from "../../../Utiles/loadingSpinner/loadingSpinner";
+import ConfirmationModal from "../../../Utiles/ConfirmationModal/ConfirmationModal";
+import ChangeConvName from "./ChangeConvName/ChangeConvName";
+import { confirmationMessage } from "../../../../constants/ConfirmationMessage";
 
 function ActionsList() {
+  const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
+
   const [active1, setActive1] = useState<boolean>(false);
   const [active2, setActive2] = useState<boolean>(false);
   const [active3, setActive3] = useState<boolean>(false);
   const [active4, setActive4] = useState<boolean>(false);
 
   const [changePhotoLoading, setChangePhotoLoading] = useState<boolean>(false);
-
-  const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
-
   const [showAddMembersModal, setShowAddMembersModal] =
     useState<boolean>(false);
+  const [showConfirmationModal, setShowConfirmationModal] =
+    useState<boolean>(false);
+
+  const [confirmationModalAction, setConfirmationModalAction] = useState<{
+    title: string;
+    text: string | JSX.Element;
+    action: () => void;
+    closeModal: () => void;
+  }>({
+    title: "",
+    text: "",
+    action: () => {},
+    closeModal: () => setShowConfirmationModal(false),
+  });
 
   const user = useContext(UserContext);
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
@@ -44,6 +60,20 @@ function ActionsList() {
   const handleActionsClick = (actionName: string) => {
     switch (actionName) {
       case "changeConvName":
+        setShowConfirmationModal(true);
+        setConfirmationModalAction({
+          title: confirmationMessage.changeConvName.title,
+          text: (
+            <ChangeConvName
+              {...{
+                closeModal: () => setShowConfirmationModal(false),
+                text: confirmationMessage.changeConvName.text,
+              }}
+            />
+          ),
+          action: () => {},
+          closeModal: () => setShowConfirmationModal(false),
+        });
     }
   };
 
@@ -150,7 +180,10 @@ function ActionsList() {
           <ul className={"actions-content" + (active1 ? " active" : "")}>
             {displayedConv.isGroupConversation && (
               <>
-                <li className="li-actions">
+                <li
+                  className="li-actions"
+                  onClick={() => handleActionsClick("changeConvName")}
+                >
                   <div className="li-icon">
                     <PencilOutline color={"#00000"} />
                   </div>
@@ -307,6 +340,10 @@ function ActionsList() {
           showAddMembersModal={showAddMembersModal}
           setShowAddMembersModal={setShowAddMembersModal}
         />
+      )}
+
+      {showConfirmationModal && (
+        <ConfirmationModal {...confirmationModalAction} />
       )}
     </div>
   );
