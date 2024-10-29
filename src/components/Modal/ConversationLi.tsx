@@ -136,10 +136,14 @@ function ConversationLi(props: {
       key={conversation._id}
     >
       <div className="modal-conversation-photo">
-        {conversation.customization.photo ? (
-          <img src={conversation.customization.photo} alt="" />
+        {conversation.isGroupConversation ? (
+          conversation.customization.photo ? (
+            <img src={conversation.customization.photo} alt="" />
+          ) : (
+            <PeopleOutline height="2.5rem" width="2.5rem" />
+          )
         ) : (
-          <PeopleOutline height="2.5rem" width="2.5rem" />
+          <>Rien atm</>
         )}
       </div>
       <div className="modal-conversation-name">
