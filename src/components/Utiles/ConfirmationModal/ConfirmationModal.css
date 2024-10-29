@@ -18,9 +18,6 @@
   height: auto !important;
   border-color: lightgray !important;
 }
-.modal-confirmation-title-text {
-  background-color: aqua !important;
-}
 
 .modal-confirmation-close-button {
   position: absolute;
