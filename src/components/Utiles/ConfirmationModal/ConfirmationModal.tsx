@@ -8,16 +8,21 @@ export default function ConfirmationModal({
   text,
   action,
   closeModal,
+  width,
 }: {
   title: string;
   text: string | JSX.Element;
   action: () => void;
   closeModal: () => void;
+  width?: string;
 }) {
   return (
     <div className="modal">
       <div className="modal-overlay">
-        <div className="modal-content modal-content-confirmation">
+        <div
+          className="modal-content modal-content-confirmation"
+          style={{ width }}
+        >
           <div className="modal-content-inner modal-content-inner-confirmation">
             <div className="modal-title modal-confirmation-title">
               <div className="modal-title-text modal-confirmation-title-text">

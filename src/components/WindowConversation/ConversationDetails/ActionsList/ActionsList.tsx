@@ -23,6 +23,7 @@ import LoadingSpinner from "../../../Utiles/loadingSpinner/loadingSpinner";
 import ConfirmationModal from "../../../Utiles/ConfirmationModal/ConfirmationModal";
 import ChangeConvName from "./ChangeConvName/ChangeConvName";
 import { confirmationMessage } from "../../../../constants/ConfirmationMessage";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 function ActionsList() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
@@ -43,6 +44,7 @@ function ActionsList() {
     text: string | JSX.Element;
     action: () => void;
     closeModal: () => void;
+    width?: string;
   }>({
     title: "",
     text: "",
@@ -74,6 +76,56 @@ function ActionsList() {
           action: () => {},
           closeModal: () => setShowConfirmationModal(false),
         });
+        break;
+      case "changeEmoji":
+        setShowConfirmationModal(true);
+        setConfirmationModalAction({
+          title: "Emoji",
+          text: <EmojiPicker onEmojiClick={(e) => handleEmojiClick(e)} />,
+          action: () => {},
+          closeModal: () => setShowConfirmationModal(false),
+          width: "auto",
+        });
+        break;
+    }
+  };
+
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    changeEmoji(emojiData.emoji);
+  };
+
+  const changeEmoji = async (emoji: string) => {
+    if (!displayedConv || !user) return;
+    try {
+      const response = await fetch(`${RESTAPIUri}/conversation/changeEmoji`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${ApiToken()}`,
+        },
+        body: JSON.stringify({
+          conversationId: displayedConv._id,
+          emoji: emoji,
+          userId: user._id,
+          date: new Date(),
+        }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+      const data = await response.json();
+      console.log(data);
+      setDisplayedConv(data.conversation);
+      setMostRecentConv(data.conversation);
+      setMessages((prev) => [...prev, data.message]);
+      setShowConfirmationModal(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message);
+      } else {
+        console.log("An unknown error occurred");
+      }
     }
   };
 
@@ -157,7 +209,13 @@ function ActionsList() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch (error) {}
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("Erreur inconnue");
+      }
+    }
   };
 
   if (!displayedConv || !user) return <></>;
@@ -220,10 +278,12 @@ function ActionsList() {
               </div>
               <span>Modifier le thème</span>
             </li>
-            <li className="li-actions">
-              <div className="li-icon">
-                <Disc color={"#00000"} />
-              </div>
+            <li
+              className="li-actions"
+              onClick={() => handleActionsClick("changeEmoji")}
+            >
+              <div className="li-icon">{displayedConv.customization.emoji}</div>
+
               <span>Modifier l'emoji</span>
             </li>
           </ul>{" "}

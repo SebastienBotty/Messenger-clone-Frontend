@@ -466,11 +466,12 @@ function WindowConversation() {
     postMessage(messageData);
   };
 
-  const sendLike = () => {
+  const sendEmoji = () => {
+    if (!displayedConv) return;
     const messageData = {
       author: user,
       authorId: userId,
-      text: "👍",
+      text: displayedConv.customization.emoji,
       seenBy: [user],
       date: new Date(),
       conversationId: displayedConv?._id,
@@ -1373,9 +1374,9 @@ function WindowConversation() {
                   ) : (
                     <div
                       style={{ cursor: "pointer", fontSize: "1.5rem" }}
-                      onClick={() => sendLike()}
+                      onClick={() => sendEmoji()}
                     >
-                      👍
+                      {displayedConv?.customization.emoji}
                     </div>
                   )}
                 </div>
