@@ -22,9 +22,9 @@ function ChangeConvName({
   const [value, setValue] = useState<string>("");
   const [isFocused, setIsFocused] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const maxLength = 30;
 
   const RESTApiUri = process.env.REACT_APP_REST_API_URI;
-  console.log(RESTApiUri);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -46,8 +46,8 @@ function ChangeConvName({
       return;
     }
 
-    if (value.length > 20) {
-      setErrorMsg("Le nom de conversation doit avoir moins de 50 caractères");
+    if (value.length > maxLength) {
+      setErrorMsg("Le nom de conversation doit avoir moins de 30 caractères");
       return;
     }
     if (value === displayedConv?.customization.conversationName) {
@@ -114,8 +114,10 @@ function ChangeConvName({
             >
               Nom de la conversation
             </label>
-            {isFocused && (
-              <div className="conv-name-char-counter">{nbCharS}/50</div>
+            {nbCharS > 0 && (
+              <div className="conv-name-char-counter">
+                {nbCharS}/{maxLength}
+              </div>
             )}
             <input
               type="text"
@@ -123,8 +125,7 @@ function ChangeConvName({
               value={value}
               onChange={onChange}
               onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              maxLength={50}
+              maxLength={maxLength}
             />
           </div>
         </div>

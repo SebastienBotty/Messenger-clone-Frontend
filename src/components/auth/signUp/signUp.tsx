@@ -14,13 +14,20 @@ function SignUp() {
       userName: userName,
     };
     try {
-      const response = fetch(RESTAPIUri + "/user/", {
+      const response = await fetch(RESTAPIUri + "/user/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(postData),
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+      const jsonData = await response.json();
+      return true;
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -29,11 +36,13 @@ function SignUp() {
       }
     }
   };
-  const createUserFireBase = () => {
-    createUserWithEmailAndPassword(auth, email, password)
+  const createUserFireBase = async (): Promise<boolean> => {
+    let created = false;
+    await createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed up
         const user = userCredential.user;
+        created = true;
         // ...
         console.log(user);
       })
@@ -43,6 +52,7 @@ function SignUp() {
         // ..
         console.error(errorCode, errorMessage);
       });
+    return created;
   };
 
   // Check if mail already exists in DB
@@ -95,9 +105,12 @@ function SignUp() {
       if (isMailExisting || isUserExisting) {
         console.log("Mail ou username déja utilisé");
       } else {
-        createUserinDb();
-        createUserFireBase();
-        console.log("user Created");
+        if (await createUserinDb()) {
+          console.log("User created db");
+          if (!(await createUserFireBase())) {
+            console.log("User not created in firebase"); // TODO DELETE USER FROM DB
+          }
+        }
       }
     } catch (error) {
       console.error("Erreur lors de la vérification de l'email", error);
