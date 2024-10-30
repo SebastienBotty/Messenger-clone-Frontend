@@ -32,7 +32,8 @@ function App() {
           RESTAPIUri + "/user/mail/" + firebaseUser.email
         );
         if (!response.ok) {
-          throw new Error("Erreur lors du fetch");
+          const error = await response.json();
+          throw new Error(error.message);
         }
         const jsonData = await response.json();
         //console.log("JSON DATA SET ");
