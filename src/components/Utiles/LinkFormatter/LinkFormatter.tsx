@@ -11,7 +11,7 @@ export function LinkFormatter({ text }: { text: string }) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: "blue", textDecoration: "underline" }}
+          style={{ color: "white" }}
         >
           {part}
         </a>

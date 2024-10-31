@@ -28,5 +28,5 @@ export const timeSince = (date: Date): string => {
     }
   }
 
-  return "A l'instant";
+  return "1min";
 };
