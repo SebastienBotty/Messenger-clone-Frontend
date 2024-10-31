@@ -2,18 +2,19 @@ import React, { ReactNode, useEffect, useState } from "react";
 
 import "./AsyncMsg.css";
 import { ApiToken } from "../../../localStorage";
-import ImageVizualizer from "../../ImageVizualizer/ImageVizualizer";
 import {
   useShowImgVisualizerContext,
   useImgVisualizerInitialImgContext,
 } from "../../../screens/userLoggedIn/userLoggedIn";
-
+import { LinkFormatter } from "../../Utiles/LinkFormatter/LinkFormatter";
 interface AsyncMessageProps {
   text: string;
   convId: string | undefined;
 }
 function AsyncMsg({ text, convId }: AsyncMessageProps) {
-  const [content, setContent] = useState<ReactNode | null>(null);
+  const [content, setContent] = useState<ReactNode | null | JSX.Element[]>(
+    null
+  );
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const { showImgVisualizer, setShowImgVisualizer } =
     useShowImgVisualizerContext();
@@ -61,7 +62,7 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
   useEffect(() => {
     const fetchData = async () => {
       if (!text.startsWith("PATHIMAGE/" + convId + ":")) {
-        setContent(<span>{text}</span>);
+        setContent(<span>{<LinkFormatter text={text} />}</span>); // <span>{text}</span>);
       } else {
         const fileNamesStr = text.split("PATHIMAGE/" + convId + ":")[1];
         const files = await fetchFilesUrl(fileNamesStr);
