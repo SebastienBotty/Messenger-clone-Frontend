@@ -11,11 +11,7 @@ import { ApiToken } from "../../../../localStorage";
 import FoundMsgLi from "./FoundMsgLi/FoundMsgLi";
 import { useSelectedFoundMsgIdContext } from "../../../../constants/context";
 
-function SearchMessage({
-  setShowSearchWordComp,
-}: {
-  setShowSearchWordComp: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+function SearchMessage() {
   const [searchMsgInput, setSearchMsgInput] = useState("");
   const [infoMsg, setInfoMsg] = useState<string>(
     "Appuyez sur Entrée pour rechercher"
@@ -91,25 +87,6 @@ function SearchMessage({
 
   return (
     <div className="search-message-container">
-      <div className="search-message-header">
-        <div
-          className="icon-button-back"
-          onClick={() => {
-            setShowSearchWordComp(false);
-          }}
-        >
-          {" "}
-          <ArrowBackOutline
-            color={"#00000"}
-            title="Retour"
-            height="1.75rem"
-            width="1.75rem"
-          />
-        </div>
-
-        <h3>Rechercher</h3>
-      </div>
-
       <div className="searchbar-message">
         <form onSubmit={(e) => handleSubmit(e)}>
           <label htmlFor="search-message" className="searchbar-message-label">

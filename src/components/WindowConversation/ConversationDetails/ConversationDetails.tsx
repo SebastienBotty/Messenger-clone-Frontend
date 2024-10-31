@@ -11,30 +11,63 @@ import SearchMessage from "./SearchMessage/SearchMessage";
 import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
 import { UserContext } from "../../../screens/userLoggedIn/userLoggedIn";
 import ActionsList from "./ActionsList/ActionsList";
+import MoreDetails from "./MoreDetails/MoreDetails";
 
 function ConversationDetails() {
-  const [showSearchWordComp, setShowSearchWordComp] = useState<boolean>(false);
-  const { displayedConv } = useDisplayedConvContext();
-  const [notifications, setNotifications] = useState<boolean>(true);
   const user = useContext(UserContext);
+  const { displayedConv } = useDisplayedConvContext();
+  const [notifications, setNotifications] = useState<boolean>(true); // NOT IMPLEMENTED YET
+  const [showMoreDetailsComp, setShowMoreDetailsComp] =
+    useState<boolean>(false);
+  const [moreDetailsCompProps, setMoreDetailsCompProps] = useState<{
+    component: React.ReactNode;
+    setShowMoreDetailsComp: React.Dispatch<React.SetStateAction<boolean>>;
+    title: string;
+  }>();
+
   useEffect(() => {
-    setShowSearchWordComp(false); // Close search message when conv is changed
+    setShowMoreDetailsComp(false); // Close search message when conv is changed
     return () => {};
   }, [displayedConv]);
 
   useEffect(() => {
     return () => {
-      setShowSearchWordComp(false);
+      setShowMoreDetailsComp(false);
     };
   }, []);
+
+  const openMoreDetailsComp = (componentName: string) => {
+    switch (componentName) {
+      case "SearchMessage":
+        console.log("c ici");
+        setMoreDetailsCompProps({
+          component: <SearchMessage />,
+          setShowMoreDetailsComp,
+          title: "Rechercher",
+        });
+        setShowMoreDetailsComp(true);
+        break;
+
+      case "convMedia":
+        setMoreDetailsCompProps({
+          component: <></>,
+          setShowMoreDetailsComp,
+          title: "Media",
+        });
+    }
+  };
 
   if (!displayedConv || !user) {
     return <></>;
   }
   return (
     <div className="conversation-details">
-      {showSearchWordComp ? (
-        <SearchMessage setShowSearchWordComp={setShowSearchWordComp} />
+      {showMoreDetailsComp ? (
+        <MoreDetails
+          component={<SearchMessage />}
+          setShowMoreDetailsComp={setShowMoreDetailsComp}
+          title="Rechercher"
+        />
       ) : (
         <div className="conversation-details-container">
           <div className="conversation-details-header">
@@ -103,7 +136,7 @@ function ConversationDetails() {
               <div className="conv-btn-actions">
                 <div
                   className="icon-button"
-                  onClick={() => setShowSearchWordComp(true)}
+                  onClick={() => openMoreDetailsComp("SearchMessage")}
                 >
                   {" "}
                   <Search
