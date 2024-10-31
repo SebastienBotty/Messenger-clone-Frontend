@@ -39,7 +39,6 @@ function ConversationDetails() {
   const openMoreDetailsComp = (componentName: string) => {
     switch (componentName) {
       case "SearchMessage":
-        console.log("c ici");
         setMoreDetailsCompProps({
           component: <SearchMessage />,
           setShowMoreDetailsComp,
