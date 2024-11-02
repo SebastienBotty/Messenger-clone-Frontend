@@ -42,19 +42,10 @@ export type MessagesContextType = {
   setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
 };
 
-export type ShowImgVisualizerContextType = {
-  showImgVisualizer: boolean | null;
-  setShowImgVisualizer: React.Dispatch<React.SetStateAction<boolean | null>>;
-};
-
 export type ImgS3DataType = {
   src: string;
   name: string;
   convId?: string;
-};
-export type ImgVisualizerInitialImgType = {
-  imgData: ImgS3DataType | null;
-  setImgData: React.Dispatch<React.SetStateAction<ImgS3DataType | null>>;
 };
 
 export type RecentConversationsContextType = {
@@ -105,4 +96,11 @@ export type SideBarPropsType = {
 export type selctedMessageContextType = {
   selectedFoundMsgId: string;
   setSelectedFoundMsgId: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export type MediasType = {
+  Key: string;
+  LastModified: Date;
+  Size: number;
+  Url: string;
 };
