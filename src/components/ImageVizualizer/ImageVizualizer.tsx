@@ -8,15 +8,11 @@ import {
   ArrowForwardCircleOutline,
   CloseCircle,
   DownloadOutline,
-  ExitOutline,
   LogOutOutline,
 } from "react-ionicons";
-import {
-  useShowImgVisualizerContext,
-  useImgVisualizerInitialImgContext,
-} from "../../screens/userLoggedIn/userLoggedIn";
 import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn";
 import Modal from "..//Modal/Modal";
+import { ImgS3DataType } from "../../typescript/types";
 
 type SelectedImageType = {
   src: string;
@@ -27,11 +23,15 @@ type thumbnailsImgType = {
   name: string;
   src: string;
 };
-function ImageVizualizer() {
+function ImageVizualizer({
+  closeVisualizer,
+  imgData,
+}: {
+  closeVisualizer: () => void;
+  imgData: ImgS3DataType;
+}) {
   const thumbnailsRef = useRef<HTMLDivElement>(null);
-  const { showImgVisualizer, setShowImgVisualizer } =
-    useShowImgVisualizerContext();
-  const { imgData, setImgData } = useImgVisualizerInitialImgContext();
+  //const { imgData, setImgData } = useImgVisualizerInitialImgContext();
   const RESTAPIuri = process.env.REACT_APP_REST_API_URI;
   const { displayedConv } = useDisplayedConvContext();
   const [images, setImages] = useState<thumbnailsImgType[]>([]);
@@ -122,10 +122,6 @@ function ImageVizualizer() {
     }, 1000);
   };
 
-  const closeVisualizer = () => {
-    setShowImgVisualizer(false);
-  };
-
   const openTransferModal = (): void => {
     setShowModal(true);
   };
@@ -175,7 +171,6 @@ function ImageVizualizer() {
     };
   }, []);
   useEffect(() => {
-    setImgData(null);
     setImages([]);
     return () => {};
   }, [displayedConv]);

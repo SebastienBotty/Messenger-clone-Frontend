@@ -10,8 +10,6 @@ import {
   UserDataType,
   MostRecentContextType,
   TriggerContextType,
-  ShowImgVisualizerContextType,
-  ImgVisualizerInitialImgType,
   ImgS3DataType,
   RecentConversationsContextType,
 } from "../../typescript/types";
@@ -27,14 +25,6 @@ const DisplayedConvContext = createContext<ConversationContextType | undefined>(
 const MostRecentConvContext = createContext<MostRecentContextType | undefined>(
   undefined
 );
-
-const ShowImgVisualizerContext = createContext<
-  ShowImgVisualizerContextType | undefined
->(undefined);
-
-const ImgVisualizerInitialImgContext = createContext<
-  ImgVisualizerInitialImgType | undefined
->(undefined);
 
 const RecentConversationsContext = createContext<
   RecentConversationsContextType | undefined
@@ -55,9 +45,7 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
     null
   );
   const [trigger, setTrigger] = useState<boolean | null>(false);
-  const [showImgVisualizer, setShowImgVisualizer] = useState<boolean | null>(
-    false
-  );
+
   const [imgData, setImgData] = useState<ImgS3DataType | null>(null);
   const [showConversationWindow, setShowConversationWindow] =
     useState<boolean>(false);
@@ -123,34 +111,25 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
         <RecentConversationsContext.Provider
           value={{ recentConversations, setRecentConversations }}
         >
-          <ShowImgVisualizerContext.Provider
-            value={{ showImgVisualizer, setShowImgVisualizer }}
+          <MostRecentConvContext.Provider
+            value={{ mostRecentConv, setMostRecentConv }}
           >
-            <ImgVisualizerInitialImgContext.Provider
-              value={{ imgData, setImgData }}
-            >
-              <MostRecentConvContext.Provider
-                value={{ mostRecentConv, setMostRecentConv }}
-              >
-                <div className="userLoggedIn">
-                  {showImgVisualizer && <ImageVizualizer />}
-                  <div className="page-header">
-                    {" "}
-                    <NavBar handleSignOut={handleSignOut} />
-                  </div>
-                  <div className="content">
-                    <TriggerContext.Provider value={{ trigger, setTrigger }}>
-                      <SideBarConversations
-                        setShowConversationWindow={setShowConversationWindow}
-                      />
+            <div className="userLoggedIn">
+              <div className="page-header">
+                {" "}
+                <NavBar handleSignOut={handleSignOut} />
+              </div>
+              <div className="content">
+                <TriggerContext.Provider value={{ trigger, setTrigger }}>
+                  <SideBarConversations
+                    setShowConversationWindow={setShowConversationWindow}
+                  />
 
-                      {showConversationWindow && <WindowConversation />}
-                    </TriggerContext.Provider>
-                  </div>
-                </div>
-              </MostRecentConvContext.Provider>
-            </ImgVisualizerInitialImgContext.Provider>
-          </ShowImgVisualizerContext.Provider>
+                  {showConversationWindow && <WindowConversation />}
+                </TriggerContext.Provider>
+              </div>
+            </div>
+          </MostRecentConvContext.Provider>
         </RecentConversationsContext.Provider>
       </DisplayedConvContext.Provider>
     </UserContext.Provider>
@@ -179,26 +158,6 @@ export const useTriggerContext = () => {
   const context = useContext(TriggerContext);
   if (context === undefined) {
     throw new Error("userTriggerContext must be used within a MyProvider");
-  }
-  return context;
-};
-
-export const useImgVisualizerInitialImgContext = () => {
-  const context = useContext(ImgVisualizerInitialImgContext);
-  if (context === undefined) {
-    throw new Error(
-      "useImgVisualizerInitialImgContext must be used within a MyProvider "
-    );
-  }
-  return context;
-};
-
-export const useShowImgVisualizerContext = () => {
-  const context = useContext(ShowImgVisualizerContext);
-  if (context === undefined) {
-    throw new Error(
-      "useShowImgVisualizerContext must be used within a MyProvider "
-    );
   }
   return context;
 };

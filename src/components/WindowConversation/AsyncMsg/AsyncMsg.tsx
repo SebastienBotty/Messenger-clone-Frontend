@@ -2,11 +2,9 @@ import React, { ReactNode, useEffect, useState } from "react";
 
 import "./AsyncMsg.css";
 import { ApiToken } from "../../../localStorage";
-import {
-  useShowImgVisualizerContext,
-  useImgVisualizerInitialImgContext,
-} from "../../../screens/userLoggedIn/userLoggedIn";
 import { LinkFormatter } from "../../Utiles/LinkFormatter/LinkFormatter";
+import ImageVizualizer from "../../ImageVizualizer/ImageVizualizer";
+import { ImgS3DataType } from "../../../typescript/types";
 interface AsyncMessageProps {
   text: string;
   convId: string | undefined;
@@ -16,9 +14,14 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
     null
   );
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
-  const { showImgVisualizer, setShowImgVisualizer } =
-    useShowImgVisualizerContext();
-  const { imgData, setImgData } = useImgVisualizerInitialImgContext();
+  const [showImgVisualizer, setShowImgVisualizer] = useState<boolean | null>(
+    false
+  );
+  const [imgData, setImgData] = useState<ImgS3DataType>({
+    src: "",
+    name: "",
+    convId: "",
+  });
 
   const fetchFilesUrl = async (fileNamesStr: string) => {
     try {
@@ -37,7 +40,8 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
       );
 
       if (!response.ok) {
-        throw new Error("Error fetching files");
+        const error = await response.json();
+        throw new Error(error.message);
       }
 
       const JSONData = await response.json();
@@ -54,6 +58,8 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
 
   const handleImgClick = (fileUrl: string, fileName: string) => {
     if (convId) {
+      console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+      console.log(fileName);
       setImgData({ src: fileUrl, name: fileName, convId: convId });
     }
     setShowImgVisualizer(true);
@@ -104,9 +110,16 @@ function AsyncMsg({ text, convId }: AsyncMessageProps) {
   }
 
   return (
-    <>
+    <div className="async-msg">
       <div className="msg-file-container">{content}</div>
-    </>
+
+      {showImgVisualizer && (
+        <ImageVizualizer
+          closeVisualizer={() => setShowImgVisualizer(false)}
+          imgData={imgData}
+        />
+      )}
+    </div>
   );
 }
 export default AsyncMsg;
