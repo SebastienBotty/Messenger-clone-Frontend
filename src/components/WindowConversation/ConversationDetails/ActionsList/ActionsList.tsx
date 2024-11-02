@@ -25,7 +25,11 @@ import ChangeConvName from "./ChangeConvName/ChangeConvName";
 import { confirmationMessage } from "../../../../constants/ConfirmationMessage";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
-function ActionsList() {
+function ActionsList({
+  openMoreDetailsComp,
+}: {
+  openMoreDetailsComp: (componentName: string) => void;
+}) {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const [active1, setActive1] = useState<boolean>(false);
@@ -331,13 +335,19 @@ function ActionsList() {
           </div>
         </li>
         <ul className={"actions-content" + (active3 ? " active" : "")}>
-          <li className="li-actions">
+          <li
+            className="li-actions"
+            onClick={() => openMoreDetailsComp("ConvMedia-Medias")}
+          >
             <div className="li-icon">
               <Disc color={"#00000"} />
             </div>
             <span>Contenu multimédia</span>
           </li>
-          <li className="li-actions">
+          <li
+            className="li-actions"
+            onClick={() => openMoreDetailsComp("ConvMedia-Files")}
+          >
             <div className="li-icon">
               <Disc color={"#00000"} />
             </div>

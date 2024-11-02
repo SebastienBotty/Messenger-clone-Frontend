@@ -12,6 +12,7 @@ import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLogge
 import { UserContext } from "../../../screens/userLoggedIn/userLoggedIn";
 import ActionsList from "./ActionsList/ActionsList";
 import MoreDetails from "./MoreDetails/MoreDetails";
+import ConvMedia from "./ActionsList/ConvMedias/ConvMedia";
 
 function ConversationDetails() {
   const user = useContext(UserContext);
@@ -23,7 +24,11 @@ function ConversationDetails() {
     component: React.ReactNode;
     setShowMoreDetailsComp: React.Dispatch<React.SetStateAction<boolean>>;
     title: string;
-  }>();
+  }>({
+    component: <></>,
+    setShowMoreDetailsComp,
+    title: "",
+  });
 
   useEffect(() => {
     setShowMoreDetailsComp(false); // Close search message when conv is changed
@@ -37,6 +42,7 @@ function ConversationDetails() {
   }, []);
 
   const openMoreDetailsComp = (componentName: string) => {
+    console.log("called");
     switch (componentName) {
       case "SearchMessage":
         setMoreDetailsCompProps({
@@ -47,12 +53,22 @@ function ConversationDetails() {
         setShowMoreDetailsComp(true);
         break;
 
-      case "convMedia":
+      case "ConvMedia-Medias": // Could be done a better way but im tired and lazy atm
         setMoreDetailsCompProps({
-          component: <></>,
+          component: <ConvMedia mediaType="Medias" />,
           setShowMoreDetailsComp,
-          title: "Media",
+          title: "Contenu multimédia et  fichiers",
         });
+        setShowMoreDetailsComp(true);
+        break;
+      case "ConvMedia-Files":
+        setMoreDetailsCompProps({
+          component: <ConvMedia mediaType="Files" />,
+          setShowMoreDetailsComp,
+          title: "Contenu multimédia et  fichiers",
+        });
+        setShowMoreDetailsComp(true);
+        break;
     }
   };
 
@@ -62,11 +78,7 @@ function ConversationDetails() {
   return (
     <div className="conversation-details">
       {showMoreDetailsComp ? (
-        <MoreDetails
-          component={<SearchMessage />}
-          setShowMoreDetailsComp={setShowMoreDetailsComp}
-          title="Rechercher"
-        />
+        <MoreDetails {...moreDetailsCompProps} />
       ) : (
         <div className="conversation-details-container">
           <div className="conversation-details-header">
@@ -150,7 +162,7 @@ function ConversationDetails() {
             </div>
           </div>
           <div className="conversations-details-body">
-            <ActionsList />
+            <ActionsList openMoreDetailsComp={openMoreDetailsComp} />
           </div>
         </div>
       )}
