@@ -9,3 +9,7 @@ export const formatFileSize = (bytes: number) => {
 
   return `${parseFloat(bytes.toFixed(2))} ${units[index]}`;
 };
+
+export const getFileTypeFromPathName = (pathName: string) => {
+  return pathName.split("/")[1];
+};

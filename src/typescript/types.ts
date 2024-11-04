@@ -93,9 +93,19 @@ export type SideBarPropsType = {
   setShowConversationWindow: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export type selctedMessageContextType = {
+export type selectedMessageContextType = {
   selectedFoundMsgId: string;
   setSelectedFoundMsgId: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export type ConversationFilesContextType = {
+  filesCtxt: MediasType[];
+  setFilesCtxt: React.Dispatch<React.SetStateAction<MediasType[]>>;
+};
+
+export type ConversationMediasContextType = {
+  mediasCtxt: MediasType[];
+  setMediasCtxt: React.Dispatch<React.SetStateAction<MediasType[]>>;
 };
 
 export type MediasType = {

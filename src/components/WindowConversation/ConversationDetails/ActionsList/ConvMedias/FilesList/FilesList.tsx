@@ -8,14 +8,15 @@ import { MediasType } from "../../../../../../typescript/types";
 import { ApiToken } from "../../../../../../localStorage";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { formatFileSize } from "../../../../../../functions/file";
+import { useConversationFilesContext } from "../../../../../../constants/context";
 
 function FilesList() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const { displayedConv } = useDisplayedConvContext();
   const user = useContext(UserContext);
+  const { filesCtxt, setFilesCtxt } = useConversationFilesContext();
 
-  const [files, setFiles] = useState<MediasType[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [fetchImgIndex, setFetchImgIndex] = useState<number>(0);
 
@@ -37,8 +38,9 @@ function FilesList() {
 
     if (fetchImgIndex === 0 && cachedFiles.length > 0) {
       console.log("cache");
-      setFiles(cachedFiles);
+      setFilesCtxt(cachedFiles);
       setFetchImgIndex(cachedFiles.length);
+      console.log(cachedFiles);
       return;
     }
     console.log(fetchImgIndex);
@@ -73,7 +75,7 @@ function FilesList() {
       }
       console.log(jsonData);
       const newfiles = [...cachedFiles, ...jsonData];
-      setFiles(newfiles);
+      setFilesCtxt(newfiles);
       setFetchImgIndex((prev) => prev + jsonData.length);
       sessionStorage.setItem(cacheKey, JSON.stringify(newfiles));
     } catch (error) {}
@@ -84,7 +86,9 @@ function FilesList() {
     console.log("useEffect");
     //useEffect
     fetchFiles();
-    return () => {};
+    return () => {
+      setFilesCtxt([]);
+    };
   }, []);
 
   return (
@@ -95,13 +99,13 @@ function FilesList() {
       >
         <InfiniteScroll
           className="files-list-infinite-scroll"
-          dataLength={files.length}
+          dataLength={filesCtxt.length}
           next={fetchFiles}
           hasMore={hasMore}
           loader={<h4>Loading...</h4>}
           scrollableTarget="infinite-scroll-files-container"
         >
-          {files.map((item, index) => (
+          {filesCtxt.map((item, index) => (
             <a
               href={item.Url}
               download={getFilenameFromUrl(item.Key)}

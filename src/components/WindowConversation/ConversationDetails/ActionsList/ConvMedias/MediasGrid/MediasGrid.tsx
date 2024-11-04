@@ -9,11 +9,13 @@ import { ApiToken } from "../../../../../../localStorage";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 import "./MediasGrid.css";
+import { useConversationMediasContext } from "../../../../../../constants/context";
 
 function MediasGrid() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const { displayedConv } = useDisplayedConvContext();
+  const { mediasCtxt, setMediasCtxt } = useConversationMediasContext();
   const user = useContext(UserContext);
   const [imgData, setImgData] = useState<ImgS3DataType>({
     src: "",
@@ -21,7 +23,6 @@ function MediasGrid() {
     convId: "",
   });
 
-  const [medias, setMedias] = useState<MediasType[]>([]);
   const [showImgVisualizer, setShowImgVisualizer] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [fetchImgIndex, setFetchImgIndex] = useState<number>(0);
@@ -42,17 +43,21 @@ function MediasGrid() {
     return pathFilename;
   };
   const fetchMedias = async () => {
+    console.log("fetch called");
     if (!displayedConv || !user) return;
     const cacheKey = `mediasCache_${displayedConv._id}`;
     const cachedMedias = JSON.parse(sessionStorage.getItem(cacheKey) || "[]");
 
     if (fetchImgIndex === 0 && cachedMedias.length > 0) {
-      setMedias(cachedMedias);
+      console.log("cace");
+      setMediasCtxt(cachedMedias);
       setFetchImgIndex(cachedMedias.length);
+      console.log(cachedMedias);
       return;
     }
     console.log(fetchImgIndex);
     try {
+      console.log("fetch");
       const response = await fetch(
         RESTAPIUri +
           "/file/userId/" +
@@ -82,7 +87,7 @@ function MediasGrid() {
       }
 
       const newMedias = [...cachedMedias, ...jsonData];
-      setMedias(newMedias);
+      setMediasCtxt(newMedias);
       setFetchImgIndex((prev) => prev + jsonData.length);
       sessionStorage.setItem(cacheKey, JSON.stringify(newMedias));
     } catch (error) {}
@@ -92,22 +97,35 @@ function MediasGrid() {
 
     //useEffect
     fetchMedias();
-    return () => {};
+    return () => {
+      setMediasCtxt([]);
+    };
   }, []);
 
   if (!displayedConv) return null;
   return (
     <div className="medias-grid">
+      <button
+        onClick={() =>
+          console.log(
+            JSON.parse(
+              sessionStorage.getItem("mediasCache_" + displayedConv._id) || "[]"
+            )
+          )
+        }
+      >
+        CLICK
+      </button>
       <div className="infinite-scroll-container" id="infinite-scroll-container">
         <InfiniteScroll
           className="media-container"
-          dataLength={medias.length}
+          dataLength={mediasCtxt.length}
           next={fetchMedias}
           hasMore={hasMore}
           loader={<h4>Loading...</h4>}
           scrollableTarget="infinite-scroll-container"
         >
-          {medias.map((item, index) => (
+          {mediasCtxt.map((item, index) => (
             <div key={index} className="media-item">
               <img src={item.Url} onClick={() => handleImgClick(item)} />
             </div>

@@ -11,6 +11,9 @@ import {
   UserDataType,
   ConversationType,
   LastMsgSeenByMembersType,
+  MediasType,
+  ConversationFilesContextType,
+  ConversationMediasContextType,
 } from "../../typescript/types";
 import { dayNames, monthNames } from "../../constants/time";
 import {
@@ -35,6 +38,8 @@ import {
 import {
   MessagesContext,
   SelectedFoundMsgIdContext,
+  ConversationFilesContext,
+  ConversationMediasContext,
 } from "../../constants/context";
 import TypingDots from "../Utiles/TypingDots/TypingdDots";
 import _ from "lodash";
@@ -44,6 +49,8 @@ import { socket } from "../../socket";
 import AsyncMsg from "./AsyncMsg/AsyncMsg";
 import ConversationDetails from "./ConversationDetails/ConversationDetails";
 import ConvSystemMsg from "./ConvSystemMsg/ConvSystemMsg";
+import { checkCacheFile } from "../../functions/cache";
+import { getFileTypeFromPathName } from "../../functions/file";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -71,13 +78,15 @@ function WindowConversation() {
   const user = useContext(UserContext)?.userName;
   const userId = useContext(UserContext)?._id;
 
-  // Files handling
+  // POST Files handling
   const inputFileRef = useRef<HTMLInputElement>(null);
   const [droppedFiles, setDroppedFiles] = useState<File[]>([]);
   const [showDragOverOverlay, setShowDragOverOverlay] =
     useState<boolean>(false);
 
-  // Img visualizer
+  //Handling files view in conversationDetails
+  const [mediasCtxt, setMediasCtxt] = useState<MediasType[]>([]);
+  const [filesCtxt, setFilesCtxt] = useState<MediasType[]>([]);
 
   const image =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=";
@@ -652,8 +661,8 @@ function WindowConversation() {
       socket.on("message", (data) => {
         const message = data[0];
         const convId = data[1]._id;
-        /*   console.log("MESSAGE RECU");
-        console.log(message); */
+        console.log("MESSAGE RECU");
+        console.log(message);
         if (convId === displayedConv?._id) {
           setMessages((prev) => [...prev, message]);
           emitSeenMsgToSocket(message, displayedConv);
@@ -712,6 +721,32 @@ function WindowConversation() {
           );
         }
       });
+      socket.on("newFile", (data) => {
+        const fileData: MediasType = data[0];
+        const conversationId: string = data[1];
+        console.log(data);
+
+        let cacheKey: string = "";
+        if (checkCacheFile(fileData, conversationId)) {
+          if (getFileTypeFromPathName(fileData.Key) === "Files") {
+            cacheKey = `filesCache_${conversationId}`;
+          } else {
+            cacheKey = `mediasCache_${conversationId}`;
+          }
+          console.log(cacheKey);
+          const cacheArr = JSON.parse(sessionStorage.getItem(cacheKey) || "[]");
+          cacheArr.unshift(fileData);
+          sessionStorage.setItem(cacheKey, JSON.stringify(cacheArr));
+
+          if (getFileTypeFromPathName(fileData.Key) === "Files") {
+            console.log("files");
+            setFilesCtxt(cacheArr);
+          } else {
+            console.log("medias");
+            setMediasCtxt(cacheArr);
+          }
+        }
+      });
 
       //Close conversatoin details every time a new conversation is selected
     } else if (searchInputRef.current) {
@@ -726,6 +761,7 @@ function WindowConversation() {
       socket.off("seenMessage");
       socket.off("typing");
       socket.off("convUpdate");
+      socket.off("newFile");
     };
   }, [displayedConv?._id]);
 
@@ -931,7 +967,8 @@ function WindowConversation() {
 
   const sendFile = async () => {
     const fileNamesTimeStamped = await uploadFiles();
-    //console.log("fichiers envoyés");
+    console.log("fichiers envoyés");
+    console.log(fileNamesTimeStamped);
     await sendMessage(fileNamesTimeStamped.fileNames);
     //console.log("msg envoyé");
   };
@@ -1394,11 +1431,19 @@ function WindowConversation() {
           }`}
         >
           {showConvDetails && (
-            <SelectedFoundMsgIdContext.Provider
-              value={{ selectedFoundMsgId, setSelectedFoundMsgId }}
+            <ConversationMediasContext.Provider
+              value={{ mediasCtxt, setMediasCtxt }}
             >
-              <ConversationDetails />
-            </SelectedFoundMsgIdContext.Provider>
+              <ConversationFilesContext.Provider
+                value={{ filesCtxt, setFilesCtxt }}
+              >
+                <SelectedFoundMsgIdContext.Provider
+                  value={{ selectedFoundMsgId, setSelectedFoundMsgId }}
+                >
+                  <ConversationDetails />
+                </SelectedFoundMsgIdContext.Provider>
+              </ConversationFilesContext.Provider>
+            </ConversationMediasContext.Provider>
           )}
         </div>
       </MessagesContext.Provider>
