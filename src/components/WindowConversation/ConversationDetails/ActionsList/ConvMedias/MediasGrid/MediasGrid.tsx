@@ -43,8 +43,6 @@ function MediasGrid() {
   };
   const fetchMedias = async () => {
     if (!displayedConv || !user) return;
-    console.log("FETCH CALLED");
-
     const cacheKey = `mediasCache_${displayedConv._id}`;
     const cachedMedias = JSON.parse(sessionStorage.getItem(cacheKey) || "[]");
 
@@ -61,8 +59,9 @@ function MediasGrid() {
           user._id +
           "/conversationId/" +
           displayedConv._id +
-          "/getRecentImages?start=" +
-          fetchImgIndex,
+          "/getRecentFiles?start=" +
+          fetchImgIndex +
+          "&fileType=Medias",
         {
           method: "GET",
           headers: {
