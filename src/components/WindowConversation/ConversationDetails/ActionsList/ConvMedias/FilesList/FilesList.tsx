@@ -18,7 +18,6 @@ function FilesList() {
   const [files, setFiles] = useState<MediasType[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [fetchImgIndex, setFetchImgIndex] = useState<number>(0);
-  const fileIconPath = "/file-icon.png";
 
   const getFilenameFromUrl = (url: string) => {
     //console.log(url);

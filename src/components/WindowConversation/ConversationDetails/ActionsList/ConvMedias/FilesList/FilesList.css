@@ -14,32 +14,32 @@
 }
 
 .files-item {
-  height: 4rem;
+  height: 5rem;
   width: 100%;
   display: flex;
   text-decoration: none;
+  border-bottom: 2px solid #f8f9fb;
 }
 
 .files-item-img-container {
   width: 15%;
   display: flex;
-  justify-content: center;
   align-items: center;
-
   border-radius: 0.25rem;
 }
 .files-item-img-container div {
   background-color: #f8f9fb;
   border-radius: 0.25rem;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
   display: flex;
+  border-radius: 0.5rem;
   justify-content: center;
   align-items: center;
 }
 .files-item-img-container div img {
-  width: 1rem;
-  height: 1rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .files-item-info {
@@ -48,16 +48,17 @@
   flex-direction: column;
   justify-content: center;
   color: #65686c;
+  margin-left: 0.25rem;
 }
 
 .files-item-name {
   font-weight: bold;
-  font-size: small;
+  font-size: medium;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
 
 .files-item-size {
-  font-size: x-small;
+  font-size: small;
 }
