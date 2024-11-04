@@ -54,7 +54,7 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
     ConversationType[] | null
   >(null);
 
-  const patchSocketId = async (socketId: string | undefined) => {
+  const setUserOnline = async (socketId: string | undefined) => {
     try {
       const response = await fetch(
         RESTAPIUri + "/user/userId/" + user?._id + "/socketId",
@@ -85,7 +85,7 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
     socket.connect();
 
     socket.on("connect", () => {
-      patchSocketId(socket.id);
+      setUserOnline(socket.id);
     });
     return () => {
       if (socket) {

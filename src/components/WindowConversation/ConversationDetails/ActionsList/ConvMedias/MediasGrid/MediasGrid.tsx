@@ -105,17 +105,6 @@ function MediasGrid() {
   if (!displayedConv) return null;
   return (
     <div className="medias-grid">
-      <button
-        onClick={() =>
-          console.log(
-            JSON.parse(
-              sessionStorage.getItem("mediasCache_" + displayedConv._id) || "[]"
-            )
-          )
-        }
-      >
-        CLICK
-      </button>
       <div className="infinite-scroll-container" id="infinite-scroll-container">
         <InfiniteScroll
           className="media-container"
