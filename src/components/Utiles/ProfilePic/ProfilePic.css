@@ -1,0 +1,34 @@
+.profile-pic {
+  border-radius: 50%;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.profile-pic > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  height: 100%;
+  width: 100%;
+}
+.profile-pic:has(svg) {
+  background-color: #f0f2f5;
+}
+.profile-pic > img {
+  border-radius: 50%;
+  height: 75%;
+  width: 75%;
+  object-fit: cover;
+}
+
+.profile-pic-user-status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 25%;
+  height: 25%;
+}

@@ -20,6 +20,7 @@ import {
 import { timeSince } from "../../functions/time";
 import { socket } from "../../socket";
 import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
+import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const userData = useContext(UserContext);
@@ -283,18 +284,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         }
       >
         <div className="conversation-img-container">
-          {conversation.isGroupConversation ? (
-            conversation.customization.photo?.length > 0 ? (
-              <img
-                src={conversation.customization.photo}
-                className="conversation-img"
-              />
-            ) : (
-              <PeopleOutline color="black" height="2.5rem" width="2.5rem" />
-            )
-          ) : (
-            <></>
-          )}
+          <ProfilePic props={conversation} />
         </div>
         <div className="conversation-text-container">
           <div className="conversation-name">

@@ -1,0 +1,22 @@
+.user-status {
+  border-radius: 50%;
+  height: 100%;
+  width: 100%;
+  border: 1px solid black;
+}
+.user-status > div {
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+}
+.Online {
+  background-color: greenyellow;
+}
+
+.Offline {
+  background-color: lightslategray;
+}
+
+.Busy {
+  background-color: red;
+}

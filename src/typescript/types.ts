@@ -13,6 +13,12 @@ export type ConversationType = {
     theme: string;
     emoji: string;
   };
+  partnerInfos?: {
+    username: string;
+    photo: string;
+    status: "Online" | "Offline" | "Busy";
+    lastSeen: Date;
+  };
 };
 export type RemovedMembersType = {
   username: string;
@@ -88,6 +94,9 @@ export type UserDataType = {
   socketId: string | undefined;
   photo: string | undefined;
   conversations: string[];
+  isOnline: boolean;
+  lastSeen: Date;
+  status: string;
 };
 export type SideBarPropsType = {
   setShowConversationWindow: React.Dispatch<React.SetStateAction<boolean>>;

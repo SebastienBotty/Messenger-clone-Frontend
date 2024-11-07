@@ -51,6 +51,7 @@ import ConversationDetails from "./ConversationDetails/ConversationDetails";
 import ConvSystemMsg from "./ConvSystemMsg/ConvSystemMsg";
 import { checkCacheFile } from "../../functions/cache";
 import { getFileTypeFromPathName } from "../../functions/file";
+import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -994,22 +995,7 @@ function WindowConversation() {
               {displayedConv ? (
                 <>
                   <div className="img-container">
-                    {displayedConv.isGroupConversation ? (
-                      displayedConv.customization.photo?.length > 0 ? (
-                        <img
-                          src={displayedConv.customization.photo}
-                          className="conversation-img"
-                        />
-                      ) : (
-                        <PeopleOutline
-                          color="black"
-                          height="2rem"
-                          width="2rem"
-                        />
-                      )
-                    ) : (
-                      <></>
-                    )}
+                    <ProfilePic props={displayedConv} />
                   </div>
                   <div className="conversation-member-info-text-container">
                     <div className="conversation-member-name">
