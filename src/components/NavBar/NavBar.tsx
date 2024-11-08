@@ -65,87 +65,85 @@ function NavBar(props: NavBarProps) {
       <div className="navBar-right">
         <div className="navBar-right-btn">
           <div className="profile-pic-container">
-            <ProfilePic props={user.photo} />
-          </div>
-          <div className="profile-dropdown-menu">
-            <div className="user-profile-container">
-              <div className="profile" onClick={() => console.log(user)}>
-                <div className="user-profile-pic">
-                  <div className="user-profile-pic-container">
-                    {" "}
-                    <ProfilePic props={user.photo} />
+            <ProfilePic props={user.photo} />{" "}
+            <div className="profile-dropdown-menu">
+              <div className="user-profile-container">
+                <div className="profile" onClick={() => console.log(user)}>
+                  <div className="user-profile-pic">
+                    <div className="user-profile-pic-container">
+                      {" "}
+                      <ProfilePic props={user.photo} />
+                    </div>
                   </div>
-                </div>
-                <div className="user-profile-info">
-                  <div className="user-profile-name">{user.userName}</div>
-                  <div className="user-profile-status">
-                    {user.status === "Offline"
-                      ? "En ligne il y a " + timeSince(new Date(user.lastSeen))
-                      : statusTranslate(user.status)}
+                  <div className="user-profile-info">
+                    <div className="user-profile-name">{user.userName}</div>
+                    <div className="user-profile-status">
+                      {user.status === "Offline"
+                        ? "En ligne il y a " +
+                          timeSince(new Date(user.lastSeen))
+                        : statusTranslate(user.status)}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="separator"></div>
-            <ul>
-              {" "}
-              <li className="profile-dropdown-menu-options">
-                <div className="options-icon">
-                  <div style={{ height: "2rem", width: "2rem" }}>
-                    {" "}
-                    <ProfilePic props={user.photo} />
+              <div className="separator"></div>
+              <ul>
+                {" "}
+                <li
+                  className="profile-dropdown-menu-options "
+                  id="status-title"
+                >
+                  <div className="options-icon">
+                    <div id="profile-pic-status-container">
+                      {" "}
+                      <ProfilePic props={user.photo} />
+                    </div>
                   </div>
-                </div>
-                <div className="options-text">Changer de photo</div>
-              </li>
-              <li className="profile-dropdown-menu-options " id="status-title">
-                <div className="options-icon">
-                  <ChevronBackOutline height="1.5rem" width="1.5rem" />
-                </div>
-                <div className="options-text ">Changer de statut</div>
-                <ul className="status-left-side-menu">
-                  <li
-                    className="status-options"
-                    onClick={() => changeStatus("Online")}
-                  >
-                    <div className="options-icon">
-                      <div className="status-container">
-                        <UserStatus status={"Online"} />
+                  <div className="options-text ">Changer de statut</div>
+                  <ul className="status-left-side-menu">
+                    <li
+                      className="status-options"
+                      onClick={() => changeStatus("Online")}
+                    >
+                      <div className="options-icon">
+                        <div className="status-container">
+                          <UserStatus status={"Online"} />
+                        </div>
                       </div>
-                    </div>
-                    <div className="options-text">En ligne</div>
-                  </li>
-                  <li
-                    className="status-options"
-                    onClick={() => changeStatus("Busy")}
-                  >
-                    <div className="options-icon">
-                      <div className="status-container">
-                        <UserStatus status={"Busy"} />
+                      <div className="options-text">En ligne</div>
+                    </li>
+                    <li
+                      className="status-options"
+                      onClick={() => changeStatus("Busy")}
+                    >
+                      <div className="options-icon">
+                        <div className="status-container">
+                          <UserStatus status={"Busy"} />
+                        </div>
                       </div>
-                    </div>
-                    <div className="options-text">Ne pas déranger</div>
-                  </li>{" "}
-                  <li
-                    className="status-options"
-                    onClick={() => changeStatus("Offline")}
-                  >
-                    <div className="options-icon">
-                      <div className="status-container">
-                        <UserStatus status={"Offline"} />
+                      <div className="options-text">Ne pas déranger</div>
+                    </li>{" "}
+                    <li
+                      className="status-options"
+                      onClick={() => changeStatus("Offline")}
+                    >
+                      <div className="options-icon">
+                        <div className="status-container">
+                          <UserStatus status={"Offline"} />
+                        </div>
                       </div>
-                    </div>
-                    <div className="options-text">Hors ligne</div>
-                  </li>
-                </ul>
-              </li>
-              <li className="profile-dropdown-menu-options" onClick={signOut}>
-                <div className="options-icon">
-                  <ExitOutline height="1.5rem" width="1.5rem" />
-                </div>
-                <div className="options-text">Sé déconnecter</div>
-              </li>
-            </ul>
+                      <div className="options-text">Hors ligne</div>
+                    </li>
+                  </ul>
+                </li>
+                <li className="profile-dropdown-menu-options" onClick={signOut}>
+                  <div className="options-icon">
+                    <ExitOutline height="75%" width="75%" />
+                  </div>
+                  <div className="options-text">Sé déconnecter</div>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>

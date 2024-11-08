@@ -6,6 +6,7 @@
   justify-content: center;
   align-items: center;
   position: relative;
+  background-color: blue;
 }
 .profile-pic > * {
   display: flex;
@@ -17,8 +18,6 @@
 }
 
 .profile-pic > *:has(svg) {
-  height: 75%;
-  width: 75%;
   background-color: #f0f2f5;
 }
 .profile-pic > img {

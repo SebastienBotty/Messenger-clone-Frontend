@@ -6,27 +6,28 @@
 }
 
 .navBar-right {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   margin-right: 1rem;
-}
-
-.profile-pic-container {
-  height: 100%;
-  aspect-ratio: 1/1;
 }
 .navBar-right-btn {
   border-radius: 50%;
-  position: relative;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100%;
+}
+
+.profile-pic-container {
+  height: 75%;
+  aspect-ratio: 1/1;
+  position: relative;
 }
 
 .profile-dropdown-menu {
   display: none;
   z-index: 100;
   position: absolute;
+  margin-top: 0.5rem;
   top: 100;
   right: 0;
   width: 20rem;
@@ -94,7 +95,7 @@
 }
 
 li.profile-dropdown-menu-options {
-  height: 3rem;
+  height: 4rem;
   display: flex;
   align-items: center;
   padding-left: 0.5rem;
@@ -129,6 +130,12 @@ li.profile-dropdown-menu-options:hover {
   height: 100%;
 }
 
+#profile-pic-status-container {
+  height: auto;
+  width: 75%;
+  aspect-ratio: 1/1 !important;
+  background-color: red !important;
+}
 .options-icon:first-child > * {
   background-color: transparent;
 }
