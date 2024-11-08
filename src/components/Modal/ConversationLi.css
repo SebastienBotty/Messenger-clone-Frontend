@@ -11,11 +11,9 @@
   align-items: center;
 }
 
-.modal-conversation-photo > * {
-  height: 3rem;
-  width: 3rem;
-  border-radius: 50%;
-  background-color: #f0f2f5;
+.modal-conversation-photo {
+  width: 5rem;
+  aspect-ratio: 1/1;
 }
 .modal-conversation-photo > * {
   display: flex;

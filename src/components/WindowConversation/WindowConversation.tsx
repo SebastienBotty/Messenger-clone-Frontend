@@ -1120,7 +1120,7 @@ function WindowConversation() {
                                 onClick={() => handleSearch(userPrediction)}
                               >
                                 <div className="user-profile-pic">
-                                  <img src={image} />
+                                  <ProfilePic props={userPrediction.photo} />
                                 </div>
                                 <span> {userPrediction.userName}</span>
                               </li>
@@ -1128,7 +1128,7 @@ function WindowConversation() {
                           }
                         })
                       ) : (
-                        <li className="user-profile-pic">
+                        <li>
                           <div className="no-user-found">
                             <span>Aucun utilisateur trouvé</span>
                           </div>

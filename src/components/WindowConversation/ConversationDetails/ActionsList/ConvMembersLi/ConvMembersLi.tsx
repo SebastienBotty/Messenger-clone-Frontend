@@ -23,6 +23,7 @@ import { confirmationMessage } from "../../../../../constants/ConfirmationMessag
 import { ApiToken } from "../../../../../localStorage";
 import { ConversationType } from "../../../../../typescript/types";
 import { socket } from "../../../../../socket";
+import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
 
 export function ConvMembersLi({
   member,
@@ -378,7 +379,9 @@ export function ConvMembersLi({
     <div style={{ position: "relative" }} key={key}>
       <li className="li-members">
         <div className="li-members-img">
-          <div className="li-members-img-container"></div>
+          <div className="li-members-img-container">
+            <ProfilePic props={member} />
+          </div>
         </div>
         <div className="li-members-text">
           <span className="members-name">{member}</span>

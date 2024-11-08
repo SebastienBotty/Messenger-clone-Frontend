@@ -20,23 +20,10 @@
 
 .conversation-photo-img-container {
   margin-top: 1rem;
-  border-radius: 50%;
-  height: 5rem;
-  width: 5rem;
-}
-.conversation-photo-img-container:has(svg) {
-  background-color: #f0f2f5;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 7.5rem;
+  aspect-ratio: 1/1;
 }
 
-.conversation-photo-img-container > img {
-  height: 100%;
-  width: 100%;
-  border-radius: 50%;
-}
 .conversation-title {
   font-size: large;
   font-weight: 600;

@@ -9,6 +9,7 @@ import { ApiToken } from "../../localStorage";
 import { socket } from "../../socket";
 import { useMostRecentConvContext } from "../../screens/userLoggedIn/userLoggedIn";
 import { PeopleOutline } from "react-ionicons";
+import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 
 function ConversationLi(props: {
   conversation: ConversationType;
@@ -134,17 +135,12 @@ function ConversationLi(props: {
       style={{ marginLeft: "2.5rem", marginRight: "2.5rem" }}
       className="modal-transfer-conversation"
       key={conversation._id}
+      onClick={() => {
+        console.log(conversation);
+      }}
     >
       <div className="modal-conversation-photo">
-        {conversation.isGroupConversation ? (
-          conversation.customization.photo ? (
-            <img src={conversation.customization.photo} alt="" />
-          ) : (
-            <PeopleOutline height="2.5rem" width="2.5rem" />
-          )
-        ) : (
-          <>Rien atm</>
-        )}
+        <ProfilePic props={conversation} />
       </div>
       <div className="modal-conversation-name">
         {conversation.isGroupConversation

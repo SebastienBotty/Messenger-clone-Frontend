@@ -167,6 +167,7 @@
 
 .conversation-img-container {
   width: 20%;
+  aspect-ratio: 1/1;
   display: flex;
   justify-content: center;
   align-items: center;

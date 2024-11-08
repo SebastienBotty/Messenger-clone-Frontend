@@ -15,7 +15,10 @@
   height: 100%;
   width: 100%;
 }
-.profile-pic:has(svg) {
+
+.profile-pic > *:has(svg) {
+  height: 75%;
+  width: 75%;
   background-color: #f0f2f5;
 }
 .profile-pic > img {

@@ -142,7 +142,8 @@
   height: auto;
 }
 .dropdown-search-list li .user-profile-pic {
-  padding: 0.5rem;
+  width: 20%;
+  aspect-ratio: 1/1;
 }
 .dropdown-search-list li > span {
   display: flex;

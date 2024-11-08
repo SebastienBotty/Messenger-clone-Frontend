@@ -13,6 +13,7 @@ import { useUserContext } from "../../../constants/context";
 import ActionsList from "./ActionsList/ActionsList";
 import MoreDetails from "./MoreDetails/MoreDetails";
 import ConvMedia from "./ActionsList/ConvMedias/ConvMedia";
+import ProfilePic from "../../Utiles/ProfilePic/ProfilePic";
 
 function ConversationDetails() {
   const { user, setUser } = useUserContext();
@@ -83,18 +84,7 @@ function ConversationDetails() {
         <div className="conversation-details-container">
           <div className="conversation-details-header">
             <div className="conversation-photo-img-container">
-              {displayedConv.isGroupConversation ? (
-                displayedConv.customization.photo?.length > 0 ? (
-                  <img
-                    src={displayedConv.customization.photo}
-                    className="conversation-img"
-                  />
-                ) : (
-                  <PeopleOutline color="black" height="3rem" width="3rem" />
-                )
-              ) : (
-                <></>
-              )}
+              <ProfilePic props={displayedConv} />
             </div>
             <div className="conversation-title">
               {displayedConv?.isGroupConversation
