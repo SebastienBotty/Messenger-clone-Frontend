@@ -1,11 +1,22 @@
 import React, { createContext, useContext } from "react";
 import {
-  MediasType,
   MessagesContextType,
   selectedMessageContextType,
   ConversationFilesContextType,
   ConversationMediasContextType,
+  UserDataContextType,
 } from "../typescript/types";
+
+//User Context
+
+export const UserContext = createContext<UserDataContextType | null>(null);
+export const useUserContext = () => {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error("useUserContext must be used within a UserProvider");
+  }
+  return context;
+};
 
 //Messages Context
 export const MessagesContext = createContext<MessagesContextType | undefined>(

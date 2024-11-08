@@ -7,10 +7,8 @@ import React, {
 } from "react";
 import "./Modal.css";
 import { SearchOutline, Close } from "react-ionicons";
-import {
-  UserContext,
-  useRecentConversationContext,
-} from "../../screens/userLoggedIn/userLoggedIn";
+import { useRecentConversationContext } from "../../screens/userLoggedIn/userLoggedIn";
+import { useUserContext } from "../../constants/context";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
 import { ConversationType } from "../../typescript/types";
@@ -23,7 +21,7 @@ function Modal({
   closeModal: () => void;
   selectedImg: string | undefined;
 }) {
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
 
   const [searchConversationInput, setSearchConversationInput] =
     useState<string>("");

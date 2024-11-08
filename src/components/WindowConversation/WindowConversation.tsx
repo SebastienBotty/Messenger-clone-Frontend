@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useContext,
-  useCallback,
-} from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   MessageType,
   Date15minDifference,
@@ -12,8 +6,6 @@ import {
   ConversationType,
   LastMsgSeenByMembersType,
   MediasType,
-  ConversationFilesContextType,
-  ConversationMediasContextType,
 } from "../../typescript/types";
 import { dayNames, monthNames } from "../../constants/time";
 import {
@@ -25,13 +17,11 @@ import {
   Send,
   Close,
   ArrowDown,
-  PeopleOutline,
 } from "react-ionicons";
 
 import "./WindowConversation.css";
 import {
   useDisplayedConvContext,
-  UserContext,
   useMostRecentConvContext,
   useTriggerContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
@@ -40,6 +30,7 @@ import {
   SelectedFoundMsgIdContext,
   ConversationFilesContext,
   ConversationMediasContext,
+  useUserContext,
 } from "../../constants/context";
 import TypingDots from "../Utiles/TypingDots/TypingdDots";
 import _ from "lodash";
@@ -76,8 +67,7 @@ function WindowConversation() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollViewRef = useRef<HTMLDivElement | null>(null);
   const inputMessageRef = useRef<HTMLTextAreaElement>(null);
-  const user = useContext(UserContext)?.userName;
-  const userId = useContext(UserContext)?._id;
+  const { user, setUser } = useUserContext();
 
   // POST Files handling
   const inputFileRef = useRef<HTMLInputElement>(null);
@@ -103,7 +93,7 @@ function WindowConversation() {
     const response = await fetch(
       RESTAPIUri +
         "/message/userId/" +
-        userId +
+        user?._id +
         "/getMessages?conversationId=" +
         displayedConv?._id +
         "&start=" +
@@ -166,7 +156,7 @@ function WindowConversation() {
     const tempArray: LastMsgSeenByMembersType[] = [];
     if (displayedConv) {
       for (const member of displayedConv.members) {
-        if (member !== user) {
+        if (member !== user?.userName) {
           for (const msg of messagesArr) {
             if (msg.seenBy.includes(member)) {
               tempArray.push({ username: member, messageId: msg._id });
@@ -197,7 +187,7 @@ function WindowConversation() {
       const response = await fetch(
         RESTAPIUri +
           "/message/userId/" +
-          userId +
+          user?._id +
           "/getLastMsgSeenByUser?conversationId=" +
           displayedConv?._id +
           "&username=" +
@@ -226,9 +216,9 @@ function WindowConversation() {
       const response = await fetch(
         RESTAPIUri +
           "/conversation/userId/" +
-          userId +
+          user?._id +
           "/privateConversation?username=" +
-          user +
+          user?.userName +
           "&recipient=" +
           addedMembers[0],
         {
@@ -257,8 +247,8 @@ function WindowConversation() {
 
   const postConversation = async () => {
     const postData = {
-      members: [user, ...addedMembers],
-      admin: user,
+      members: [user?.userName, ...addedMembers],
+      admin: user?.userName,
       creationDate: new Date(),
     };
     try {
@@ -277,10 +267,10 @@ function WindowConversation() {
       //console.log(jsonData);
       if (jsonData._id) {
         const messageData = {
-          author: user,
-          authorId: userId,
+          author: user?.userName,
+          authorId: user?._id,
           text: inputMessage,
-          seenBy: [user],
+          seenBy: [user?.userName],
           date: new Date(),
           conversationId: jsonData._id,
         };
@@ -454,8 +444,8 @@ function WindowConversation() {
     const trimmedString = inputMessage.replace(/^\s+|\s+$/g, "");
 
     const messageData = {
-      author: user,
-      authorId: userId,
+      author: user?.userName,
+      authorId: user?._id,
 
       text: fileNames
         ? "PATHIMAGE/" +
@@ -463,7 +453,7 @@ function WindowConversation() {
           ":" +
           fileNames.map((name) => name).join(",")
         : trimmedString,
-      seenBy: [user],
+      seenBy: [user?.userName],
       date: new Date(),
       conversationId: displayedConv?._id,
     };
@@ -477,10 +467,10 @@ function WindowConversation() {
   const sendEmoji = () => {
     if (!displayedConv) return;
     const messageData = {
-      author: user,
-      authorId: userId,
+      author: user?.userName,
+      authorId: user?._id,
       text: displayedConv.customization.emoji,
-      seenBy: [user],
+      seenBy: [user?.userName],
       date: new Date(),
       conversationId: displayedConv?._id,
     };
@@ -546,7 +536,7 @@ function WindowConversation() {
 
   const getUsersSocket = async (conversation: ConversationType | null) => {
     const convMembersStr = conversation?.members
-      ?.filter((member) => member !== user)
+      ?.filter((member) => member !== user?.userName)
       .join("-");
     try {
       const response = await fetch(
@@ -595,7 +585,7 @@ function WindowConversation() {
   ) => {
     const convMembersSocket = await getUsersSocket(conversation);
     const seenMsgData = messageData;
-    messageData.seenBy = [user];
+    messageData.seenBy = [user?.userName];
     const socketData = [convMembersSocket, seenMsgData, conversation];
     socket.emit("seenMessage", socketData);
   };
@@ -603,7 +593,12 @@ function WindowConversation() {
   const emitUserWrittingToSocket = async (isWriting: boolean) => {
     if (displayedConv) {
       const convMembersSocket = await getUsersSocket(displayedConv);
-      const socketData = [convMembersSocket, isWriting, user, displayedConv];
+      const socketData = [
+        convMembersSocket,
+        isWriting,
+        user?.userName,
+        displayedConv,
+      ];
       socket.emit("typing", socketData);
     }
   };
@@ -1003,10 +998,10 @@ function WindowConversation() {
                         ? displayedConv?.customization.conversationName
                           ? displayedConv?.customization.conversationName
                           : displayedConv?.members
-                              .filter((item) => item !== user)
+                              .filter((item) => item !== user?.userName)
                               .join(", ")
                         : displayedConv?.members.filter(
-                            (item) => item !== user
+                            (item) => item !== user?.userName
                           )}
                     </div>
                     <div className="online-since">En ligne depuis X</div>
@@ -1056,7 +1051,7 @@ function WindowConversation() {
                         usersPrediction.map((userPrediction) => {
                           if (
                             !addedMembers.includes(userPrediction.userName) &&
-                            userPrediction.userName !== user
+                            userPrediction.userName !== user?.userName
                           ) {
                             return (
                               <li
@@ -1167,7 +1162,7 @@ function WindowConversation() {
                     </div>
                   );
                 }
-                if (message?.author === user) {
+                if (message?.author === user?.userName) {
                   return (
                     <div
                       key={message.author + "-" + index}
@@ -1312,7 +1307,7 @@ function WindowConversation() {
             </div>
           </div>
           <div className="conversation-footer">
-            {(user && displayedConv?.members.includes(user)) ||
+            {(user && displayedConv?.members.includes(user.userName)) ||
             displayedConv == null ? (
               <>
                 <div className="icons">

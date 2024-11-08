@@ -98,6 +98,11 @@ export type UserDataType = {
   lastSeen: Date;
   status: string;
 };
+
+export type UserDataContextType = {
+  user: UserDataType | null;
+  setUser: React.Dispatch<React.SetStateAction<UserDataType | null>>;
+};
 export type SideBarPropsType = {
   setShowConversationWindow: React.Dispatch<React.SetStateAction<boolean>>;
 };

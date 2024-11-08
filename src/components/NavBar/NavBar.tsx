@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import "./NavBar.css";
 import { NavBarProps } from "../../typescript/types";
-import { UserContext } from "../../screens/userLoggedIn/userLoggedIn";
+import { useUserContext } from "../../constants/context";
 import { ApiToken } from "../../localStorage";
 import { ExitOutline, ChevronBackOutline } from "react-ionicons";
 import UserStatus from "../UserStatus/UserStatus";
@@ -9,7 +9,7 @@ import { timeSince } from "../../functions/time";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 
 function NavBar(props: NavBarProps) {
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
   const signOut = props.handleSignOut;
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 

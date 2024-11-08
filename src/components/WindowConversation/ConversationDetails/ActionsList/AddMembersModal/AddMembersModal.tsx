@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import {
   useDisplayedConvContext,
-  UserContext,
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
 import "./AddMembersModal.css";
@@ -25,7 +24,10 @@ import {
 import { ApiToken } from "../../../../../localStorage";
 import _ from "lodash";
 import { socket } from "../../../../../socket";
-import { useMessagesContext } from "../../../../../constants/context";
+import {
+  useMessagesContext,
+  useUserContext,
+} from "../../../../../constants/context";
 
 function AddMembersModal({
   showAddMembersModal,
@@ -34,7 +36,7 @@ function AddMembersModal({
   showAddMembersModal: boolean;
   setShowAddMembersModal: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { messages, setMessages } = useMessagesContext();
   const { setMostRecentConv } = useMostRecentConvContext();

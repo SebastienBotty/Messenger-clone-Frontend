@@ -2,17 +2,16 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import NavBar from "../../components/NavBar/NavBar";
 import WindowConversation from "../../components/WindowConversation/WindowConversation";
 import SideBarConversations from "../../components/SideBarConversations/SideBarConversations";
-import ImageVizualizer from "../../components/ImageVizualizer/ImageVizualizer";
 import {
   NavBarProps,
   ConversationType,
   ConversationContextType,
-  UserDataType,
   MostRecentContextType,
   TriggerContextType,
-  ImgS3DataType,
   RecentConversationsContextType,
+  UserDataType,
 } from "../../typescript/types";
+import { UserContext } from "../../constants/context";
 import { socket } from "../../socket";
 import { useLocation } from "react-router-dom";
 import { ApiToken } from "../../localStorage";
@@ -31,11 +30,10 @@ const RecentConversationsContext = createContext<
 >(undefined);
 
 const TriggerContext = createContext<TriggerContextType | undefined>(undefined);
-export const UserContext = createContext<UserDataType | null>(null);
 
 function UserLoggedIn({ handleSignOut }: NavBarProps) {
   const location = useLocation();
-  const user = location.state;
+  const [user, setUser] = useState<UserDataType | null>(location.state);
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const [displayedConv, setDisplayedConv] = useState<ConversationType | null>(
@@ -46,7 +44,6 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
   );
   const [trigger, setTrigger] = useState<boolean | null>(false);
 
-  const [imgData, setImgData] = useState<ImgS3DataType | null>(null);
   const [showConversationWindow, setShowConversationWindow] =
     useState<boolean>(false);
 
@@ -104,7 +101,7 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
   }, [displayedConv]);
 
   return (
-    <UserContext.Provider value={user}>
+    <UserContext.Provider value={{ user, setUser }}>
       <DisplayedConvContext.Provider
         value={{ displayedConv, setDisplayedConv }}
       >

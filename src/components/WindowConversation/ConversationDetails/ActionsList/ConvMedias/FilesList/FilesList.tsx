@@ -1,20 +1,19 @@
 import React, { useState, useContext, useEffect } from "react";
-import {
-  useDisplayedConvContext,
-  UserContext,
-} from "../../../../../../screens/userLoggedIn/userLoggedIn";
+import { useDisplayedConvContext } from "../../../../../../screens/userLoggedIn/userLoggedIn";
 import "./FilesList.css";
-import { MediasType } from "../../../../../../typescript/types";
 import { ApiToken } from "../../../../../../localStorage";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { formatFileSize } from "../../../../../../functions/file";
-import { useConversationFilesContext } from "../../../../../../constants/context";
+import {
+  useConversationFilesContext,
+  useUserContext,
+} from "../../../../../../constants/context";
 
 function FilesList() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const { displayedConv } = useDisplayedConvContext();
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
   const { filesCtxt, setFilesCtxt } = useConversationFilesContext();
 
   const [hasMore, setHasMore] = useState<boolean>(true);

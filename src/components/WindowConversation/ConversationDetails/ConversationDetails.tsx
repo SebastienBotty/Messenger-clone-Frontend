@@ -9,13 +9,13 @@ import {
 import SearchMessage from "./SearchMessage/SearchMessage";
 
 import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
-import { UserContext } from "../../../screens/userLoggedIn/userLoggedIn";
+import { useUserContext } from "../../../constants/context";
 import ActionsList from "./ActionsList/ActionsList";
 import MoreDetails from "./MoreDetails/MoreDetails";
 import ConvMedia from "./ActionsList/ConvMedias/ConvMedia";
 
 function ConversationDetails() {
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
   const [notifications, setNotifications] = useState<boolean>(true); // NOT IMPLEMENTED YET
   const [showMoreDetailsComp, setShowMoreDetailsComp] =

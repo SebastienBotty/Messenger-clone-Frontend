@@ -4,7 +4,6 @@ import {
   CreateOutline,
   EllipsisHorizontal,
   Search,
-  PeopleOutline,
 } from "react-ionicons";
 import { ConversationType, SideBarPropsType } from "../../typescript/types";
 import "./SideBarConversations.css";
@@ -12,18 +11,18 @@ import "./SideBarConversations.css";
 import { ApiToken } from "../../localStorage";
 import {
   useDisplayedConvContext,
-  UserContext,
   useMostRecentConvContext,
   useTriggerContext,
   useRecentConversationContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
+import { useUserContext } from "../../constants/context";
 import { timeSince } from "../../functions/time";
 import { socket } from "../../socket";
 import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
-  const userData = useContext(UserContext);
+  const { user, setUser } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
   const { recentConversations, setRecentConversations } =
@@ -47,7 +46,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         const response = await fetch(
           RESTAPIUri +
             "/conversation/userId/" +
-            userData?._id +
+            user?._id +
             "/conversation/lastMessage?conversationId=" +
             conversation._id,
           {
@@ -91,7 +90,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       const response = await fetch(
         RESTAPIUri +
           "/conversation/userId/" +
-          userData?._id +
+          user?._id +
           "/getConversations?conversationsId=" +
           conversationsIdStr,
         {
@@ -123,7 +122,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const fetchConversationsId = async () => {
     try {
       const response = await fetch(
-        RESTAPIUri + "/user/userConversationsId/userId/" + userData?._id,
+        RESTAPIUri + "/user/userConversationsId/userId/" + user?._id,
         {
           headers: {
             Authorization: `Bearer ${authApiToken}`,
@@ -161,10 +160,10 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
 
   const handleConversationClick = async (conversation: ConversationType) => {
     //console.log(conversation.lastMessage);
-    if (conversation.lastMessage._id && userData?._id && userData?.userName) {
+    if (conversation.lastMessage._id && user?._id && user?.userName) {
       setDisplayedConv(conversation);
 
-      if (!conversation.lastMessage.seenBy.includes(userData?.userName)) {
+      if (!conversation.lastMessage.seenBy.includes(user?.userName)) {
         updateSeenConversation(conversation.lastMessage._id, conversation);
       }
     }
@@ -208,11 +207,11 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     messageId: string,
     conversation: ConversationType
   ) => {
-    if (userData) {
+    if (user) {
       const setMsgSeen = await markMessagesAsSeen(
         messageId,
-        userData._id,
-        userData.userName
+        user._id,
+        user.userName
       );
       if (setMsgSeen) {
         setConversations((prev) => {
@@ -292,17 +291,15 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
               ? conversation.customization.conversationName
                 ? conversation.customization.conversationName
                 : conversation.members
-                    .filter((item) => item !== userData?.userName)
+                    .filter((item) => item !== user?.userName)
                     .join(", ")
-              : conversation.members.filter(
-                  (item) => item !== userData?.userName
-                )}
+              : conversation.members.filter((item) => item !== user?.userName)}
           </div>
           <div id="conversation-last-message">
             <div
               className="truncated-text"
               id={
-                conversation.lastMessage.seenBy.includes(userData?.userName)
+                conversation.lastMessage.seenBy.includes(user?.userName)
                   ? "seen"
                   : "unseen-conversation"
               }
@@ -314,7 +311,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
               "System/" + conversation._id ? (
                 <ConvSystemMsg textProps={conversation.lastMessage.text} />
               ) : conversation.isGroupConversation ? (
-                (conversation.lastMessage.author === userData?.userName
+                (conversation.lastMessage.author === user?.userName
                   ? "Vous"
                   : conversation.lastMessage.author) +
                 ": " +
@@ -332,7 +329,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
               )}
             </div>
             - {timeSince(conversation.lastMessage.date)}
-            {!conversation.lastMessage.seenBy.includes(userData?.userName) && (
+            {!conversation.lastMessage.seenBy.includes(user?.userName) && (
               <div className="unseen-conversation-notification"></div>
             )}
           </div>

@@ -3,8 +3,10 @@ import {
   useDisplayedConvContext,
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
-import { useMessagesContext } from "../../../../../constants/context";
-import { UserContext } from "../../../../../screens/userLoggedIn/userLoggedIn";
+import {
+  useMessagesContext,
+  useUserContext,
+} from "../../../../../constants/context";
 import "./ChangeConvName.css";
 import { ApiToken } from "../../../../../localStorage";
 function ChangeConvName({
@@ -14,7 +16,7 @@ function ChangeConvName({
   closeModal: () => void;
   text: string;
 }) {
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { setMostRecentConv } = useMostRecentConvContext();
   const { setMessages } = useMessagesContext();

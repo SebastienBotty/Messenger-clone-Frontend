@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ImgS3DataType, MediasType } from "../../../../../../typescript/types";
 import ImageVizualizer from "../../../../../ImageVizualizer/ImageVizualizer";
-import {
-  useDisplayedConvContext,
-  UserContext,
-} from "../../../../../../screens/userLoggedIn/userLoggedIn";
+import { useDisplayedConvContext } from "../../../../../../screens/userLoggedIn/userLoggedIn";
 import { ApiToken } from "../../../../../../localStorage";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 import "./MediasGrid.css";
-import { useConversationMediasContext } from "../../../../../../constants/context";
+import {
+  useConversationMediasContext,
+  useUserContext,
+} from "../../../../../../constants/context";
 
 function MediasGrid() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const { displayedConv } = useDisplayedConvContext();
   const { mediasCtxt, setMediasCtxt } = useConversationMediasContext();
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
   const [imgData, setImgData] = useState<ImgS3DataType>({
     src: "",
     name: "",

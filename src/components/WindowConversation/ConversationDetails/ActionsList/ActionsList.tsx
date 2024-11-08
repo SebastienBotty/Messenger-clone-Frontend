@@ -2,13 +2,15 @@ import React, { useContext, useState } from "react";
 import "./ActionsList.css";
 import {
   useDisplayedConvContext,
-  UserContext,
   useMostRecentConvContext,
 } from "../../../../screens/userLoggedIn/userLoggedIn";
 import { ConvMembersLi } from "./ConvMembersLi/ConvMembersLi";
 import imageCompression from "browser-image-compression";
 
-import { useMessagesContext } from "../../../../constants/context";
+import {
+  useMessagesContext,
+  useUserContext,
+} from "../../../../constants/context";
 
 import {
   ChevronDownOutline,
@@ -56,7 +58,7 @@ function ActionsList({
     closeModal: () => setShowConfirmationModal(false),
   });
 
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { setMostRecentConv } = useMostRecentConvContext();
   const { setMessages } = useMessagesContext();

@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import "./ProfilePic.css";
 import { ConversationType } from "../../../typescript/types";
 import { PeopleOutline, PersonOutline } from "react-ionicons";
-import { UserContext } from "../../../screens/userLoggedIn/userLoggedIn";
+import { useUserContext } from "../../../constants/context";
 import UserStatus from "../../UserStatus/UserStatus";
 
 function ProfilePic({
@@ -10,7 +10,7 @@ function ProfilePic({
 }: {
   props: ConversationType | string | undefined;
 }) {
-  const user = useContext(UserContext);
+  const { user } = useUserContext();
   if (props === undefined || !user) {
     return <>RIEN</>;
   }

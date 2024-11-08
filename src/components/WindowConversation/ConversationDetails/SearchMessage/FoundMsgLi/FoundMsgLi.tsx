@@ -4,10 +4,10 @@ import { timeSince } from "../../../../../functions/time";
 
 import "./FoundMsgLi.css";
 import { ApiToken } from "../../../../../localStorage";
-import { UserContext } from "../../../../../screens/userLoggedIn/userLoggedIn";
 import {
   useMessagesContext,
   useSelectedFoundMsgIdContext,
+  useUserContext,
 } from "../../../../../constants/context";
 
 function FoundMsgLi({
@@ -20,7 +20,7 @@ function FoundMsgLi({
   word: string;
 }) {
   const apiUrl = process.env.REACT_APP_REST_API_URI;
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
 
   const { messages, setMessages } = useMessagesContext();
   const { setSelectedFoundMsgId } = useSelectedFoundMsgIdContext();

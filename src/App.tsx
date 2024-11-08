@@ -1,24 +1,15 @@
 import "./App.css";
-import React, {
-  useState,
-  useLayoutEffect,
-  createContext,
-  useEffect,
-} from "react";
+import React, { useState, useLayoutEffect, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { auth } from "./firebase";
 import { User } from "firebase/auth";
-import { UserDataType } from "./typescript/types";
 
 import UserLoggedIn from "./screens/userLoggedIn/userLoggedIn";
 import UserNotLogged from "./screens/userNotLogged/userNotLogged";
 
-export const UserContext = createContext<UserDataType | null>(null);
-
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthChecked, setIsAuthChecked] = useState<boolean>(false);
-  const [userData, setUserData] = useState<UserDataType | null>(null);
   const navigate = useNavigate();
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
@@ -38,7 +29,6 @@ function App() {
         const jsonData = await response.json();
         //console.log("JSON DATA SET ");
         //console.log(jsonData);
-        setUserData(jsonData[0]);
         localStorage.setItem("ApiToken", JSON.stringify(jsonData[1].ApiToken));
         //console.log(localStorage.getItem("ApiToken"));
         navigate("/MyMessages", { state: jsonData[0] });
@@ -59,7 +49,6 @@ function App() {
         fetchUserData(user);
         //console.log(user);
       } else {
-        setUserData(null);
         navigate("/");
       }
     });

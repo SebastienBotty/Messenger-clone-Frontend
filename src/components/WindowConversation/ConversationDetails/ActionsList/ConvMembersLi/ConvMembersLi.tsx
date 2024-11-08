@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   useDisplayedConvContext,
-  UserContext,
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
-import { useMessagesContext } from "../../../../../constants/context";
+import {
+  useMessagesContext,
+  useUserContext,
+} from "../../../../../constants/context";
 import "./ConvMembersLi.css";
 import {
   ChatbubbleOutline,
@@ -19,7 +21,7 @@ import {
 import ConfirmationModal from "../../../../Utiles/ConfirmationModal/ConfirmationModal";
 import { confirmationMessage } from "../../../../../constants/ConfirmationMessage";
 import { ApiToken } from "../../../../../localStorage";
-import { ConversationType, MessageType } from "../../../../../typescript/types";
+import { ConversationType } from "../../../../../typescript/types";
 import { socket } from "../../../../../socket";
 
 export function ConvMembersLi({
@@ -35,7 +37,7 @@ export function ConvMembersLi({
   const btnRef = useRef<HTMLDivElement>(null);
   const [showModal, setShowModal] = useState(false);
   const showModalRef = useRef(showModal);
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
   const [showConfirmationModal, setShowConfirmationModal] =
     useState<boolean>(false);
   const [confirmationModalAction, setConfirmationModalAction] = useState<{

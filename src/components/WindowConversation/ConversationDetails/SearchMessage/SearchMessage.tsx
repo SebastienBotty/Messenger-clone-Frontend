@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect, useContext } from "react";
 import "./SearchMessage.css";
 import { Search, ArrowBackOutline } from "react-ionicons";
 import { MessageType } from "../../../../typescript/types";
-import {
-  UserContext,
-  useDisplayedConvContext,
-} from "../../../../screens/userLoggedIn/userLoggedIn";
+import { useDisplayedConvContext } from "../../../../screens/userLoggedIn/userLoggedIn";
 
 import { ApiToken } from "../../../../localStorage";
 import FoundMsgLi from "./FoundMsgLi/FoundMsgLi";
-import { useSelectedFoundMsgIdContext } from "../../../../constants/context";
+import {
+  useSelectedFoundMsgIdContext,
+  useUserContext,
+} from "../../../../constants/context";
 
 function SearchMessage() {
   const [searchMsgInput, setSearchMsgInput] = useState("");
@@ -19,7 +19,7 @@ function SearchMessage() {
   const [messagesList, setMessagesList] = useState<MessageType[]>([]);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const user = useContext(UserContext);
+  const { user, setUser } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
   const { setSelectedFoundMsgId } = useSelectedFoundMsgIdContext();
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
