@@ -1,10 +1,14 @@
-import React from "react";
 import "./UserStatus.css";
 
 function UserStatus({ status }: { status: string }) {
   return (
     <div className={`user-status`}>
-      <div className={status}></div>
+      <div
+        className={status}
+        onClick={() => {
+          console.log(status);
+        }}
+      ></div>
     </div>
   );
 }

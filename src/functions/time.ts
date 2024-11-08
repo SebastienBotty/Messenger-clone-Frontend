@@ -14,7 +14,7 @@ export const timeSince = (date: Date): string => {
     if (count >= 1) {
       switch (interval.label) {
         case "minute":
-          return count === 1 ? "1m" : `${count}min`;
+          return count === 1 ? "1min" : `${count}min`;
         case "heure":
           return count === 1 ? "1h" : `${count}h`;
         case "jour":

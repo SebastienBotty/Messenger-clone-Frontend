@@ -7,6 +7,8 @@ import { ExitOutline, ChevronBackOutline } from "react-ionicons";
 import UserStatus from "../UserStatus/UserStatus";
 import { timeSince } from "../../functions/time";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
+import { socket } from "../../socket";
+import { statusTranslate } from "../../constants/status";
 
 function NavBar(props: NavBarProps) {
   const { user, setUser } = useUserContext();
@@ -14,7 +16,7 @@ function NavBar(props: NavBarProps) {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const changeStatus = async (status: string) => {
-    if (!user) return;
+    if (!user || status === user.status) return;
     try {
       const response = await fetch(
         RESTAPIUri + "/user/" + user._id + "/changeStatus",
@@ -35,7 +37,18 @@ function NavBar(props: NavBarProps) {
 
       const jsonData = await response.json();
       console.log(jsonData);
-      user.status = jsonData;
+
+      setUser({
+        ...user,
+        status: jsonData.status,
+        lastSeen: jsonData.lastSeen,
+      });
+      socket.emit("changeStatus", {
+        userId: user._id,
+        username: user.userName,
+        status: jsonData.status,
+        lastSeen: jsonData.lastSeen,
+      });
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -68,7 +81,7 @@ function NavBar(props: NavBarProps) {
                   <div className="user-profile-status">
                     {user.status === "Offline"
                       ? "En ligne il y a " + timeSince(new Date(user.lastSeen))
-                      : user.status}
+                      : statusTranslate(user.status)}
                   </div>
                 </div>
               </div>
@@ -104,17 +117,6 @@ function NavBar(props: NavBarProps) {
                   </li>
                   <li
                     className="status-options"
-                    onClick={() => changeStatus("Offline")}
-                  >
-                    <div className="options-icon">
-                      <div className="status-container">
-                        <UserStatus status={"Offline"} />
-                      </div>
-                    </div>
-                    <div className="options-text">Hors ligne</div>
-                  </li>
-                  <li
-                    className="status-options"
                     onClick={() => changeStatus("Busy")}
                   >
                     <div className="options-icon">
@@ -123,6 +125,17 @@ function NavBar(props: NavBarProps) {
                       </div>
                     </div>
                     <div className="options-text">Ne pas déranger</div>
+                  </li>{" "}
+                  <li
+                    className="status-options"
+                    onClick={() => changeStatus("Offline")}
+                  >
+                    <div className="options-icon">
+                      <div className="status-container">
+                        <UserStatus status={"Offline"} />
+                      </div>
+                    </div>
+                    <div className="options-text">Hors ligne</div>
                   </li>
                 </ul>
               </li>

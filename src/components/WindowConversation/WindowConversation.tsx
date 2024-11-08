@@ -43,6 +43,8 @@ import ConvSystemMsg from "./ConvSystemMsg/ConvSystemMsg";
 import { checkCacheFile } from "../../functions/cache";
 import { getFileTypeFromPathName } from "../../functions/file";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
+import { timeSince } from "../../functions/time";
+import { statusTranslate } from "../../constants/status";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -744,6 +746,44 @@ function WindowConversation() {
         }
       });
 
+      socket.on("changeStatus", (data) => {
+        if (displayedConv?.partnerInfos?.userId === data.userId) {
+          console.log("CHANGE STATUS DISPLAYED CONV");
+          setDisplayedConv((prev) => {
+            if (prev?.partnerInfos) {
+              return {
+                ...prev,
+                partnerInfos: {
+                  ...prev?.partnerInfos,
+                  status: data.status,
+                  lastSeenAt: data.lastSeenAt,
+                },
+              };
+            }
+            return prev;
+          });
+        }
+      });
+      socket.on("isUserOnline", (data) => {
+        console.log("IS USER ONLINE");
+        if (displayedConv?.partnerInfos?.userId === data.userId) {
+          setDisplayedConv((prev) => {
+            if (prev?.partnerInfos) {
+              console.log("IS USER ONLINE DISPLAYED CONV");
+              return {
+                ...prev,
+                partnerInfos: {
+                  ...prev?.partnerInfos,
+                  isOnline: data.isOnline,
+                  lastSeen: data.lastSeen,
+                },
+              };
+            }
+            return prev;
+          });
+        }
+      });
+
       //Close conversatoin details every time a new conversation is selected
     } else if (searchInputRef.current) {
       setMessages([]);
@@ -758,8 +798,13 @@ function WindowConversation() {
       socket.off("typing");
       socket.off("convUpdate");
       socket.off("newFile");
+      socket.off("changeStatus");
+      socket.off("isUserONline");
     };
   }, [displayedConv?._id]);
+  useEffect(() => {
+    console.log(displayedConv?.partnerInfos);
+  }, [displayedConv?.partnerInfos]);
 
   useEffect(() => {
     if (isAtBottom && messagesEndRef.current) {
@@ -1004,7 +1049,23 @@ function WindowConversation() {
                             (item) => item !== user?.userName
                           )}
                     </div>
-                    <div className="online-since">En ligne depuis X</div>
+                    <div
+                      className="online-since"
+                      onClick={() => {
+                        console.log(displayedConv);
+                      }}
+                    >
+                      {!displayedConv?.isGroupConversation &&
+                      displayedConv?.partnerInfos
+                        ? !displayedConv.partnerInfos?.isOnline ||
+                          displayedConv?.partnerInfos?.status === "Offline"
+                          ? "Hors ligne depuis " +
+                            timeSince(
+                              new Date(displayedConv.partnerInfos.lastSeen)
+                            )
+                          : statusTranslate(displayedConv.partnerInfos.status)
+                        : ""}
+                    </div>
                   </div>
                 </>
               ) : (

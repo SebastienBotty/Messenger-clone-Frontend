@@ -15,7 +15,9 @@ export type ConversationType = {
   };
   partnerInfos?: {
     username: string;
+    userId: string;
     photo: string;
+    isOnline: boolean;
     status: "Online" | "Offline" | "Busy";
     lastSeen: Date;
   };

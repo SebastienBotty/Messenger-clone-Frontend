@@ -57,12 +57,16 @@ function ProfilePic({
 
       //Private conversation
     } else {
+      const status = props.partnerInfos?.isOnline
+        ? props.partnerInfos.status
+        : "Offline";
+
       if (props.partnerInfos?.photo?.length) {
         return (
           <div className="profile-pic">
             <img src={props.partnerInfos?.photo} />
             <div className="profile-pic-user-status">
-              <UserStatus status={props.partnerInfos.status} />
+              <UserStatus status={status} />
             </div>
           </div>
         );
@@ -71,7 +75,7 @@ function ProfilePic({
           <div className="profile-pic">
             <PersonOutline height={"75%"} width={"75%"} />
             <div className="profile-pic-user-status">
-              <UserStatus status={props.partnerInfos.status} />
+              <UserStatus status={status} />
             </div>
           </div>
         );

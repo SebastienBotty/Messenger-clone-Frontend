@@ -357,15 +357,23 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       //console.log(data[0]);
       //console.log(data[1]);
       //console.log(data[2]);
-      if (data[2]) {
-        if (
-          moreThanOneMinBetween(new Date(data[0].date), new Date(data[2].date))
-        ) {
+      if (user?.status !== "Busy") {
+        console.log(user?.status);
+        if (data[2]) {
+          console.log(user?.status);
+          if (
+            moreThanOneMinBetween(
+              new Date(data[0].date),
+              new Date(data[2].date)
+            )
+          ) {
+            notificationSound.play();
+          }
+        } else {
           notificationSound.play();
         }
-      } else {
-        notificationSound.play();
       }
+
       if (displayedConv?._id === data[0].conversationId) {
         // On new message, if the displayed conversation is the one with the new message, update the last message and mark it as seen
         updateSeenConversation(data[0]._id, data[1]);
@@ -406,12 +414,36 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       });
     });
 
+    socket.on("changeStatus", (data) => {
+      setConversations((prev) => {
+        return prev.map((conv) => {
+          if (conv.partnerInfos && conv.partnerInfos?.userId === data.userId) {
+            conv.partnerInfos.status = data.status;
+            conv.partnerInfos.lastSeen = data.lastSeen;
+          }
+          return conv;
+        });
+      });
+    });
+    socket.on("isUserOnline", (data) => {
+      setConversations((prev) => {
+        return prev.map((conv) => {
+          if (conv.partnerInfos && conv.partnerInfos?.userId === data.userId) {
+            conv.partnerInfos.isOnline = data.isOnline;
+            conv.partnerInfos.lastSeen = data.lastSeen;
+          }
+          return conv;
+        });
+      });
+    });
+
     return () => {
       socket.off("message");
       socket.off("convUpdate");
       socket.off("adminChange");
+      socket.off("changeStatus");
     };
-  }, [displayedConv?._id]);
+  }, [displayedConv?._id, user?.status]);
 
   useEffect(() => {
     if (mostRecentConv) {
@@ -427,7 +459,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         <div className="first-line">
           <div className="first-line-title">Discussions</div>
           <div className="sideBar-header-buttons">
-            <button>
+            <button onClick={() => console.log(user)}>
               <EllipsisHorizontal
                 color={"#00000"}
                 title="Paramètres"
