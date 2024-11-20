@@ -28,6 +28,7 @@ import {
   useMessagesContext,
   useUserContext,
 } from "../../../../../constants/context";
+import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
 
 function AddMembersModal({
   showAddMembersModal,
@@ -259,7 +260,12 @@ function AddMembersModal({
                 )}
                 {addedMembers.map((user) => (
                   <div className="modal-added-member">
-                    <div className="added-member-img-container">Img</div>
+                    <div
+                      className="added-member-img-container"
+                      onClick={() => console.log(user)}
+                    >
+                      <ProfilePic props={user.photo} />
+                    </div>
                     <div className="added-member-username">{user.userName}</div>
                   </div>
                 ))}
@@ -271,7 +277,10 @@ function AddMembersModal({
                     onClick={() => handleUserClick(user)}
                   >
                     <div className="found-msg-user-img">
-                      <div className="found-msg-user-img-container">Img</div>
+                      <div className="found-msg-user-img-container">
+                        {" "}
+                        <ProfilePic props={user.photo} />
+                      </div>
                     </div>
                     <div className="found-username-txt"> {user.userName}</div>
                     <div className="is-user-added">
