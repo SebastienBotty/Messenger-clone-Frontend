@@ -1,9 +1,9 @@
-import React, { useContext } from "react";
+import React, { useRef } from "react";
 import "./NavBar.css";
 import { NavBarProps } from "../../typescript/types";
 import { useUserContext } from "../../constants/context";
 import { ApiToken } from "../../localStorage";
-import { ExitOutline, ChevronBackOutline } from "react-ionicons";
+import { ExitOutline } from "react-ionicons";
 import UserStatus from "../UserStatus/UserStatus";
 import { timeSince } from "../../functions/time";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
@@ -13,6 +13,9 @@ import { statusTranslate } from "../../constants/status";
 function NavBar(props: NavBarProps) {
   const { user, setUser } = useUserContext();
   const signOut = props.handleSignOut;
+  const profilePicInputRef = useRef<HTMLInputElement>(null);
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const changeStatus = async (status: string) => {
@@ -58,9 +61,79 @@ function NavBar(props: NavBarProps) {
     }
   };
 
+  const focusProfilePicinput = () => {
+    if (profilePicInputRef.current) {
+      profilePicInputRef.current.click();
+    }
+  };
+  const changeProfilePic = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        profilePicInputRef.current!.value = "";
+        alert("La taille de l'image ne doit pas depasser 2 Mo.");
+        return;
+      }
+      postProfilePic(file);
+    } else {
+      console.log("no file");
+    }
+  };
+
+  const postProfilePic = async (file: File) => {
+    if (!user || !file) return;
+    const formData = new FormData();
+    formData.append("profilePic", file);
+    console.log("allo");
+    try {
+      const response = await fetch(
+        RESTAPIUri + "/file/profilePic/" + user._id,
+        {
+          method: "POST",
+          headers: {
+            authorization: "Bearer " + ApiToken(),
+          },
+          body: formData,
+        }
+      );
+      console.log("iciii");
+      if (!response.ok) {
+        const error = await response.json();
+        console.log("erreur");
+        throw new Error(error.message);
+      }
+      console.log("okokk");
+      const jsonData = await response.json();
+      console.log("papapapap");
+      console.log(jsonData);
+      setUser({
+        ...user,
+        photo: jsonData.image,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+
   if (!user) return null;
   return (
     <div className="NavBar">
+      <input
+        type="file"
+        className=" profile-pic-input"
+        name="profile-pic-input"
+        id="profile-pic-input"
+        ref={profilePicInputRef}
+        multiple={false}
+        accept=".jpg, .jpeg, .png"
+        onChange={changeProfilePic}
+      />
       {user.userName}
       <div className="navBar-right">
         <div className="navBar-right-btn">
@@ -70,7 +143,10 @@ function NavBar(props: NavBarProps) {
               <div className="user-profile-container">
                 <div className="profile" onClick={() => console.log(user)}>
                   <div className="user-profile-pic">
-                    <div className="user-profile-pic-container">
+                    <div
+                      className="user-profile-pic-container"
+                      onClick={() => focusProfilePicinput()}
+                    >
                       {" "}
                       <ProfilePic props={user.photo} />
                     </div>

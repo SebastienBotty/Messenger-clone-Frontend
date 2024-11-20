@@ -65,6 +65,11 @@
 .user-profile-pic-container {
   width: 100%;
   aspect-ratio: 1/1;
+  cursor: pointer;
+}
+
+.user-profile-pic-container:hover {
+  filter: brightness(0.8);
 }
 .user-profile-info {
   width: 90%;
@@ -187,4 +192,8 @@ li.profile-dropdown-menu-options:hover {
 
 #status-title:hover .status-left-side-menu {
   display: block;
+}
+
+.profile-pic-input {
+  display: none;
 }
