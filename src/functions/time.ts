@@ -30,3 +30,15 @@ export const timeSince = (date: Date): string => {
 
   return "1min";
 };
+
+export const formatDateMsg = (date: Date): string => {
+  const options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+
+  return date.toLocaleDateString("fr-FR", options);
+};

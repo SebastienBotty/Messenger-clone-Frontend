@@ -268,7 +268,25 @@
   word-wrap: break-word;
   word-break: break-word; /* Casse les mots longs sans espace */
   text-wrap: wrap;
+  position: relative;
 }
+.msg-date {
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 100%;
+  font-size: 0.75rem;
+  padding: 0.5rem 0;
+  width: 10rem;
+  color: white;
+  background-color: #333333;
+  border-radius: 0.75rem;
+}
+#message-others .msg-date {
+  left: 100% !important;
+}
+
 .selectedFoundMsg {
   border: 2px double black;
   background-color: gold !important;

@@ -43,7 +43,7 @@ import ConvSystemMsg from "./ConvSystemMsg/ConvSystemMsg";
 import { checkCacheFile } from "../../functions/cache";
 import { getFileTypeFromPathName } from "../../functions/file";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
-import { timeSince } from "../../functions/time";
+import { formatDateMsg, timeSince } from "../../functions/time";
 import { statusTranslate } from "../../constants/status";
 
 function WindowConversation() {
@@ -86,6 +86,8 @@ function WindowConversation() {
   const fetchMsgIndex = useRef(0);
   const limitFetchMsg: number = 20;
   const [messages, setMessages] = useState<MessageType[]>([]);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
   const [showConvDetails, setShowConvDetails] = useState<boolean>(false); //Displays conversation details
 
@@ -645,6 +647,22 @@ function WindowConversation() {
     lastMsgSeenByMembers(fetchedMessages);
     emitSeenMsgToSocket(fetchedMessages[0], displayedConv);
   };
+
+  const handleMouseEnter = (id: string | undefined) => {
+    if (!id) return;
+    const timer = setTimeout(() => {
+      setHoveredId(id);
+    }, 250);
+    setHoverTimer(timer);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimer) {
+      clearTimeout(hoverTimer);
+    }
+    setHoveredId(null);
+  };
+
   useEffect(() => {
     setInputMessage("");
     if (displayedConv) {
@@ -1247,11 +1265,16 @@ function WindowConversation() {
                               : ""
                           }`}
                           ref={lastMessage ? messagesEndRef : null}
+                          onMouseEnter={() => handleMouseEnter(message._id)}
+                          onMouseLeave={handleMouseLeave}
                         >
-                          <AsyncMsg
-                            text={message?.text}
-                            convId={displayedConv?._id}
-                          />
+                          {hoveredId === message._id && (
+                            <div className="msg-date">
+                              {formatDateMsg(new Date(message.date))}
+                            </div>
+                          )}
+
+                          <AsyncMsg message={message} />
                         </div>
                       </div>
                       <div className="seen-by">
@@ -1301,11 +1324,15 @@ function WindowConversation() {
                               : ""
                           }`}
                           ref={lastMessage ? messagesEndRef : null}
+                          onMouseEnter={() => handleMouseEnter(message._id)}
+                          onMouseLeave={handleMouseLeave}
                         >
-                          <AsyncMsg
-                            text={message?.text}
-                            convId={displayedConv?._id}
-                          />
+                          {hoveredId === message._id && (
+                            <div className="msg-date">
+                              {formatDateMsg(new Date(message.date))}
+                            </div>
+                          )}
+                          <AsyncMsg message={message} />
                         </div>
                       </div>
                       <div className="seen-by">
@@ -1339,11 +1366,15 @@ function WindowConversation() {
                         }`}
                         ref={lastMessage ? messagesEndRef : null}
                         onClick={() => console.log(message)}
+                        onMouseEnter={() => handleMouseEnter(message._id)}
+                        onMouseLeave={handleMouseLeave}
                       >
-                        <AsyncMsg
-                          text={message?.text}
-                          convId={displayedConv?._id}
-                        />
+                        {hoveredId === message._id && (
+                          <div className="msg-date">
+                            {formatDateMsg(new Date(message.date))}
+                          </div>
+                        )}
+                        <AsyncMsg message={message} />
                       </div>
                     </div>
                     <div className="seen-by">

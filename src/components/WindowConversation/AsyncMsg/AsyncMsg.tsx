@@ -4,12 +4,11 @@ import "./AsyncMsg.css";
 import { ApiToken } from "../../../localStorage";
 import { LinkFormatter } from "../../Utiles/LinkFormatter/LinkFormatter";
 import ImageVizualizer from "../../ImageVizualizer/ImageVizualizer";
-import { ImgS3DataType } from "../../../typescript/types";
-interface AsyncMessageProps {
-  text: string;
-  convId: string | undefined;
-}
-function AsyncMsg({ text, convId }: AsyncMessageProps) {
+import { ImgS3DataType, MessageType } from "../../../typescript/types";
+
+function AsyncMsg({ message }: { message: MessageType }) {
+  const convId = message.conversationId;
+  const text = message.text;
   const [content, setContent] = useState<ReactNode | null | JSX.Element[]>(
     null
   );
