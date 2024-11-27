@@ -6,7 +6,16 @@ export type ConversationType = {
   photo: string;
   lastMessage: MessageType;
   creationDate: Date;
-  removedMembers: RemovedMembersType[];
+  removedMembers: {
+    username: string;
+    removedData: Date;
+  };
+  mutedBy: [
+    {
+      userId: string;
+      untilDate: Date;
+    }
+  ];
   customization: {
     conversationName: string;
     photo: string;
@@ -22,10 +31,7 @@ export type ConversationType = {
     lastSeen: Date;
   };
 };
-export type RemovedMembersType = {
-  username: string;
-  removedData: Date;
-};
+
 export type ConversationContextType = {
   displayedConv: ConversationType | null;
   setDisplayedConv: React.Dispatch<

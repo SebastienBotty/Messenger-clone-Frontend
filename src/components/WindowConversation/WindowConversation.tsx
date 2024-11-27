@@ -265,7 +265,8 @@ function WindowConversation() {
         body: JSON.stringify(postData),
       });
       if (!response.ok) {
-        throw new Error("Erreur lors du POST conversations");
+        const error = await response.json();
+        throw new Error(error.message);
       }
       const jsonData = await response.json();
       //console.log(jsonData);

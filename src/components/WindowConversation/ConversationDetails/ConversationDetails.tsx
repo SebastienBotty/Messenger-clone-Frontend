@@ -18,7 +18,7 @@ import ProfilePic from "../../Utiles/ProfilePic/ProfilePic";
 function ConversationDetails() {
   const { user, setUser } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
-  const [notifications, setNotifications] = useState<boolean>(true); // NOT IMPLEMENTED YET
+  const [notifications, setNotifications] = useState<boolean>(); // NOT IMPLEMENTED YET
   const [showMoreDetailsComp, setShowMoreDetailsComp] =
     useState<boolean>(false);
   const [moreDetailsCompProps, setMoreDetailsCompProps] = useState<{
@@ -33,6 +33,11 @@ function ConversationDetails() {
 
   useEffect(() => {
     setShowMoreDetailsComp(false); // Close search message when conv is changed
+    const isConvMuted = displayedConv?.mutedBy.some(
+      (item) => item.userId === user?._id
+    );
+    setNotifications(!isConvMuted);
+
     return () => {};
   }, [displayedConv]);
 
