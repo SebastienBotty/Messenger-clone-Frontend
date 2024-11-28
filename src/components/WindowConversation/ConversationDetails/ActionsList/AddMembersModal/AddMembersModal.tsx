@@ -164,45 +164,6 @@ function AddMembersModal({
     }
   };
 
-  const getUsersSocket = async (
-    conversation: ConversationType | null
-  ): Promise<{ userName: string; socketId: string }[] | false> => {
-    if (!conversation || !user) return false;
-
-    const convMembersStr = conversation.members
-      ?.filter((member) => member !== user.userName)
-      .join("-");
-    try {
-      const response = await fetch(
-        RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr,
-        {
-          headers: {
-            Authorization: "Bearer " + ApiToken(),
-          },
-        }
-      );
-      const jsonData = await response.json();
-      //console.log("ICI SOCKET");
-      //console.log(jsonData);
-
-      return jsonData;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-      return false;
-    }
-  };
-
-  const emitToSockets = async (eventName: string, data: any): Promise<void> => {
-    if (!displayedConv || !user) return;
-
-    const convMembersSocket = await getUsersSocket(displayedConv);
-    if (!convMembersSocket) return;
-    socket.emit(eventName, [convMembersSocket, data]);
-  };
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
