@@ -1396,7 +1396,7 @@ function WindowConversation() {
                 <div className="typing-users">
                   <TypingDots /> {displayMembersTyping()}
                 </div>
-              )}
+              )}{" "}
             </div>
           </div>
           <div className="conversation-footer">
