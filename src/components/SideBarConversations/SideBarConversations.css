@@ -149,7 +149,8 @@
 /*--------------------------------------------CONVERSATIONS--------------------------------------*/
 .conversations-container {
   height: calc(80% - 1px);
-  overflow-y: scroll;
+  overflow-y: auto;
+
   width: 100%;
 }
 .conversation {
@@ -159,6 +160,7 @@
   cursor: pointer;
   margin: 0 0.5rem;
   width: 19vw;
+  position: relative;
 }
 
 .conversation:hover {
@@ -233,4 +235,44 @@
 
 #selected-conversation {
   background-color: #ebf5ff;
+}
+.conversation:hover .conversation-params {
+  display: block !important;
+}
+.conversation-params {
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0.25rem;
+  color: green;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  pointer-events: all;
+  border: 1px solid #ccc;
+  z-index: 1;
+}
+.conversation-params .conversation-params-button > * {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.conversation-params:hover {
+  background-color: #e4e6eb;
+}
+
+.conversation-params-container {
+  position: relative;
+}
+.conversation-params-menu {
+  margin-top: 1.5rem;
+  position: absolute;
+  top: 100%;
+  left: 100%;
+  transform: translateX(-50%);
+  background-color: aqua;
 }

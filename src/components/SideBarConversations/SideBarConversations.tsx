@@ -25,6 +25,7 @@ import { socket } from "../../socket";
 import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { isConvMuted } from "../../functions/conversation";
+import ConversationParams from "./ConversationParams/ConversationParams";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const { user } = useUserContext();
@@ -37,6 +38,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const RESTAPIUri: string | undefined = process.env.REACT_APP_REST_API_URI;
   const [searchConversationInput, setSearchConversationInput] =
     useState<string>("");
+
+  const [clickedConvParamsBtn, setClickedConvParamsBtn] = useState<string>("");
 
   const notificationSound = new Audio("notification.wav");
 
@@ -261,6 +264,20 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     }
   };
 
+  const handleConvParamsClick = (
+    e: React.MouseEvent,
+    conversation: ConversationType
+  ) => {
+    e.stopPropagation();
+    console.log("ouiouioui" + conversation);
+    setClickedConvParamsBtn((prev) => {
+      if (prev === conversation._id) {
+        return "";
+      }
+      return conversation._id;
+    });
+  };
+
   useEffect(() => {
     fetchConversationsId();
     return () => {};
@@ -343,6 +360,34 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                 <div className="unseen-conversation-notification"></div>
               )}
             </div>
+          </div>
+          <div
+            className="conversation-params"
+            style={{
+              display:
+                clickedConvParamsBtn === conversation._id ? "block" : "none",
+            }}
+          >
+            <div className="conversation-params-button">
+              {" "}
+              <EllipsisHorizontal
+                onClick={(event: React.MouseEvent) =>
+                  handleConvParamsClick(event, conversation)
+                }
+              />
+            </div>
+            {clickedConvParamsBtn === conversation._id && (
+              <div className="conversation-params-menu-container">
+                {" "}
+                <div className="conversation-params-menu">
+                  {" "}
+                  <ConversationParams
+                    conversation={conversation}
+                    closeComponent={() => setClickedConvParamsBtn("")}
+                  />
+                </div>{" "}
+              </div>
+            )}
           </div>
         </div>
       </div>
