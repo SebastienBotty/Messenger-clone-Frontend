@@ -5,6 +5,7 @@ import {
   ConversationFilesContextType,
   ConversationMediasContextType,
   UserDataContextType,
+  ConversationContextType,
 } from "../typescript/types";
 
 //User Context
@@ -14,6 +15,20 @@ export const useUserContext = () => {
   const context = useContext(UserContext);
   if (!context) {
     throw new Error("useUserContext must be used within a UserProvider");
+  }
+  return context;
+};
+
+// Conversations Context
+export const ConversationsContext =
+  createContext<ConversationContextType | null>(null);
+
+export const useConversationsContext = () => {
+  const context = useContext(ConversationsContext);
+  if (!context) {
+    throw new Error(
+      "useConversationsContext must be used within a ConversationProvider"
+    );
   }
   return context;
 };

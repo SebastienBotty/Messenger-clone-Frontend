@@ -10,12 +10,6 @@ export type ConversationType = {
     username: string;
     removedData: Date;
   };
-  mutedBy: [
-    {
-      userId: string;
-      untilDate: Date;
-    }
-  ];
   customization: {
     conversationName: string;
     photo: string;
@@ -32,7 +26,7 @@ export type ConversationType = {
   };
 };
 
-export type ConversationContextType = {
+export type displayedConvContextType = {
   displayedConv: ConversationType | null;
   setDisplayedConv: React.Dispatch<
     React.SetStateAction<ConversationType | null>
@@ -102,6 +96,10 @@ export type UserDataType = {
   socketId: string | undefined;
   photo: string | undefined;
   conversations: string[];
+  mutedConversations: Array<{
+    conversationId: string;
+    untilDate: Date;
+  }>;
   isOnline: boolean;
   lastSeen: Date;
   status: string;
@@ -128,6 +126,11 @@ export type ConversationFilesContextType = {
 export type ConversationMediasContextType = {
   mediasCtxt: MediasType[];
   setMediasCtxt: React.Dispatch<React.SetStateAction<MediasType[]>>;
+};
+
+export type ConversationContextType = {
+  conversations: ConversationType[];
+  setConversations: React.Dispatch<React.SetStateAction<ConversationType[]>>;
 };
 
 export type MediasType = {

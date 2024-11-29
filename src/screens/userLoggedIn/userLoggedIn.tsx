@@ -5,22 +5,22 @@ import SideBarConversations from "../../components/SideBarConversations/SideBarC
 import {
   NavBarProps,
   ConversationType,
-  ConversationContextType,
+  displayedConvContextType,
   MostRecentContextType,
   TriggerContextType,
   RecentConversationsContextType,
   UserDataType,
 } from "../../typescript/types";
-import { UserContext } from "../../constants/context";
+import { ConversationsContext, UserContext } from "../../constants/context";
 import { socket } from "../../socket";
 import { useLocation } from "react-router-dom";
 import { ApiToken } from "../../localStorage";
 
 import "./userLoggedIn.css";
 
-const DisplayedConvContext = createContext<ConversationContextType | undefined>(
-  undefined
-);
+const DisplayedConvContext = createContext<
+  displayedConvContextType | undefined
+>(undefined);
 const MostRecentConvContext = createContext<MostRecentContextType | undefined>(
   undefined
 );
@@ -35,7 +35,7 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
   const location = useLocation();
   const [user, setUser] = useState<UserDataType | null>(location.state);
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
-
+  const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [displayedConv, setDisplayedConv] = useState<ConversationType | null>(
     null
   );
@@ -102,36 +102,43 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
-      <DisplayedConvContext.Provider
-        value={{ displayedConv, setDisplayedConv }}
+      {" "}
+      <ConversationsContext.Provider
+        value={{ conversations, setConversations }}
       >
-        <RecentConversationsContext.Provider
-          value={{ recentConversations, setRecentConversations }}
+        <DisplayedConvContext.Provider
+          value={{ displayedConv, setDisplayedConv }}
         >
-          <MostRecentConvContext.Provider
-            value={{ mostRecentConv, setMostRecentConv }}
+          <RecentConversationsContext.Provider
+            value={{ recentConversations, setRecentConversations }}
           >
-            <div className="userLoggedIn">
-              <div className="page-header">
-                {" "}
-                <NavBar handleSignOut={handleSignOut} />
-              </div>
-              <div className="content">
-                <TriggerContext.Provider value={{ trigger, setTrigger }}>
-                  <SideBarConversations
-                    setShowConversationWindow={setShowConversationWindow}
-                  />
+            <MostRecentConvContext.Provider
+              value={{ mostRecentConv, setMostRecentConv }}
+            >
+              <div className="userLoggedIn">
+                <div className="page-header">
+                  {" "}
+                  <NavBar handleSignOut={handleSignOut} />
+                </div>
+                <div className="content">
+                  <TriggerContext.Provider value={{ trigger, setTrigger }}>
+                    <SideBarConversations
+                      setShowConversationWindow={setShowConversationWindow}
+                    />
 
-                  {showConversationWindow && <WindowConversation />}
-                </TriggerContext.Provider>
+                    {showConversationWindow && <WindowConversation />}
+                  </TriggerContext.Provider>
+                </div>
               </div>
-            </div>
-          </MostRecentConvContext.Provider>
-        </RecentConversationsContext.Provider>
-      </DisplayedConvContext.Provider>
+            </MostRecentConvContext.Provider>
+          </RecentConversationsContext.Provider>
+        </DisplayedConvContext.Provider>{" "}
+      </ConversationsContext.Provider>
     </UserContext.Provider>
   );
 }
+export default UserLoggedIn;
+
 export const useDisplayedConvContext = () => {
   const context = useContext(DisplayedConvContext);
   if (context === undefined) {
@@ -139,7 +146,6 @@ export const useDisplayedConvContext = () => {
   }
   return context;
 };
-export default UserLoggedIn;
 
 export const useMostRecentConvContext = () => {
   const context = useContext(MostRecentConvContext);

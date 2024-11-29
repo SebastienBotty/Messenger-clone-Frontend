@@ -1,11 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./ConversationDetails.css";
-import {
-  Search,
-  Notifications,
-  NotificationsOff,
-  PeopleOutline,
-} from "react-ionicons";
+import { Search, Notifications, NotificationsOff } from "react-ionicons";
 import SearchMessage from "./SearchMessage/SearchMessage";
 
 import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
@@ -14,10 +9,17 @@ import ActionsList from "./ActionsList/ActionsList";
 import MoreDetails from "./MoreDetails/MoreDetails";
 import ConvMedia from "./ActionsList/ConvMedias/ConvMedia";
 import ProfilePic from "../../Utiles/ProfilePic/ProfilePic";
+import MuteConversation from "../../MuteConversation/MuteConversation";
+import ConfirmationModal from "../../Utiles/ConfirmationModal/ConfirmationModal";
+import { muteConv } from "../../../constants/ConfirmationMessage";
+import { ApiToken } from "../../../localStorage";
+import { isConvMuted } from "../../../functions/conversation";
 
 function ConversationDetails() {
   const { user, setUser } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
+  const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
+
   const [notifications, setNotifications] = useState<boolean>(); // NOT IMPLEMENTED YET
   const [showMoreDetailsComp, setShowMoreDetailsComp] =
     useState<boolean>(false);
@@ -31,15 +33,88 @@ function ConversationDetails() {
     title: "",
   });
 
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [notificationsModalAction, setNotificationsModalAction] = useState<{
+    title: string;
+    text: string | JSX.Element;
+    action: () => void;
+    closeModal: () => void;
+    width?: string;
+  }>({
+    title: "",
+    text: "",
+    action: () => {},
+    closeModal: () => setShowNotificationsModal(false),
+  });
+
+  const openNotificationsModal = () => {
+    if (!displayedConv) return;
+    setShowNotificationsModal(true);
+    setNotificationsModalAction({
+      title: muteConv.title,
+      text: (
+        <MuteConversation
+          closeModal={() => setShowNotificationsModal(false)}
+          conversationId={displayedConv._id}
+        />
+      ),
+      action: () => {},
+      closeModal: () => setShowNotificationsModal(false),
+    });
+  };
+
+  const unmuteConversation = async () => {
+    if (!displayedConv || !user) return;
+    try {
+      const response = await fetch(
+        RESTAPIUri + "/user/userId/" + user._id + "/unmuteConversation",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${ApiToken()}`,
+          },
+          body: JSON.stringify({
+            conversationId: displayedConv._id,
+          }),
+        }
+      );
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+
+      setUser((prev) => {
+        if (prev)
+          return {
+            ...prev,
+            mutedConversations: prev.mutedConversations.filter(
+              (item) => item.conversationId !== displayedConv._id
+            ),
+          };
+        return prev;
+      });
+      setNotifications(true);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+
   useEffect(() => {
     setShowMoreDetailsComp(false); // Close search message when conv is changed
-    const isConvMuted = displayedConv?.mutedBy.some(
-      (item) => item.userId === user?._id
-    );
-    setNotifications(!isConvMuted);
-
     return () => {};
   }, [displayedConv]);
+
+  useEffect(() => {
+    const mutedConv = isConvMuted(user?.mutedConversations, displayedConv?._id);
+    setNotifications(!mutedConv);
+
+    return () => {};
+  }, [displayedConv, user?.mutedConversations]);
 
   useEffect(() => {
     return () => {
@@ -86,80 +161,90 @@ function ConversationDetails() {
       {showMoreDetailsComp ? (
         <MoreDetails {...moreDetailsCompProps} />
       ) : (
-        <div className="conversation-details-container">
-          <div className="conversation-details-header">
-            <div className="conversation-photo-img-container">
-              <ProfilePic props={displayedConv} />
-            </div>
-            <div className="conversation-title">
-              {displayedConv?.isGroupConversation
-                ? displayedConv?.customization.conversationName
+        <>
+          <div className="conversation-details-container">
+            <div className="conversation-details-header">
+              <div
+                className="conversation-photo-img-container"
+                onClick={() => {
+                  console.log(displayedConv);
+                }}
+              >
+                <ProfilePic props={displayedConv} />
+              </div>
+              <div className="conversation-title">
+                {displayedConv?.isGroupConversation
                   ? displayedConv?.customization.conversationName
-                  : displayedConv?.members
-                      .filter((item) => item !== user?.userName)
-                      .join(", ")
-                : displayedConv?.members.filter(
-                    (item) => item !== user?.userName
-                  )}
-            </div>
-            <span className="user-online">
-              {displayedConv?.isGroupConversation ? "" : "Online"}
-            </span>
-            <div className="conversations-details-buttons">
-              {" "}
-              {notifications ? (
+                    ? displayedConv?.customization.conversationName
+                    : displayedConv?.members
+                        .filter((item) => item !== user?.userName)
+                        .join(", ")
+                  : displayedConv?.members.filter(
+                      (item) => item !== user?.userName
+                    )}
+              </div>
+              <span className="user-online">
+                {displayedConv?.isGroupConversation ? "" : "Online"}
+              </span>
+              <div className="conversations-details-buttons">
+                {" "}
+                {notifications ? (
+                  <div className="conv-btn-actions">
+                    <div
+                      className="icon-button"
+                      onClick={() => openNotificationsModal()}
+                    >
+                      <Notifications
+                        color={"#00000"}
+                        title="Notifications"
+                        height="1.75rem"
+                        width="1.75rem"
+                      />
+                    </div>
+                    <span>Mettre en sourdine</span>
+                  </div>
+                ) : (
+                  <div className="conv-btn-actions">
+                    {" "}
+                    <div
+                      className="icon-button"
+                      onClick={() => unmuteConversation()}
+                    >
+                      <NotificationsOff
+                        color={"#00000"}
+                        title="Notifications"
+                        height="1.75rem"
+                        width="1.75rem"
+                      />
+                    </div>
+                    <span>Réactiver</span>
+                  </div>
+                )}
                 <div className="conv-btn-actions">
                   <div
                     className="icon-button"
-                    onClick={() => setNotifications(!notifications)}
+                    onClick={() => openMoreDetailsComp("SearchMessage")}
                   >
-                    <Notifications
+                    {" "}
+                    <Search
                       color={"#00000"}
-                      title="Notifications"
+                      title="Rechercher"
                       height="1.75rem"
                       width="1.75rem"
                     />
                   </div>
-                  <span>Mettre en sourdine</span>
+                  <span>Rechercher</span>
                 </div>
-              ) : (
-                <div className="conv-btn-actions">
-                  {" "}
-                  <div
-                    className="icon-button"
-                    onClick={() => setNotifications(!notifications)}
-                  >
-                    <NotificationsOff
-                      color={"#00000"}
-                      title="Notifications"
-                      height="1.75rem"
-                      width="1.75rem"
-                    />
-                  </div>
-                  <span>Réactiver</span>
-                </div>
-              )}
-              <div className="conv-btn-actions">
-                <div
-                  className="icon-button"
-                  onClick={() => openMoreDetailsComp("SearchMessage")}
-                >
-                  {" "}
-                  <Search
-                    color={"#00000"}
-                    title="Rechercher"
-                    height="1.75rem"
-                    width="1.75rem"
-                  />
-                </div>
-                <span>Rechercher</span>
               </div>
             </div>
+            <div className="conversations-details-body">
+              <ActionsList openMoreDetailsComp={openMoreDetailsComp} />
+            </div>
           </div>
-          <div className="conversations-details-body">
-            <ActionsList openMoreDetailsComp={openMoreDetailsComp} />
-          </div>
-        </div>
+          {showNotificationsModal && (
+            <ConfirmationModal {...notificationsModalAction} />
+          )}
+        </>
       )}
     </div>
   );

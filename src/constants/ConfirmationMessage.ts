@@ -20,3 +20,13 @@ export const confirmationMessage = {
     text: "Lorsque vous modifiez le nom d'une discussion de groupe, il est modifié pour tout le monde.",
   },
 };
+
+export const muteConv = {
+  title: "Mettre la conversation en sourdine.",
+  text: "Les fenêtres de discussion resteront fermées et vous ne recevrez aucune notification push sur vos appareils.",
+  option1: "Pendant 15 minutes",
+  option2: "Pendant 1 heure",
+  option3: "Pendant 8 heures",
+  option4: "Pendant 24 heures",
+  option5: "Jusqu'à réactivation",
+};

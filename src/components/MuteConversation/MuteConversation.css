@@ -1,0 +1,42 @@
+.mute-conversation {
+  display: flex;
+  flex-direction: column;
+}
+
+.mute-conversation input[type="checkbox"] {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+.mute-conversation label {
+  height: 3rem;
+  margin-bottom: 0.25rem;
+  padding-left: 1rem;
+  display: flex;
+  gap: 1rem;
+  cursor: pointer;
+  align-items: center;
+  font-weight: 500;
+}
+
+.mute-conversation label:hover {
+  background-color: #f2f2f2;
+}
+
+.mute-conversation-text {
+  margin-top: 0.5rem;
+}
+.mute-conversation-error-msg {
+  min-height: 2rem;
+  color: lightcoral;
+}
+
+.mute-oconversation-btns-container {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.mute-oconversation-btns-container button:hover {
+  filter: brightness(0.9);
+}

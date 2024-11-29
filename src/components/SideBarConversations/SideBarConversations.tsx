@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Close,
   CreateOutline,
   EllipsisHorizontal,
+  NotificationsOff,
   Search,
 } from "react-ionicons";
 import { ConversationType, SideBarPropsType } from "../../typescript/types";
@@ -15,14 +16,19 @@ import {
   useTriggerContext,
   useRecentConversationContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
-import { useUserContext } from "../../constants/context";
+import {
+  useConversationsContext,
+  useUserContext,
+} from "../../constants/context";
 import { timeSince } from "../../functions/time";
 import { socket } from "../../socket";
 import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
+import { isConvMuted } from "../../functions/conversation";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
-  const { user, setUser } = useUserContext();
+  const { user } = useUserContext();
+  const { conversations, setConversations } = useConversationsContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
   const { recentConversations, setRecentConversations } =
@@ -31,7 +37,6 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const RESTAPIUri: string | undefined = process.env.REACT_APP_REST_API_URI;
   const [searchConversationInput, setSearchConversationInput] =
     useState<string>("");
-  const [conversations, setConversations] = useState<ConversationType[]>([]);
 
   const notificationSound = new Audio("notification.wav");
 
@@ -327,11 +332,17 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
               ) : (
                 conversation.lastMessage.text
               )}
+            </div>{" "}
+            &nbsp;- {timeSince(conversation.lastMessage.date)} &nbsp;
+            <div className="conversation-right-icons-container">
+              {" "}
+              {isConvMuted(user?.mutedConversations, conversation._id) && (
+                <NotificationsOff height="1rem" width="1rem" color="#B0B3B8" />
+              )}
+              {!conversation.lastMessage.seenBy.includes(user?.userName) && (
+                <div className="unseen-conversation-notification"></div>
+              )}
             </div>
-            - {timeSince(conversation.lastMessage.date)}
-            {!conversation.lastMessage.seenBy.includes(user?.userName) && (
-              <div className="unseen-conversation-notification"></div>
-            )}
           </div>
         </div>
       </div>
@@ -354,31 +365,37 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   useEffect(() => {
     socket.on("message", (data) => {
       //console.log("Message reçu");
-      //console.log(data[0]);
-      //console.log(data[1]);
-      //console.log(data[2]);
-      if (user?.status !== "Busy") {
+      console.log(data[0]);
+      const currentMsg = data[0];
+      const conversation = data[1];
+
+      if (displayedConv?._id === currentMsg.conversationId) {
+        // On new message, if the displayed conversation is the one with the new message, update the last message and mark it as seen
+        updateSeenConversation(currentMsg._id, conversation);
+      }
+      setMostRecentConv(conversation);
+
+      if (
+        user?.status == "Busy" ||
+        isConvMuted(user?.mutedConversations, currentMsg.conversationId)
+      )
+        return;
+
+      console.log(user?.status);
+      if (data[2]) {
         console.log(user?.status);
-        if (data[2]) {
-          console.log(user?.status);
-          if (
-            moreThanOneMinBetween(
-              new Date(data[0].date),
-              new Date(data[2].date)
-            )
-          ) {
-            notificationSound.play();
-          }
-        } else {
+        const previousMsg = data[2];
+        if (
+          moreThanOneMinBetween(
+            new Date(currentMsg.date),
+            new Date(previousMsg.date)
+          )
+        ) {
           notificationSound.play();
         }
+      } else {
+        notificationSound.play();
       }
-
-      if (displayedConv?._id === data[0].conversationId) {
-        // On new message, if the displayed conversation is the one with the new message, update the last message and mark it as seen
-        updateSeenConversation(data[0]._id, data[1]);
-      }
-      setMostRecentConv(data[1]);
     });
 
     socket.on("convUpdate", (conversation: ConversationType) => {
