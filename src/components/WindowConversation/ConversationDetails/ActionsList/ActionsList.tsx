@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./ActionsList.css";
 import {
   useDisplayedConvContext,
@@ -16,6 +16,8 @@ import {
   ChevronDownOutline,
   Disc,
   ImagesOutline,
+  Notifications,
+  NotificationsOff,
   PencilOutline,
   PersonAdd,
 } from "react-ionicons";
@@ -24,8 +26,14 @@ import { ApiToken } from "../../../../localStorage";
 import LoadingSpinner from "../../../Utiles/loadingSpinner/loadingSpinner";
 import ConfirmationModal from "../../../Utiles/ConfirmationModal/ConfirmationModal";
 import ChangeConvName from "./ChangeConvName/ChangeConvName";
-import { confirmationMessage } from "../../../../constants/ConfirmationMessage";
+import {
+  confirmationMessage,
+  muteConv,
+} from "../../../../constants/ConfirmationMessage";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import { isConvMuted } from "../../../../functions/conversation";
+import { formatDateMsg } from "../../../../functions/time";
+import MuteConversation from "../../../MuteConversation/MuteConversation";
 
 function ActionsList({
   openMoreDetailsComp,
@@ -58,6 +66,8 @@ function ActionsList({
     closeModal: () => setShowConfirmationModal(false),
   });
 
+  const [mutedConv, setMutedConv] = useState<boolean>();
+
   const { user, setUser } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { setMostRecentConv } = useMostRecentConvContext();
@@ -66,6 +76,7 @@ function ActionsList({
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleActionsClick = (actionName: string) => {
+    if (!displayedConv || !user) return;
     switch (actionName) {
       case "changeConvName":
         setShowConfirmationModal(true);
@@ -91,6 +102,20 @@ function ActionsList({
           action: () => {},
           closeModal: () => setShowConfirmationModal(false),
           width: "auto",
+        });
+        break;
+      case "muteConv":
+        setShowConfirmationModal(true);
+        setConfirmationModalAction({
+          title: muteConv.title,
+          text: (
+            <MuteConversation
+              closeModal={() => setShowConfirmationModal(false)}
+              conversationId={displayedConv?._id}
+            />
+          ),
+          action: () => {},
+          closeModal: () => setShowConfirmationModal(false),
         });
         break;
     }
@@ -223,7 +248,51 @@ function ActionsList({
       }
     }
   };
+  const unmuteConversation = async () => {
+    if (!displayedConv || !user) return;
+    try {
+      const response = await fetch(
+        RESTAPIUri + "/user/userId/" + user._id + "/unmuteConversation",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${ApiToken()}`,
+          },
+          body: JSON.stringify({
+            conversationId: displayedConv._id,
+          }),
+        }
+      );
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
 
+      setUser((prev) => {
+        if (prev)
+          return {
+            ...prev,
+            mutedConversations: prev.mutedConversations.filter(
+              (item) => item.conversationId !== displayedConv._id
+            ),
+          };
+        return prev;
+      });
+      setMutedConv(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message);
+      } else {
+        console.error("An unknown error occurred");
+      }
+    }
+  };
+
+  useEffect(() => {
+    setMutedConv(isConvMuted(user?.mutedConversations, displayedConv?._id));
+    return () => {};
+  }, [user?.mutedConversations, displayedConv?._id]);
   if (!displayedConv || !user) return <></>;
 
   return (
@@ -368,11 +437,45 @@ function ActionsList({
           </div>
         </li>
         <ul className={"actions-content" + (active4 ? " active" : "")}>
-          <li className="li-actions">
+          <li
+            className="li-actions"
+            onClick={() => {
+              mutedConv ? unmuteConversation() : handleActionsClick("muteConv");
+            }}
+          >
             <div className="li-icon">
-              <Disc color={"#00000"} />
+              {mutedConv ? (
+                <NotificationsOff />
+              ) : (
+                <Notifications color={"#00000"} />
+              )}
             </div>
-            <span>Mettre les messages en sourdine</span>
+            {mutedConv ? (
+              <div className="mute-container">
+                <span className="mute">Réactiver les notifications</span>
+                <span className="mute-until">
+                  Désactivées jusqu'au{" "}
+                  {mutedConv && (
+                    <span>
+                      {user.mutedConversations.find(
+                        (item) => item.conversationId === displayedConv?._id
+                      )?.untilDate && (
+                        <span>
+                          {formatDateMsg(
+                            user.mutedConversations.find(
+                              (item) =>
+                                item.conversationId === displayedConv?._id
+                            )?.untilDate
+                          )}
+                        </span>
+                      )}{" "}
+                    </span>
+                  )}
+                </span>
+              </div>
+            ) : (
+              <span>Mettre les notifications en sourdine</span>
+            )}
           </li>
           <li className="li-actions">
             <div className="li-icon">

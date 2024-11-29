@@ -31,7 +31,8 @@ export const timeSince = (date: Date): string => {
   return "1min";
 };
 
-export const formatDateMsg = (date: Date): string => {
+export const formatDateMsg = (date: Date | undefined): string => {
+  if (!date) return "pa trouvé";
   const options: Intl.DateTimeFormatOptions = {
     day: "numeric",
     month: "long",

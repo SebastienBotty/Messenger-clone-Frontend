@@ -54,6 +54,14 @@ li.li-actions {
   padding: 0.5rem;
   display: flex;
   gap: 0.5rem;
+  height: 3rem;
+  align-items: center;
+}
+
+.li-actions .li-icon > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .category-title,
@@ -73,4 +81,14 @@ li.li-actions {
 
 .conversation-photo-file-input {
   display: none;
+}
+
+.mute-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.mute-until {
+  color: #888b8e;
+  font-size: 0.75rem;
 }
