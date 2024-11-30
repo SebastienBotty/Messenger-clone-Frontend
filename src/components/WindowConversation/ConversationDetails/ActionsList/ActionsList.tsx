@@ -220,34 +220,6 @@ function ActionsList({
       }
     }
   };
-  const unmuteConversation = async () => {
-    if (!displayedConv || !user) return;
-    try {
-      const response = await fetch(
-        RESTAPIUri + "/user/userId/" + user._id + "/unmuteConversation",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${ApiToken()}`,
-          },
-          body: JSON.stringify({
-            conversationId: displayedConv._id,
-          }),
-        }
-      );
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  };
 
   useEffect(() => {
     setMutedConv(isConvMuted(user?.mutedConversations, displayedConv?._id));
