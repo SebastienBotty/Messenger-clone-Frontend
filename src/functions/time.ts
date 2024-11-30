@@ -33,6 +33,7 @@ export const timeSince = (date: Date): string => {
 
 export const formatDateMsg = (date: Date | undefined): string => {
   if (!date) return "pa trouvé";
+  const newdate = new Date(date);
   const options: Intl.DateTimeFormatOptions = {
     day: "numeric",
     month: "long",
@@ -40,6 +41,7 @@ export const formatDateMsg = (date: Date | undefined): string => {
     hour: "2-digit",
     minute: "2-digit",
   };
+  //console.log(newdate.toLocaleDateString("fr-FR", options));
 
-  return date.toLocaleDateString("fr-FR", options);
+  return newdate.toLocaleDateString("fr-FR", options);
 };
