@@ -82,13 +82,3 @@ li.li-actions {
 .conversation-photo-file-input {
   display: none;
 }
-
-.mute-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.mute-until {
-  color: #888b8e;
-  font-size: 0.75rem;
-}

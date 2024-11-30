@@ -1,0 +1,16 @@
+.notifications-display {
+  display: flex;
+  gap: 0.5rem;
+  height: 3rem;
+  align-items: center;
+}
+
+.mute-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.mute-until {
+  color: #888b8e;
+  font-size: 0.75rem;
+}

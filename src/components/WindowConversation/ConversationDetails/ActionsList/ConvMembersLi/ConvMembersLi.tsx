@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   useDisplayedConvContext,
   useMostRecentConvContext,
@@ -21,9 +21,13 @@ import {
 import ConfirmationModal from "../../../../Utiles/ConfirmationModal/ConfirmationModal";
 import { confirmationMessage } from "../../../../../constants/ConfirmationMessage";
 import { ApiToken } from "../../../../../localStorage";
-import { ConversationType } from "../../../../../typescript/types";
+import {
+  ConfirmationModalPropsType,
+  ConversationType,
+} from "../../../../../typescript/types";
 import { socket } from "../../../../../socket";
 import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
+import { leaveConv } from "../../../../../api/conversation";
 
 export function ConvMembersLi({
   member,
@@ -41,57 +45,15 @@ export function ConvMembersLi({
   const { user, setUser } = useUserContext();
   const [showConfirmationModal, setShowConfirmationModal] =
     useState<boolean>(false);
-  const [confirmationModalAction, setConfirmationModalAction] = useState<{
-    title: string;
-    text: string;
-    action: () => void;
-    closeModal: () => void;
-  }>({
-    title: "",
-    text: "",
-    action: () => {},
-    closeModal: () => setShowConfirmationModal(false),
-  });
+  const [confirmationModalAction, setConfirmationModalAction] =
+    useState<ConfirmationModalPropsType>({
+      title: "",
+      text: "",
+      action: () => {},
+      closeModal: () => setShowConfirmationModal(false),
+    });
 
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
-  const leaveConv = async (
-    conversationId: string,
-    username: string,
-    userId: string
-  ): Promise<false | string[]> => {
-    try {
-      const response = await fetch(
-        RESTAPIUri + "/conversation/leaveConversation",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + ApiToken(),
-          },
-          body: JSON.stringify({
-            conversationId: conversationId,
-            username: username,
-            userId: userId,
-            date: new Date(),
-          }),
-        }
-      );
-      if (!response.ok) {
-        const errorMsg = await response.json();
-        throw new Error(errorMsg.message);
-      }
-      const jsonData = await response.json();
-      //console.log(jsonData.members);
-      return jsonData.members;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-      return false;
-    }
-  };
 
   const removeUser = async (
     conversationId: string,

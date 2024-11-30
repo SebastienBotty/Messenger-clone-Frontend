@@ -7,10 +7,7 @@ import {
 import { ConvMembersLi } from "./ConvMembersLi/ConvMembersLi";
 import imageCompression from "browser-image-compression";
 
-import {
-  useMessagesContext,
-  useUserContext,
-} from "../../../../constants/context";
+import { useMessagesContext, useUserContext } from "../../../../constants/context";
 
 import {
   ChevronDownOutline,
@@ -26,14 +23,10 @@ import { ApiToken } from "../../../../localStorage";
 import LoadingSpinner from "../../../Utiles/loadingSpinner/loadingSpinner";
 import ConfirmationModal from "../../../Utiles/ConfirmationModal/ConfirmationModal";
 import ChangeConvName from "./ChangeConvName/ChangeConvName";
-import {
-  confirmationMessage,
-  muteConv,
-} from "../../../../constants/ConfirmationMessage";
+import { confirmationMessage, muteConv } from "../../../../constants/ConfirmationMessage";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { isConvMuted } from "../../../../functions/conversation";
-import { formatDateMsg } from "../../../../functions/time";
-import MuteConversation from "../../../MuteConversation/MuteConversation";
+import NotificationsDisplay from "../../../Utiles/NotificationsDisplay/NotificationsDisplay";
 
 function ActionsList({
   openMoreDetailsComp,
@@ -48,10 +41,8 @@ function ActionsList({
   const [active4, setActive4] = useState<boolean>(false);
 
   const [changePhotoLoading, setChangePhotoLoading] = useState<boolean>(false);
-  const [showAddMembersModal, setShowAddMembersModal] =
-    useState<boolean>(false);
-  const [showConfirmationModal, setShowConfirmationModal] =
-    useState<boolean>(false);
+  const [showAddMembersModal, setShowAddMembersModal] = useState<boolean>(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
 
   const [confirmationModalAction, setConfirmationModalAction] = useState<{
     title: string;
@@ -104,20 +95,6 @@ function ActionsList({
           width: "auto",
         });
         break;
-      case "muteConv":
-        setShowConfirmationModal(true);
-        setConfirmationModalAction({
-          title: muteConv.title,
-          text: (
-            <MuteConversation
-              closeModal={() => setShowConfirmationModal(false)}
-              conversationId={displayedConv?._id}
-            />
-          ),
-          action: () => {},
-          closeModal: () => setShowConfirmationModal(false),
-        });
-        break;
     }
   };
 
@@ -163,9 +140,7 @@ function ActionsList({
   // Conversation Photo handling
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 10 MB
 
-  const handleImageChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
@@ -206,22 +181,19 @@ function ActionsList({
 
   const postConvPhoto = async (base64String: string) => {
     try {
-      const response = await fetch(
-        `${RESTAPIUri}/conversation/changeConversationPhoto`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${ApiToken()}`,
-          },
-          body: JSON.stringify({
-            conversationId: displayedConv?._id,
-            photoStr: base64String,
-            userId: user?._id,
-            date: new Date(),
-          }),
-        }
-      );
+      const response = await fetch(`${RESTAPIUri}/conversation/changeConversationPhoto`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${ApiToken()}`,
+        },
+        body: JSON.stringify({
+          conversationId: displayedConv?._id,
+          photoStr: base64String,
+          userId: user?._id,
+          date: new Date(),
+        }),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -268,18 +240,6 @@ function ActionsList({
         const error = await response.json();
         throw new Error(error.message);
       }
-
-      setUser((prev) => {
-        if (prev)
-          return {
-            ...prev,
-            mutedConversations: prev.mutedConversations.filter(
-              (item) => item.conversationId !== displayedConv._id
-            ),
-          };
-        return prev;
-      });
-      setMutedConv(false);
     } catch (error) {
       if (error instanceof Error) {
         console.log(error.message);
@@ -297,26 +257,18 @@ function ActionsList({
 
   return (
     <div className="actions-list">
-      {displayedConv.admin.includes(user.userName) ||
-      !displayedConv.isGroupConversation ? (
+      {displayedConv.admin.includes(user.userName) || !displayedConv.isGroupConversation ? (
         <ul className="ul-actions-category">
           <li className="category-title" onClick={() => setActive1(!active1)}>
             <div className="title-text">Personnaliser la discussion</div>
-            <div
-              className={
-                active1 ? "title-arrow-icon active" : "title-arrow-icon"
-              }
-            >
+            <div className={active1 ? "title-arrow-icon active" : "title-arrow-icon"}>
               <ChevronDownOutline color={"#00000"} />
             </div>
           </li>
           <ul className={"actions-content" + (active1 ? " active" : "")}>
             {displayedConv.isGroupConversation && (
               <>
-                <li
-                  className="li-actions"
-                  onClick={() => handleActionsClick("changeConvName")}
-                >
+                <li className="li-actions" onClick={() => handleActionsClick("changeConvName")}>
                   <div className="li-icon">
                     <PencilOutline color={"#00000"} />
                   </div>
@@ -327,10 +279,7 @@ function ActionsList({
                     <LoadingSpinner />
                   </li>
                 ) : (
-                  <li
-                    className="li-actions"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
+                  <li className="li-actions" onClick={() => fileInputRef.current?.click()}>
                     <div className="li-icon">
                       <ImagesOutline color={"#00000"} />
                     </div>
@@ -353,10 +302,7 @@ function ActionsList({
               </div>
               <span>Modifier le thème</span>
             </li>
-            <li
-              className="li-actions"
-              onClick={() => handleActionsClick("changeEmoji")}
-            >
+            <li className="li-actions" onClick={() => handleActionsClick("changeEmoji")}>
               <div className="li-icon">{displayedConv.customization.emoji}</div>
 
               <span>Modifier l'emoji</span>
@@ -370,11 +316,7 @@ function ActionsList({
         <ul className="ul-actions-category">
           <li className="category-title" onClick={() => setActive2(!active2)}>
             <div className="title-text">Membres de la discussion</div>
-            <div
-              className={
-                active2 ? "title-arrow-icon active" : "title-arrow-icon"
-              }
-            >
+            <div className={active2 ? "title-arrow-icon active" : "title-arrow-icon"}>
               {" "}
               <ChevronDownOutline color={"#00000"} />
             </div>
@@ -383,10 +325,7 @@ function ActionsList({
             {displayedConv.members.map((member) => (
               <ConvMembersLi key={member} member={member} />
             ))}
-            <li
-              className="li-actions"
-              onClick={() => setShowAddMembersModal(true)}
-            >
+            <li className="li-actions" onClick={() => setShowAddMembersModal(true)}>
               <div className="li-icon">
                 <PersonAdd color={"#00000"} />
               </div>
@@ -398,27 +337,19 @@ function ActionsList({
       <ul className="ul-actions-category">
         <li className="category-title" onClick={() => setActive3(!active3)}>
           <div className="title-text">Fichiers et contenus multimédia</div>
-          <div
-            className={active3 ? "title-arrow-icon active" : "title-arrow-icon"}
-          >
+          <div className={active3 ? "title-arrow-icon active" : "title-arrow-icon"}>
             {" "}
             <ChevronDownOutline color={"#00000"} />
           </div>
         </li>
         <ul className={"actions-content" + (active3 ? " active" : "")}>
-          <li
-            className="li-actions"
-            onClick={() => openMoreDetailsComp("ConvMedia-Medias")}
-          >
+          <li className="li-actions" onClick={() => openMoreDetailsComp("ConvMedia-Medias")}>
             <div className="li-icon">
               <Disc color={"#00000"} />
             </div>
             <span>Contenu multimédia</span>
           </li>
-          <li
-            className="li-actions"
-            onClick={() => openMoreDetailsComp("ConvMedia-Files")}
-          >
+          <li className="li-actions" onClick={() => openMoreDetailsComp("ConvMedia-Files")}>
             <div className="li-icon">
               <Disc color={"#00000"} />
             </div>
@@ -429,53 +360,18 @@ function ActionsList({
       <ul className="ul-actions-category">
         <li className="category-title" onClick={() => setActive4(!active4)}>
           <div className="title-text">Confidentialité et assistance</div>
-          <div
-            className={active4 ? "title-arrow-icon active" : "title-arrow-icon"}
-          >
+          <div className={active4 ? "title-arrow-icon active" : "title-arrow-icon"}>
             {" "}
             <ChevronDownOutline color={"#00000"} />
           </div>
         </li>
         <ul className={"actions-content" + (active4 ? " active" : "")}>
-          <li
-            className="li-actions"
-            onClick={() => {
-              mutedConv ? unmuteConversation() : handleActionsClick("muteConv");
-            }}
-          >
-            <div className="li-icon">
-              {mutedConv ? (
-                <NotificationsOff />
-              ) : (
-                <Notifications color={"#00000"} />
-              )}
-            </div>
-            {mutedConv ? (
-              <div className="mute-container">
-                <span className="mute">Réactiver les notifications</span>
-                <span className="mute-until">
-                  Désactivées jusqu'au{" "}
-                  {mutedConv && (
-                    <span>
-                      {user.mutedConversations.find(
-                        (item) => item.conversationId === displayedConv?._id
-                      )?.untilDate && (
-                        <span>
-                          {formatDateMsg(
-                            user.mutedConversations.find(
-                              (item) =>
-                                item.conversationId === displayedConv?._id
-                            )?.untilDate
-                          )}
-                        </span>
-                      )}{" "}
-                    </span>
-                  )}
-                </span>
-              </div>
-            ) : (
-              <span>Mettre les notifications en sourdine</span>
-            )}
+          <li className="li-actions">
+            <NotificationsDisplay
+              conversation={displayedConv}
+              outlineNotifSvg={false}
+              iconSize="1.5rem"
+            />
           </li>
           <li className="li-actions">
             <div className="li-icon">
@@ -517,9 +413,7 @@ function ActionsList({
         />
       )}
 
-      {showConfirmationModal && (
-        <ConfirmationModal {...confirmationModalAction} />
-      )}
+      {showConfirmationModal && <ConfirmationModal {...confirmationModalAction} />}
     </div>
   );
 }
