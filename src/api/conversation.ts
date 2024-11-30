@@ -1,5 +1,4 @@
 import { ApiToken } from "../localStorage";
-import { ConversationType, UserDataType } from "../typescript/types";
 
 const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
@@ -9,22 +8,19 @@ export const leaveConv = async (
   userId: string
 ): Promise<false | string[]> => {
   try {
-    const response = await fetch(
-      RESTAPIUri + "/conversation/leaveConversation",
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + ApiToken(),
-        },
-        body: JSON.stringify({
-          conversationId: conversationId,
-          username: username,
-          userId: userId,
-          date: new Date(),
-        }),
-      }
-    );
+    const response = await fetch(RESTAPIUri + "/conversation/leaveConversation", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + ApiToken(),
+      },
+      body: JSON.stringify({
+        conversationId: conversationId,
+        username: username,
+        userId: userId,
+        date: new Date(),
+      }),
+    });
     if (!response.ok) {
       const errorMsg = await response.json();
       throw new Error(errorMsg.message);
@@ -42,25 +38,18 @@ export const leaveConv = async (
   }
 };
 
-export const unmuteConversation = async (
-  conversation: ConversationType,
-  user: UserDataType
-) => {
-  if (!user) return;
+export const unmuteConversation = async (conversationId: string, userId: string) => {
   try {
-    const response = await fetch(
-      RESTAPIUri + "/user/userId/" + user._id + "/unmuteConversation",
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${ApiToken()}`,
-        },
-        body: JSON.stringify({
-          conversationId: conversation._id,
-        }),
-      }
-    );
+    const response = await fetch(RESTAPIUri + "/user/userId/" + userId + "/unmuteConversation", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${ApiToken()}`,
+      },
+      body: JSON.stringify({
+        conversationId: conversationId,
+      }),
+    });
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message);

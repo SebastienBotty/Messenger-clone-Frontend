@@ -9,10 +9,7 @@ import {
 } from "react-ionicons";
 import { formatDateMsg } from "../../../functions/time";
 import { useUserContext } from "../../../constants/context";
-import {
-  ConversationType,
-  ConfirmationModalPropsType,
-} from "../../../typescript/types";
+import { ConversationType, ConfirmationModalPropsType } from "../../../typescript/types";
 import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
 import { muteConv } from "../../../constants/ConfirmationMessage";
 import MuteConversation from "../../MuteConversation/MuteConversation";
@@ -29,15 +26,13 @@ function NotificationsDisplay({
 }) {
   const { user, setUser } = useUserContext();
   const [mutedConv, setMutedConv] = useState<boolean>();
-  const [showConfirmationModal, setShowConfirmationModal] =
-    useState<boolean>(false);
-  const [confirmationModalProps, setConfirmationModalProps] =
-    useState<ConfirmationModalPropsType>({
-      title: "",
-      text: "",
-      action: () => {},
-      closeModal: () => {},
-    });
+  const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
+  const [confirmationModalProps, setConfirmationModalProps] = useState<ConfirmationModalPropsType>({
+    title: "",
+    text: "",
+    action: () => {},
+    closeModal: () => {},
+  });
 
   const svgNotifOff = outlineNotifSvg ? (
     <NotificationsOffOutline width={iconSize} height={iconSize} />
@@ -70,13 +65,10 @@ function NotificationsDisplay({
       },
     });
   };
-  const handleUnmuteClick = async (
-    conversation: ConversationType,
-    event: React.MouseEvent
-  ) => {
+  const handleUnmuteClick = async (conversation: ConversationType, event: React.MouseEvent) => {
     event.stopPropagation();
     if (!user) return;
-    const requestUnmute = await unmuteConversation(conversation, user);
+    const requestUnmute = await unmuteConversation(conversation._id, user._id);
     if (requestUnmute) {
       setUser((prev) => {
         if (prev)
@@ -113,9 +105,8 @@ function NotificationsDisplay({
               Désactivées jusqu'au{" "}
               {mutedConv && (
                 <span>
-                  {user.mutedConversations.find(
-                    (item) => item.conversationId === conversation?._id
-                  )?.untilDate && (
+                  {user.mutedConversations.find((item) => item.conversationId === conversation?._id)
+                    ?.untilDate && (
                     <span>
                       {formatDateMsg(
                         user.mutedConversations.find(
@@ -132,9 +123,7 @@ function NotificationsDisplay({
           <span>Mettre les notifications en sourdine</span>
         )}
       </div>
-      {showConfirmationModal && (
-        <ConfirmationModal {...confirmationModalProps} />
-      )}
+      {showConfirmationModal && <ConfirmationModal {...confirmationModalProps} />}
     </>
   );
 }

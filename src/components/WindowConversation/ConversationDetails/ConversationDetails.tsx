@@ -14,6 +14,7 @@ import ConfirmationModal from "../../Utiles/ConfirmationModal/ConfirmationModal"
 import { muteConv } from "../../../constants/ConfirmationMessage";
 import { ApiToken } from "../../../localStorage";
 import { isConvMuted } from "../../../functions/conversation";
+import { ConfirmationModalPropsType } from "../../../typescript/types";
 
 function ConversationDetails() {
   const { user, setUser } = useUserContext();
@@ -21,8 +22,7 @@ function ConversationDetails() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const [notifications, setNotifications] = useState<boolean>(); // NOT IMPLEMENTED YET
-  const [showMoreDetailsComp, setShowMoreDetailsComp] =
-    useState<boolean>(false);
+  const [showMoreDetailsComp, setShowMoreDetailsComp] = useState<boolean>(false);
   const [moreDetailsCompProps, setMoreDetailsCompProps] = useState<{
     component: React.ReactNode;
     setShowMoreDetailsComp: React.Dispatch<React.SetStateAction<boolean>>;
@@ -34,18 +34,13 @@ function ConversationDetails() {
   });
 
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
-  const [notificationsModalAction, setNotificationsModalAction] = useState<{
-    title: string;
-    text: string | JSX.Element;
-    action: () => void;
-    closeModal: () => void;
-    width?: string;
-  }>({
-    title: "",
-    text: "",
-    action: () => {},
-    closeModal: () => setShowNotificationsModal(false),
-  });
+  const [notificationsModalAction, setNotificationsModalAction] =
+    useState<ConfirmationModalPropsType>({
+      title: "",
+      text: "",
+      action: () => {},
+      closeModal: () => setShowNotificationsModal(false),
+    });
 
   const openNotificationsModal = () => {
     if (!displayedConv) return;
@@ -176,12 +171,8 @@ function ConversationDetails() {
                 {displayedConv?.isGroupConversation
                   ? displayedConv?.customization.conversationName
                     ? displayedConv?.customization.conversationName
-                    : displayedConv?.members
-                        .filter((item) => item !== user?.userName)
-                        .join(", ")
-                  : displayedConv?.members.filter(
-                      (item) => item !== user?.userName
-                    )}
+                    : displayedConv?.members.filter((item) => item !== user?.userName).join(", ")
+                  : displayedConv?.members.filter((item) => item !== user?.userName)}
               </div>
               <span className="user-online">
                 {displayedConv?.isGroupConversation ? "" : "Online"}
@@ -190,10 +181,7 @@ function ConversationDetails() {
                 {" "}
                 {notifications ? (
                   <div className="conv-btn-actions">
-                    <div
-                      className="icon-button"
-                      onClick={() => openNotificationsModal()}
-                    >
+                    <div className="icon-button" onClick={() => openNotificationsModal()}>
                       <Notifications
                         color={"#00000"}
                         title="Notifications"
@@ -206,10 +194,7 @@ function ConversationDetails() {
                 ) : (
                   <div className="conv-btn-actions">
                     {" "}
-                    <div
-                      className="icon-button"
-                      onClick={() => unmuteConversation()}
-                    >
+                    <div className="icon-button" onClick={() => unmuteConversation()}>
                       <NotificationsOff
                         color={"#00000"}
                         title="Notifications"
@@ -221,17 +206,9 @@ function ConversationDetails() {
                   </div>
                 )}
                 <div className="conv-btn-actions">
-                  <div
-                    className="icon-button"
-                    onClick={() => openMoreDetailsComp("SearchMessage")}
-                  >
+                  <div className="icon-button" onClick={() => openMoreDetailsComp("SearchMessage")}>
                     {" "}
-                    <Search
-                      color={"#00000"}
-                      title="Rechercher"
-                      height="1.75rem"
-                      width="1.75rem"
-                    />
+                    <Search color={"#00000"} title="Rechercher" height="1.75rem" width="1.75rem" />
                   </div>
                   <span>Rechercher</span>
                 </div>
@@ -241,9 +218,7 @@ function ConversationDetails() {
               <ActionsList openMoreDetailsComp={openMoreDetailsComp} />
             </div>
           </div>
-          {showNotificationsModal && (
-            <ConfirmationModal {...notificationsModalAction} />
-          )}
+          {showNotificationsModal && <ConfirmationModal {...notificationsModalAction} />}
         </>
       )}
     </div>
