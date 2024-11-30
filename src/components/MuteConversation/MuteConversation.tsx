@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { muteConv } from "../../constants/ConfirmationMessage";
-import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn";
 import { useUserContext } from "../../constants/context";
 import "./MuteConversation.css";
 import { ApiToken } from "../../localStorage";

@@ -90,7 +90,7 @@
 .separator {
   height: 2px;
   width: 90%;
-  margin: 0 auto;
+  margin: 0.5rem auto;
   background-color: #d0d3d7;
 }
 

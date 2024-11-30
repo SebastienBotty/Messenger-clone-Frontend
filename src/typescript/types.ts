@@ -139,3 +139,10 @@ export type MediasType = {
   Size: number;
   Url: string;
 };
+
+export type ConfirmationModalPropsType = {
+  title: string;
+  text: string | JSX.Element;
+  action: () => void;
+  closeModal: () => void;
+};
