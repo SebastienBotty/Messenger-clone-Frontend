@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import {
   useDisplayedConvContext,
   useMostRecentConvContext,
@@ -24,6 +24,7 @@ function ChangeConvName({
   const [value, setValue] = useState<string>("");
   const [isFocused, setIsFocused] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const inputTextRef = useRef<HTMLInputElement>(null);
   const maxLength = 30;
 
   const RESTApiUri = process.env.REACT_APP_REST_API_URI;
@@ -96,6 +97,9 @@ function ChangeConvName({
       setValue(displayedConv.customization.conversationName);
       setIsFocused(true);
     }
+    if (inputTextRef.current) {
+      inputTextRef.current.focus();
+    }
     return () => {};
   }, []);
   if (!displayedConv || !user) {
@@ -124,6 +128,7 @@ function ChangeConvName({
             <input
               type="text"
               className="text-input"
+              ref={inputTextRef}
               value={value}
               onChange={onChange}
               onFocus={() => setIsFocused(true)}
