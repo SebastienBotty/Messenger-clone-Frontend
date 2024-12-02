@@ -1,3 +1,23 @@
+export type UserDataType = {
+  _id: string;
+  mail: string;
+  userName: string;
+  socketId: string | undefined;
+  photo: string | undefined;
+  conversations: string[];
+  mutedConversations: Array<{
+    conversationId: string;
+    untilDate: Date;
+  }>;
+  deletedConversations: Array<{
+    conversationId: string;
+    deleteDate: Date;
+  }>;
+  isOnline: boolean;
+  lastSeen: Date;
+  status: string;
+};
+
 export type ConversationType = {
   _id: string;
   isGroupConversation: boolean;
@@ -28,16 +48,12 @@ export type ConversationType = {
 
 export type displayedConvContextType = {
   displayedConv: ConversationType | null;
-  setDisplayedConv: React.Dispatch<
-    React.SetStateAction<ConversationType | null>
-  >;
+  setDisplayedConv: React.Dispatch<React.SetStateAction<ConversationType | null>>;
 };
 
 export type MostRecentContextType = {
   mostRecentConv: ConversationType | null;
-  setMostRecentConv: React.Dispatch<
-    React.SetStateAction<ConversationType | null>
-  >;
+  setMostRecentConv: React.Dispatch<React.SetStateAction<ConversationType | null>>;
 };
 
 export type TriggerContextType = {
@@ -58,9 +74,7 @@ export type ImgS3DataType = {
 
 export type RecentConversationsContextType = {
   recentConversations: ConversationType[] | null;
-  setRecentConversations: React.Dispatch<
-    React.SetStateAction<ConversationType[] | null>
-  >;
+  setRecentConversations: React.Dispatch<React.SetStateAction<ConversationType[] | null>>;
 };
 
 export type MessageType = {
@@ -87,22 +101,6 @@ export type Date15minDifference = {
 
 export type NavBarProps = {
   handleSignOut: () => void;
-};
-
-export type UserDataType = {
-  _id: string;
-  mail: string;
-  userName: string;
-  socketId: string | undefined;
-  photo: string | undefined;
-  conversations: string[];
-  mutedConversations: Array<{
-    conversationId: string;
-    untilDate: Date;
-  }>;
-  isOnline: boolean;
-  lastSeen: Date;
-  status: string;
 };
 
 export type UserDataContextType = {

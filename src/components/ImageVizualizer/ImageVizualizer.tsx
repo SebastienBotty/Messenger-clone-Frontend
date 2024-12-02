@@ -13,6 +13,7 @@ import {
 import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn";
 import Modal from "..//Modal/Modal";
 import { ImgS3DataType } from "../../typescript/types";
+import { useUserContext } from "../../constants/context";
 
 type SelectedImageType = {
   src: string;
@@ -33,6 +34,7 @@ function ImageVizualizer({
   const thumbnailsRef = useRef<HTMLDivElement>(null);
   //const { imgData, setImgData } = useImgVisualizerInitialImgContext();
   const RESTAPIuri = process.env.REACT_APP_REST_API_URI;
+  const { user } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
   const [images, setImages] = useState<thumbnailsImgType[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -43,9 +45,7 @@ function ImageVizualizer({
     return { src: images[0], index: 0 };
   }}); */
   //const [selectedImg, setSelectedImg] = useState<SelectedImageType>({src: imgData?imgData.src:images[0].src, index: images.indexOf(imgData?imgData:images[0])});
-  const [selectedImg, setSelectedImg] = useState<SelectedImageType | null>(
-    null
-  );
+  const [selectedImg, setSelectedImg] = useState<SelectedImageType | null>(null);
   const [translateValue, setTranslateValue] = useState<number>(0);
   const [mouseMoved, setMouseMoved] = useState<boolean>(false);
   let timeoutId: NodeJS.Timeout | null = null;
@@ -81,9 +81,7 @@ function ImageVizualizer({
     if (thumbnailsRef.current && selectedImg !== null) {
       if (side && selectedImg.index !== images.length - 1) {
         console.log("slide right");
-        thumbnailsRef.current.style.transform = `translateX(${
-          translateValue - 5
-        }rem)`;
+        thumbnailsRef.current.style.transform = `translateX(${translateValue - 5}rem)`;
         setTranslateValue((prev) => prev - 5);
         setSelectedImg((prev) => {
           if (prev !== null) {
@@ -94,9 +92,7 @@ function ImageVizualizer({
         });
       } else if (!side && selectedImg.index !== 0) {
         console.log("slide left");
-        thumbnailsRef.current.style.transform = `translateX(${
-          translateValue + 5
-        }rem)`;
+        thumbnailsRef.current.style.transform = `translateX(${translateValue + 5}rem)`;
         setTranslateValue((prev) => prev + 5);
         setSelectedImg((prev) => {
           if (prev !== null) {
@@ -133,14 +129,22 @@ function ImageVizualizer({
   useEffect(() => {
     const fetchImages = async () => {
       console.log(displayedConv?._id);
-      if (displayedConv && imgData) {
+      if (displayedConv && imgData && user) {
         try {
           const response = await fetch(
             RESTAPIuri +
-              "/file/conversationId/" +
+              "/file/UserId/" +
+              user._id +
+              "/conversationId/" +
               displayedConv._id +
               "/getConversationImages?fileName=" +
-              imgData.name
+              imgData.name,
+            {
+              method: "GET",
+              headers: {
+                authorization: "Bearer " + ApiToken(),
+              },
+            }
           );
           if (!response.ok) {
             throw new Error(response.statusText);
@@ -187,9 +191,7 @@ function ImageVizualizer({
     <div
       className="ImageVisualizer"
       style={{
-        backgroundImage: { selectedImg }
-          ? `url(${selectedImg?.src})`
-          : `url(${images[0].src})`,
+        backgroundImage: { selectedImg } ? `url(${selectedImg?.src})` : `url(${images[0].src})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -225,12 +227,7 @@ function ImageVizualizer({
           </div>
           <div>
             <a href={selectedImg?.src} download={selectedImg?.src}>
-              <DownloadOutline
-                color={"#FFFFFF"}
-                title={"Télécharger"}
-                height="2rem"
-                width="2rem"
-              />
+              <DownloadOutline color={"#FFFFFF"} title={"Télécharger"} height="2rem" width="2rem" />
             </a>
           </div>
         </div>
@@ -240,12 +237,7 @@ function ImageVizualizer({
           style={mouseMoved ? { opacity: 1 } : { opacity: 0 }}
           onClick={() => slideCarousel(false)}
         >
-          <ArrowBackCircleOutline
-            color={"white"}
-            title={"Précédent"}
-            height="4rem"
-            width="4rem"
-          />
+          <ArrowBackCircleOutline color={"white"} title={"Précédent"} height="4rem" width="4rem" />
         </div>
         <div className="image-visualiser-container">
           {selectedImg !== null && <img src={selectedImg.src} />}
@@ -256,12 +248,7 @@ function ImageVizualizer({
           style={mouseMoved ? { opacity: 1 } : { opacity: 0 }}
           onClick={() => slideCarousel(true)}
         >
-          <ArrowForwardCircleOutline
-            color={"white"}
-            title={"Suivant"}
-            height="4rem"
-            width="4rem"
-          />{" "}
+          <ArrowForwardCircleOutline color={"white"} title={"Suivant"} height="4rem" width="4rem" />{" "}
         </div>
         <div className="thumbnails-container">
           {selectedImg !== null && (
@@ -272,11 +259,7 @@ function ImageVizualizer({
                     src={image.src}
                     onClick={() => handleImgClick({ src: image.src, index })}
                     key={index + "-" + image}
-                    style={
-                      index === selectedImg.index
-                        ? { filter: "brightness(1)" }
-                        : {}
-                    }
+                    style={index === selectedImg.index ? { filter: "brightness(1)" } : {}}
                   ></img>
                 );
               })}
@@ -284,9 +267,7 @@ function ImageVizualizer({
           )}
         </div>
       </div>
-      {showModal && (
-        <Modal closeModal={closeTransferModal} selectedImg={selectedImg?.src} />
-      )}
+      {showModal && <Modal closeModal={closeTransferModal} selectedImg={selectedImg?.src} />}
     </div>
   );
 }

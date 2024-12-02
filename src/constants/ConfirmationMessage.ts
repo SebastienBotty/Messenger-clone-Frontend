@@ -19,6 +19,10 @@ export const confirmationMessage = {
     title: "Changer le nom de la conversation",
     text: "Lorsque vous modifiez le nom d'une discussion de groupe, il est modifié pour tout le monde.",
   },
+  deleteConv: {
+    title: "Supprimer la conversation",
+    text: "Voulez-vous supprimer cette conversation ? Vous ne pourrez plus voir les messages et médias ayant été envoyés dans cette conversation avant maintenant.",
+  },
 };
 
 export const muteConv = {
