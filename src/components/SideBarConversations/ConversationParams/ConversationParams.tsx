@@ -55,6 +55,7 @@ function ConversationParams({
           action: () => {
             deleteConversation(conversation._id, user._id, () => {
               updateConversations(conversation._id);
+              deleteConvCache(conversation._id);
             });
           },
           closeModal: () => setShowConfirmationModal(false),
@@ -81,6 +82,13 @@ function ConversationParams({
     setConversations((prev) => prev.filter((conv) => conv._id !== convId));
     if (displayedConv?._id == convId) setDisplayedConv(null);
     //console.log("updatedUser");
+  };
+
+  const deleteConvCache = (convId: string) => {
+    const cacheFilesKey = `filesCache_${convId}`;
+    const cacheMediasKey = `mediasCache_${convId}`;
+    sessionStorage.removeItem(cacheFilesKey);
+    sessionStorage.removeItem(cacheMediasKey);
   };
 
   useEffect(() => {
