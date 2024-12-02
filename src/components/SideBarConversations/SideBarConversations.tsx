@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Close,
-  CreateOutline,
-  EllipsisHorizontal,
-  NotificationsOff,
-  Search,
-} from "react-ionicons";
+import { Close, CreateOutline, EllipsisHorizontal, NotificationsOff, Search } from "react-ionicons";
 import { ConversationType, SideBarPropsType } from "../../typescript/types";
 import "./SideBarConversations.css";
 
@@ -16,10 +10,7 @@ import {
   useTriggerContext,
   useRecentConversationContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
-import {
-  useConversationsContext,
-  useUserContext,
-} from "../../constants/context";
+import { useConversationsContext, useUserContext } from "../../constants/context";
 import { timeSince } from "../../functions/time";
 import { socket } from "../../socket";
 import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
@@ -32,12 +23,10 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const { conversations, setConversations } = useConversationsContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
-  const { recentConversations, setRecentConversations } =
-    useRecentConversationContext();
+  const { recentConversations, setRecentConversations } = useRecentConversationContext();
   const { trigger, setTrigger } = useTriggerContext();
   const RESTAPIUri: string | undefined = process.env.REACT_APP_REST_API_URI;
-  const [searchConversationInput, setSearchConversationInput] =
-    useState<string>("");
+  const [searchConversationInput, setSearchConversationInput] = useState<string>("");
 
   const [clickedConvParamsBtn, setClickedConvParamsBtn] = useState<string>("");
 
@@ -45,9 +34,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
 
   const authApiToken = ApiToken();
 
-  const fetchConversationLastMsg = async (
-    conversationArr: ConversationType[]
-  ) => {
+  const fetchConversationLastMsg = async (conversationArr: ConversationType[]) => {
     const responseArr: ConversationType[] = [];
     for (let conversation of conversationArr) {
       try {
@@ -70,9 +57,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         const jsonData = await response.json();
         let conversationObject = conversation;
         conversationObject.lastMessage = jsonData;
-        conversationObject.lastMessage.date = new Date(
-          conversationObject.lastMessage.date
-        );
+        conversationObject.lastMessage.date = new Date(conversationObject.lastMessage.date);
         responseArr.push(conversationObject);
       } catch (error) {
         if (error instanceof Error) {
@@ -84,10 +69,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     }
     responseArr
       .sort((a, b) => {
-        return (
-          new Date(a.lastMessage.date).getTime() -
-          new Date(b.lastMessage.date).getTime()
-        );
+        return new Date(a.lastMessage.date).getTime() - new Date(b.lastMessage.date).getTime();
       })
       .reverse();
     return responseArr;
@@ -129,14 +111,11 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
 
   const fetchConversationsId = async () => {
     try {
-      const response = await fetch(
-        RESTAPIUri + "/user/userConversationsId/userId/" + user?._id,
-        {
-          headers: {
-            Authorization: `Bearer ${authApiToken}`,
-          },
-        }
-      );
+      const response = await fetch(RESTAPIUri + "/user/userConversationsId/userId/" + user?._id, {
+        headers: {
+          Authorization: `Bearer ${authApiToken}`,
+        },
+      });
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message);
@@ -176,11 +155,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       }
     }
   };
-  const markMessagesAsSeen = async (
-    messageId: string,
-    userId: string,
-    username: string
-  ) => {
+  const markMessagesAsSeen = async (messageId: string, userId: string, username: string) => {
     try {
       const response = await fetch(
         RESTAPIUri + "/message/userId/" + userId + "/markMessageAsSeen",
@@ -211,16 +186,9 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       }
     }
   };
-  const updateSeenConversation = async (
-    messageId: string,
-    conversation: ConversationType
-  ) => {
+  const updateSeenConversation = async (messageId: string, conversation: ConversationType) => {
     if (user) {
-      const setMsgSeen = await markMessagesAsSeen(
-        messageId,
-        user._id,
-        user.userName
-      );
+      const setMsgSeen = await markMessagesAsSeen(messageId, user._id, user.userName);
       if (setMsgSeen) {
         setConversations((prev) => {
           return prev.map((conv) => {
@@ -240,14 +208,9 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     }
   };
 
-  const set5LatestConversation = (
-    arrConversations: ConversationType[]
-  ): void => {
+  const set5LatestConversation = (arrConversations: ConversationType[]): void => {
     let sortedConvArr = [...arrConversations].sort((a, b) => {
-      return (
-        new Date(b.lastMessage.date).getTime() -
-        new Date(a.lastMessage.date).getTime()
-      );
+      return new Date(b.lastMessage.date).getTime() - new Date(a.lastMessage.date).getTime();
     });
     //console.log(sortedConvArr.slice(0, 5).reverse());
     setRecentConversations(sortedConvArr.slice(0, 5));
@@ -264,10 +227,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     }
   };
 
-  const handleConvParamsClick = (
-    e: React.MouseEvent,
-    conversation: ConversationType
-  ) => {
+  const handleConvParamsClick = (e: React.MouseEvent, conversation: ConversationType) => {
     e.stopPropagation();
     console.log("ouiouioui" + conversation);
     setClickedConvParamsBtn((prev) => {
@@ -300,9 +260,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           console.log("ON CLICK CONV : ");
           console.log(conversation);
         }}
-        id={
-          conversation._id === displayedConv?._id ? "selected-conversation" : ""
-        }
+        id={conversation._id === displayedConv?._id ? "selected-conversation" : ""}
       >
         <div className="conversation-img-container">
           <ProfilePic props={conversation} />
@@ -312,9 +270,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
             {conversation.isGroupConversation
               ? conversation.customization.conversationName
                 ? conversation.customization.conversationName
-                : conversation.members
-                    .filter((item) => item !== user?.userName)
-                    .join(", ")
+                : conversation.members.filter((item) => item !== user?.userName).join(", ")
               : conversation.members.filter((item) => item !== user?.userName)}
           </div>
           <div id="conversation-last-message">
@@ -329,22 +285,17 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
               {
                 //Kinda messy yeah
               }
-              {conversation.lastMessage.author ===
-              "System/" + conversation._id ? (
+              {conversation.lastMessage.author === "System/" + conversation._id ? (
                 <ConvSystemMsg textProps={conversation.lastMessage.text} />
               ) : conversation.isGroupConversation ? (
                 (conversation.lastMessage.author === user?.userName
                   ? "Vous"
                   : conversation.lastMessage.author) +
                 ": " +
-                (conversation.lastMessage.text.startsWith(
-                  "PATHIMAGE/" + conversation._id
-                )
+                (conversation.lastMessage.text.startsWith("PATHIMAGE/" + conversation._id)
                   ? " Fichier joint"
                   : conversation.lastMessage.text)
-              ) : conversation.lastMessage.text.startsWith(
-                  "PATHIMAGE/" + conversation._id
-                ) ? (
+              ) : conversation.lastMessage.text.startsWith("PATHIMAGE/" + conversation._id) ? (
                 " Fichier joint"
               ) : (
                 conversation.lastMessage.text
@@ -364,16 +315,13 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           <div
             className="conversation-params"
             style={{
-              display:
-                clickedConvParamsBtn === conversation._id ? "block" : "none",
+              display: clickedConvParamsBtn === conversation._id ? "block" : "none",
             }}
           >
             <div className="conversation-params-button">
               {" "}
               <EllipsisHorizontal
-                onClick={(event: React.MouseEvent) =>
-                  handleConvParamsClick(event, conversation)
-                }
+                onClick={(event: React.MouseEvent) => handleConvParamsClick(event, conversation)}
               />
             </div>
             {clickedConvParamsBtn === conversation._id && (
@@ -401,9 +349,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       .includes(searchConversationInput.toLowerCase());
   };
   const moreThanOneMinBetween = (date1: Date, date2: Date): boolean => {
-    const differenceInMilliseconds = Math.abs(
-      date2.getTime() - date1.getTime()
-    );
+    const differenceInMilliseconds = Math.abs(date2.getTime() - date1.getTime());
     const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
     return differenceInMinutes > 1;
   };
@@ -430,12 +376,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       if (data[2]) {
         console.log(user?.status);
         const previousMsg = data[2];
-        if (
-          moreThanOneMinBetween(
-            new Date(currentMsg.date),
-            new Date(previousMsg.date)
-          )
-        ) {
+        if (moreThanOneMinBetween(new Date(currentMsg.date), new Date(previousMsg.date))) {
           notificationSound.play();
         }
       } else {
@@ -522,12 +463,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           <div className="first-line-title">Discussions</div>
           <div className="sideBar-header-buttons">
             <button onClick={() => console.log(user)}>
-              <EllipsisHorizontal
-                color={"#00000"}
-                title="Paramètres"
-                height="2rem"
-                width="2rem"
-              />
+              <EllipsisHorizontal color={"#00000"} title="Paramètres" height="2rem" width="2rem" />
             </button>
 
             <button onClick={() => setDisplayedConv(null)}>
@@ -541,10 +477,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           </div>
         </div>
         <div className="second-line">
-          <label
-            htmlFor="search-conversations"
-            className="search-conversations-label"
-          >
+          <label htmlFor="search-conversations" className="search-conversations-label">
             <div className="test">
               {" "}
               <Search color={"#65676b"} />
@@ -563,10 +496,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           {searchConversationInput && (
             <div className="search-input-cross-container">
               {" "}
-              <div
-                id="search-input-cross"
-                onClick={() => setSearchConversationInput("")}
-              >
+              <div id="search-input-cross" onClick={() => setSearchConversationInput("")}>
                 <Close color={"#9B7575"} height="1.5rem" width="1.5rem" />
               </div>
             </div>
@@ -590,16 +520,11 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
 
                 // If neither has test: true, sort by date
                 return (
-                  new Date(a.lastMessage.date).getTime() -
-                  new Date(b.lastMessage.date).getTime()
+                  new Date(a.lastMessage.date).getTime() - new Date(b.lastMessage.date).getTime()
                 );
               })
-              .map((conversation, index) =>
-                conversationsMap(conversation, index)
-              )
-          : conversations.map((conversation, index) =>
-              conversationsMap(conversation, index)
-            )}
+              .map((conversation, index) => conversationsMap(conversation, index))
+          : conversations.map((conversation, index) => conversationsMap(conversation, index))}
       </div>
     </div>
   );
