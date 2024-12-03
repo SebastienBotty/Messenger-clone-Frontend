@@ -380,8 +380,8 @@ function ActionsList({
 
       {showAddMembersModal && (
         <AddMembersModal
-          showAddMembersModal={showAddMembersModal}
-          setShowAddMembersModal={setShowAddMembersModal}
+          conversation={displayedConv}
+          closeModal={() => setShowAddMembersModal(false)}
         />
       )}
 

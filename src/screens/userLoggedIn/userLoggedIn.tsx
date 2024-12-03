@@ -10,24 +10,21 @@ import {
   TriggerContextType,
   RecentConversationsContextType,
   UserDataType,
+  MessageType,
 } from "../../typescript/types";
-import { ConversationsContext, UserContext } from "../../constants/context";
+import { ConversationsContext, MessagesContext, UserContext } from "../../constants/context";
 import { socket } from "../../socket";
 import { useLocation } from "react-router-dom";
 import { ApiToken } from "../../localStorage";
 
 import "./userLoggedIn.css";
 
-const DisplayedConvContext = createContext<
-  displayedConvContextType | undefined
->(undefined);
-const MostRecentConvContext = createContext<MostRecentContextType | undefined>(
+const DisplayedConvContext = createContext<displayedConvContextType | undefined>(undefined);
+const MostRecentConvContext = createContext<MostRecentContextType | undefined>(undefined);
+
+const RecentConversationsContext = createContext<RecentConversationsContextType | undefined>(
   undefined
 );
-
-const RecentConversationsContext = createContext<
-  RecentConversationsContextType | undefined
->(undefined);
 
 const TriggerContext = createContext<TriggerContextType | undefined>(undefined);
 
@@ -36,34 +33,25 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
   const [user, setUser] = useState<UserDataType | null>(location.state);
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const [conversations, setConversations] = useState<ConversationType[]>([]);
-  const [displayedConv, setDisplayedConv] = useState<ConversationType | null>(
-    null
-  );
-  const [mostRecentConv, setMostRecentConv] = useState<ConversationType | null>(
-    null
-  );
+  const [displayedConv, setDisplayedConv] = useState<ConversationType | null>(null);
+  const [mostRecentConv, setMostRecentConv] = useState<ConversationType | null>(null);
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const [trigger, setTrigger] = useState<boolean | null>(false);
 
-  const [showConversationWindow, setShowConversationWindow] =
-    useState<boolean>(false);
+  const [showConversationWindow, setShowConversationWindow] = useState<boolean>(false);
 
-  const [recentConversations, setRecentConversations] = useState<
-    ConversationType[] | null
-  >(null);
+  const [recentConversations, setRecentConversations] = useState<ConversationType[] | null>(null);
 
   const setUserOnline = async (socketId: string | undefined) => {
     try {
-      const response = await fetch(
-        RESTAPIUri + "/user/userId/" + user?._id + "/socketId",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: "Bearer " + ApiToken(),
-          },
-          body: JSON.stringify({ socketId: socketId }),
-        }
-      );
+      const response = await fetch(RESTAPIUri + "/user/userId/" + user?._id + "/socketId", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: "Bearer " + ApiToken(),
+        },
+        body: JSON.stringify({ socketId: socketId }),
+      });
       if (!response.ok) {
         throw new Error("Erreur lors du patch socketId");
       }
@@ -103,33 +91,27 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
   return (
     <UserContext.Provider value={{ user, setUser }}>
       {" "}
-      <ConversationsContext.Provider
-        value={{ conversations, setConversations }}
-      >
-        <DisplayedConvContext.Provider
-          value={{ displayedConv, setDisplayedConv }}
-        >
+      <ConversationsContext.Provider value={{ conversations, setConversations }}>
+        <DisplayedConvContext.Provider value={{ displayedConv, setDisplayedConv }}>
           <RecentConversationsContext.Provider
             value={{ recentConversations, setRecentConversations }}
           >
-            <MostRecentConvContext.Provider
-              value={{ mostRecentConv, setMostRecentConv }}
-            >
-              <div className="userLoggedIn">
-                <div className="page-header">
-                  {" "}
-                  <NavBar handleSignOut={handleSignOut} />
-                </div>
-                <div className="content">
-                  <TriggerContext.Provider value={{ trigger, setTrigger }}>
-                    <SideBarConversations
-                      setShowConversationWindow={setShowConversationWindow}
-                    />
+            <MostRecentConvContext.Provider value={{ mostRecentConv, setMostRecentConv }}>
+              <MessagesContext.Provider value={{ messages, setMessages }}>
+                <div className="userLoggedIn">
+                  <div className="page-header">
+                    {" "}
+                    <NavBar handleSignOut={handleSignOut} />
+                  </div>
+                  <div className="content">
+                    <TriggerContext.Provider value={{ trigger, setTrigger }}>
+                      <SideBarConversations setShowConversationWindow={setShowConversationWindow} />
 
-                    {showConversationWindow && <WindowConversation />}
-                  </TriggerContext.Provider>
+                      {showConversationWindow && <WindowConversation />}
+                    </TriggerContext.Provider>
+                  </div>
                 </div>
-              </div>
+              </MessagesContext.Provider>
             </MostRecentConvContext.Provider>
           </RecentConversationsContext.Provider>
         </DisplayedConvContext.Provider>{" "}
@@ -150,9 +132,7 @@ export const useDisplayedConvContext = () => {
 export const useMostRecentConvContext = () => {
   const context = useContext(MostRecentConvContext);
   if (context === undefined) {
-    throw new Error(
-      "useMostRecentConvContext must be used within a MyProvider"
-    );
+    throw new Error("useMostRecentConvContext must be used within a MyProvider");
   }
   return context;
 };
@@ -168,9 +148,7 @@ export const useTriggerContext = () => {
 export const useRecentConversationContext = () => {
   const context = useContext(RecentConversationsContext);
   if (context === undefined) {
-    throw new Error(
-      "useShowImgVisualizerContext must be used within a MyProvider "
-    );
+    throw new Error("useShowImgVisualizerContext must be used within a MyProvider ");
   }
   return context;
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ConversationType } from "../../../typescript/types";
 import "./ConversationParams.css";
-import { ExitOutline, TrashOutline } from "react-ionicons";
+import { ExitOutline, PersonAddOutline, TrashOutline } from "react-ionicons";
 import { useUserContext, useConversationsContext } from "../../../constants/context";
 import NotificationsDisplay from "../../Utiles/NotificationsDisplay/NotificationsDisplay";
 import { leaveConv } from "../../../api/conversation";
@@ -10,6 +10,7 @@ import { confirmationMessage } from "../../../constants/ConfirmationMessage";
 import ConfirmationModal from "../../Utiles/ConfirmationModal/ConfirmationModal";
 import { deleteConversation } from "../../../api/user";
 import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
+import AddMembersModal from "../../WindowConversation/ConversationDetails/ActionsList/AddMembersModal/AddMembersModal";
 
 function ConversationParams({
   conversation,
@@ -29,6 +30,7 @@ function ConversationParams({
     action: () => {},
     closeModal: () => {},
   });
+  const [showAddMembersModal, setShowAddMembersModal] = useState<boolean>(false);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (ref.current && !ref.current.contains(event.target as Node)) {
@@ -100,21 +102,20 @@ function ConversationParams({
 
   if (!user) return null;
   return (
-    <>
-      <div className="conversation-params-dropdown" ref={ref}>
+    <div ref={ref}>
+      <div className="conversation-params-dropdown">
         <ul>
-          <li className="conversation-params-li">
-            <div className="conversation-params-action">
-              <div className="conversation-params-action-icon"></div>
-              <div className="conversation-params-action-text"></div>
-            </div>
-          </li>
-          <li className="conversation-params-li">
-            <div className="conversation-params-action">
-              <div className="conversation-params-action-icon"></div>
-              <div className="conversation-params-action-text"></div>
-            </div>
-          </li>
+          {conversation.isGroupConversation && conversation.admin.includes(user.userName) && (
+            <li className="conversation-params-li" onClick={() => setShowAddMembersModal(true)}>
+              <div className="conversation-params-action">
+                <div className="conversation-params-action-icon">
+                  {" "}
+                  <PersonAddOutline color={"#00000"} />
+                </div>
+                <div className="conversation-params-action-text">Ajouter des membres</div>
+              </div>
+            </li>
+          )}
           <li className="conversation-params-li">
             <div className="conversation-params-action">
               <NotificationsDisplay
@@ -146,8 +147,16 @@ function ConversationParams({
           )}
         </ul>
       </div>
-      {showConfirmationModal && <ConfirmationModal {...confirmationModalProps} />}
-    </>
+      <div className="conversation-params-modal">
+        {showConfirmationModal && <ConfirmationModal {...confirmationModalProps} />}
+        {showAddMembersModal && (
+          <AddMembersModal
+            conversation={conversation}
+            closeModal={() => setShowAddMembersModal(false)}
+          />
+        )}
+      </div>
+    </div>
   );
 }
 

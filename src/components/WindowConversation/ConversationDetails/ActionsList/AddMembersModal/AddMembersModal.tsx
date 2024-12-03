@@ -1,69 +1,49 @@
-import React, {
-  useState,
-  useContext,
-  useRef,
-  useCallback,
-  useEffect,
-} from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   useDisplayedConvContext,
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
 import "./AddMembersModal.css";
 import "../../../../Modal/Modal.css";
-import {
-  ConversationType,
-  UserDataType,
-} from "../../../../../typescript/types";
-import {
-  AddCircleOutline,
-  CheckmarkCircleOutline,
-  Close,
-  SearchOutline,
-} from "react-ionicons";
+import { ConversationType, UserDataType } from "../../../../../typescript/types";
+import { AddCircleOutline, CheckmarkCircleOutline, Close, SearchOutline } from "react-ionicons";
 import { ApiToken } from "../../../../../localStorage";
 import _ from "lodash";
-import { socket } from "../../../../../socket";
-import {
-  useMessagesContext,
-  useUserContext,
-} from "../../../../../constants/context";
+import { useMessagesContext, useUserContext } from "../../../../../constants/context";
 import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
 
 function AddMembersModal({
-  showAddMembersModal,
-  setShowAddMembersModal,
+  conversation,
+  closeModal,
 }: {
-  showAddMembersModal: boolean;
-  setShowAddMembersModal: React.Dispatch<React.SetStateAction<boolean>>;
+  conversation: ConversationType;
+  closeModal: () => void;
 }) {
-  const { user, setUser } = useUserContext();
+  const { user } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
-  const { messages, setMessages } = useMessagesContext();
+  const ref = useRef<HTMLDivElement>(null);
+  const { setMessages } = useMessagesContext();
   const { setMostRecentConv } = useMostRecentConvContext();
 
-  const [searchConversationInput, setSearchConversationInput] =
-    useState<string>("");
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const [conversationsList, setConversationsList] = useState<
-    ConversationType[]
-  >([]);
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
-  const handleSearchInputValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchConversationInput(e.target.value);
-    debouncedFetchUsers(e.target.value);
-  };
+  const [searchConversationInput, setSearchConversationInput] = useState<string>("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [usersPrediction, setUsersPrediction] = useState<UserDataType[]>([]);
   const [addedMembers, setAddedMembers] = useState<UserDataType[]>([]);
+
+  const handleSearchInputValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    setSearchConversationInput(e.target.value);
+    debouncedFetchUsers(e.target.value);
+  };
 
   const debouncedFetchUsers = useCallback(
     _.debounce(async (searchQuery: string) => {
       console.log("))))))))");
       console.log(searchQuery);
-      if (!displayedConv) return false;
-      const exceptUsers = displayedConv.members;
+      const exceptUsers = conversation.members;
       if (searchQuery.length > 2) {
         try {
           const response = await fetch(
@@ -122,8 +102,7 @@ function AddMembersModal({
     userId: string | undefined
   ) => {
     console.log(arrMembers, conversationId, userUsername, userId);
-    if (!conversationId || !userUsername || !userId || arrMembers.length < 1)
-      return;
+    if (!conversationId || !userUsername || !userId || arrMembers.length < 1) return;
     try {
       const response = await fetch(RESTAPIUri + "/conversation/addMembers", {
         method: "PATCH",
@@ -150,11 +129,12 @@ function AddMembersModal({
       const updatedConv = jsonData.conversation;
       updatedConv.lastMessage = jsonData.message;
       setAddedMembers([]);
-      setDisplayedConv(updatedConv);
+      if (conversation._id === displayedConv?._id) {
+        setDisplayedConv(updatedConv);
+      }
       setMostRecentConv(updatedConv);
-      setShowAddMembersModal(false);
+      closeModal();
       setMessages((prev) => [...prev, jsonData.message]);
-      //emitToSockets("convUpdate", updatedConv);
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -169,13 +149,23 @@ function AddMembersModal({
       searchInputRef.current.focus();
     }
 
-    return () => {};
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        closeModal();
+      }
+    };
+
+    //document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      //document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   return (
     <div className="modal">
       <div className="modal-overlay">
-        <div className="modal-content">
+        <div className="modal-content" ref={ref}>
           <div className="modal-content-inner">
             <div className="modal-title">
               <div className="modal-title-text">
@@ -184,7 +174,7 @@ function AddMembersModal({
               </div>
               <div className="modal-close-button">
                 <Close
-                  onClick={() => setShowAddMembersModal(false)}
+                  onClick={() => closeModal()}
                   color="black"
                   title={"Fermer"}
                   height="2rem"
@@ -194,10 +184,7 @@ function AddMembersModal({
             </div>
             <div className="modal-search-section">
               <div className="modal-searchbar">
-                <label
-                  htmlFor="search-conversations"
-                  className="modal-search-conversations-label"
-                >
+                <label htmlFor="search-conversations" className="modal-search-conversations-label">
                   <div className="modal-search-icon-container">
                     {" "}
                     <SearchOutline color={"#65676b"} />
@@ -215,16 +202,11 @@ function AddMembersModal({
               </div>
               <div className="modal-added-members-container">
                 {addedMembers.length === 0 && (
-                  <div className="no-added-members">
-                    Aucun utilisateur sélectionné
-                  </div>
+                  <div className="no-added-members">Aucun utilisateur sélectionné</div>
                 )}
                 {addedMembers.map((user) => (
                   <div className="modal-added-member">
-                    <div
-                      className="added-member-img-container"
-                      onClick={() => console.log(user)}
-                    >
+                    <div className="added-member-img-container" onClick={() => console.log(user)}>
                       <ProfilePic props={user.photo} />
                     </div>
                     <div className="added-member-username">{user.userName}</div>
@@ -233,10 +215,7 @@ function AddMembersModal({
               </div>
               <div className="users-found-list">
                 {usersPrediction.map((user) => (
-                  <div
-                    className="user-found"
-                    onClick={() => handleUserClick(user)}
-                  >
+                  <div className="user-found" onClick={() => handleUserClick(user)}>
                     <div className="found-msg-user-img">
                       <div className="found-msg-user-img-container">
                         {" "}
@@ -247,19 +226,11 @@ function AddMembersModal({
                     <div className="is-user-added">
                       {isUserAdded(user._id) ? (
                         <>
-                          <CheckmarkCircleOutline
-                            color={"blue"}
-                            width={"2rem"}
-                            height={"2rem"}
-                          />
+                          <CheckmarkCircleOutline color={"blue"} width={"2rem"} height={"2rem"} />
                         </>
                       ) : (
                         <>
-                          <AddCircleOutline
-                            color={"#65676b"}
-                            width={"2rem"}
-                            height={"2rem"}
-                          />
+                          <AddCircleOutline color={"#65676b"} width={"2rem"} height={"2rem"} />
                         </>
                       )}
                     </div>
@@ -272,12 +243,7 @@ function AddMembersModal({
                   className="confirm-add-members-btn"
                   disabled={addedMembers.length === 0}
                   onClick={() => {
-                    handleAddMembers(
-                      addedMembers,
-                      displayedConv?._id,
-                      user?.userName,
-                      user?._id
-                    );
+                    handleAddMembers(addedMembers, conversation._id, user?.userName, user?._id);
                   }}
                 >
                   Ajouter des personnes
