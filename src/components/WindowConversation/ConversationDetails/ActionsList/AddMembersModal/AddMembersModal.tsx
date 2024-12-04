@@ -207,6 +207,14 @@ function AddMembersModal({
                 {addedMembers.map((user) => (
                   <div className="modal-added-member">
                     <div className="added-member-img-container" onClick={() => console.log(user)}>
+                      <div className="modal-delete-added-member">
+                        <Close
+                          color={"#65676b"}
+                          height={"1rem"}
+                          width={"1rem"}
+                          onClick={() => handleUserClick(user)}
+                        />
+                      </div>
                       <ProfilePic props={user.photo} />
                     </div>
                     <div className="added-member-username">{user.userName}</div>

@@ -24,6 +24,29 @@
   width: 2.5rem;
   border-radius: 50%;
   background-color: aqua;
+  position: relative;
+}
+.modal-delete-added-member {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  cursor: pointer;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1/1;
+}
+.modal-delete-added-member > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.added-member-img-container:has(.modal-delete-added-member:hover) {
+  transform: scale(0.9);
 }
 .added-member-username {
   margin-top: 0.25rem;
