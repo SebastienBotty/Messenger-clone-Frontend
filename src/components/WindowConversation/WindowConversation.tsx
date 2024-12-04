@@ -46,6 +46,7 @@ import { getFileTypeFromPathName } from "../../functions/file";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { formatDateMsg, timeSince } from "../../functions/time";
 import { statusTranslate } from "../../constants/status";
+import GifPicker, { TenorImage } from "gif-picker-react";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -92,6 +93,9 @@ function WindowConversation() {
   const [showConvDetails, setShowConvDetails] = useState<boolean>(false); //Displays conversation details
 
   const [selectedFoundMsgId, setSelectedFoundMsgId] = useState<string>(""); //Stocks the id of the message that was found by the search bar
+
+  const [showGifPicker, setShowGifPicker] = useState<boolean>(false);
+  const gifPickerRef = useRef<HTMLDivElement>(null);
 
   const fetchMessages = async (): Promise<MessageType[] | false> => {
     const response = await fetch(
@@ -620,6 +624,29 @@ function WindowConversation() {
     setHoveredId(null);
   };
 
+  const handleGifPickerContainerClick = (event: MouseEvent) => {
+    if (gifPickerRef.current && !gifPickerRef.current.contains(event.target as Node)) {
+      setShowGifPicker(false);
+    }
+  };
+
+  const handleGifClick = (gif: TenorImage) => {
+    if (!user || !displayedConv) return;
+    console.log(gif);
+    setShowGifPicker(false);
+
+    const messageData = {
+      author: user.userName,
+      authorId: user._id,
+      text: "GIF/" + displayedConv._id + ":" + gif.preview.url,
+      seenBy: [user.userName],
+      date: new Date(),
+      conversationId: displayedConv._id,
+    };
+
+    postMessage(messageData);
+  };
+
   useEffect(() => {
     setInputMessage("");
     if (displayedConv) {
@@ -750,6 +777,7 @@ function WindowConversation() {
           });
         }
       });
+      document.addEventListener("mousedown", handleGifPickerContainerClick);
 
       //Close conversatoin details every time a new conversation is selected
     } else if (searchInputRef.current) {
@@ -767,6 +795,7 @@ function WindowConversation() {
       socket.off("newFile");
       socket.off("changeStatus");
       socket.off("isUserONline");
+      document.removeEventListener("mousedown", handleGifPickerContainerClick);
     };
   }, [displayedConv?._id]);
   useEffect(() => {
@@ -1281,27 +1310,50 @@ function WindowConversation() {
                 />
                 {!inputMessage && (
                   <>
-                    <ImagesOutline
-                      onClick={openFileInput}
-                      title="Joindre un fichier"
-                      color={"#00000"}
-                      height="3vh"
-                      width="3vh"
-                      style={{ transform: "rotate(270deg)" }}
-                    />
-                    <ImagesOutline
-                      onClick={() => console.log(droppedFiles)}
-                      color={"#00000"}
-                      height="3vh"
-                      width="3vh"
-                      style={{ transform: "rotate(270deg)" }}
-                    />
-                    <ImagesOutline
-                      color={"#00000"}
-                      height="3vh"
-                      width="3vh"
-                      style={{ transform: "rotate(270deg)" }}
-                    />
+                    <div className="icon">
+                      {" "}
+                      <ImagesOutline
+                        onClick={openFileInput}
+                        title="Joindre un fichier"
+                        color={"#00000"}
+                        width={"1.5rem"}
+                        height={"1.5rem"}
+                        style={{ transform: "rotate(270deg)" }}
+                      />
+                    </div>
+                    <div className="icon">
+                      {" "}
+                      <ImagesOutline
+                        onClick={() => console.log(droppedFiles)}
+                        color={"#00000"}
+                        width={"1.5rem"}
+                        height={"1.5rem"}
+                        style={{ transform: "rotate(270deg)" }}
+                      />
+                    </div>
+
+                    <div
+                      className="gif-icon icon"
+                      ref={gifPickerRef}
+                      onClick={() => setShowGifPicker(!showGifPicker)}
+                    >
+                      <ImagesOutline
+                        width={"1.5rem"}
+                        height={"1.5rem"}
+                        color={"#00000"}
+                        title={"Envoyer un GIF"}
+                        style={{ transform: "rotate(270deg)" }}
+                      />
+                      <div className="gif-picker-container" onClick={(e) => e.stopPropagation()}>
+                        {" "}
+                        {showGifPicker && (
+                          <GifPicker
+                            tenorApiKey={process.env.REACT_APP_TENOR_API_KEY as string}
+                            onGifClick={(gif) => handleGifClick(gif)}
+                          />
+                        )}
+                      </div>
+                    </div>
                   </>
                 )}
               </div>

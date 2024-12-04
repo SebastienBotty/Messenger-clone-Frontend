@@ -398,15 +398,35 @@
   justify-content: center;
   align-items: center;
 }
-.conversation-footer .icons > * {
+.conversation-footer .icons .icon {
+  width: 1.5rem;
   cursor: pointer;
   border-radius: 50%; /* Rend l'image ronde */
+  aspect-ratio: 1/1;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.conversation-footer .icons > *:hover {
+.conversation-footer .icons .icon:hover {
   background-color: #f0f2f5;
+}
+
+.icons .icon > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gif-icon {
+  position: relative;
+}
+
+.gif-picker-container {
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .conversation-footer .message-input {

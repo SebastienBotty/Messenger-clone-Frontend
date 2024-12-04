@@ -9,13 +9,9 @@ import { ImgS3DataType, MessageType } from "../../../typescript/types";
 function AsyncMsg({ message }: { message: MessageType }) {
   const convId = message.conversationId;
   const text = message.text;
-  const [content, setContent] = useState<ReactNode | null | JSX.Element[]>(
-    null
-  );
+  const [content, setContent] = useState<ReactNode | null | JSX.Element[]>(null);
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
-  const [showImgVisualizer, setShowImgVisualizer] = useState<boolean | null>(
-    false
-  );
+  const [showImgVisualizer, setShowImgVisualizer] = useState<boolean | null>(false);
   const [imgData, setImgData] = useState<ImgS3DataType>({
     src: "",
     name: "",
@@ -25,11 +21,7 @@ function AsyncMsg({ message }: { message: MessageType }) {
   const fetchFilesUrl = async (fileNamesStr: string) => {
     try {
       const response = await fetch(
-        RESTAPIUri +
-          "/file/conversationId/" +
-          convId +
-          "/getFiles?fileNames=" +
-          fileNamesStr,
+        RESTAPIUri + "/file/conversationId/" + convId + "/getFiles?fileNames=" + fileNamesStr,
         {
           method: "GET",
           headers: {
@@ -66,7 +58,12 @@ function AsyncMsg({ message }: { message: MessageType }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!text.startsWith("PATHIMAGE/" + convId + ":")) {
+      if (text.startsWith("GIF/" + convId + ":")) {
+        const gifUrl = text.split("GIF/" + convId + ":")[1];
+        setContent(
+          <span>{<img src={gifUrl} alt="gif" onClick={() => window.open(gifUrl)} />}</span>
+        );
+      } else if (!text.startsWith("PATHIMAGE/" + convId + ":")) {
         setContent(<span>{<LinkFormatter text={text} />}</span>); // <span>{text}</span>);
       } else {
         const fileNamesStr = text.split("PATHIMAGE/" + convId + ":")[1];
@@ -113,10 +110,7 @@ function AsyncMsg({ message }: { message: MessageType }) {
       <div className="msg-file-container">{content}</div>
 
       {showImgVisualizer && (
-        <ImageVizualizer
-          closeVisualizer={() => setShowImgVisualizer(false)}
-          imgData={imgData}
-        />
+        <ImageVizualizer closeVisualizer={() => setShowImgVisualizer(false)} imgData={imgData} />
       )}
     </div>
   );
