@@ -40,20 +40,17 @@ function MuteConversation({
     if (!user) return;
     const untilDate = new Date(Date.now() + muteTimeOptions[checkBoxChecked]);
     try {
-      const response = await fetch(
-        RESTAPIUri + "/user/userId/" + user._id + "/muteConversation",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: "Bearer " + ApiToken(),
-          },
-          body: JSON.stringify({
-            conversationId: conversationId,
-            untilDate: untilDate,
-          }),
-        }
-      );
+      const response = await fetch(RESTAPIUri + "/user/userId/" + user._id + "/muteConversation", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: "Bearer " + ApiToken(),
+        },
+        body: JSON.stringify({
+          conversationId: conversationId,
+          untilDate: untilDate,
+        }),
+      });
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message);
@@ -66,10 +63,7 @@ function MuteConversation({
         if (prev) {
           return {
             ...prev,
-            mutedConversations: [
-              ...prev.mutedConversations,
-              { conversationId, untilDate },
-            ],
+            mutedConversations: [...prev.mutedConversations, { conversationId, untilDate }],
           };
         }
         return prev;
@@ -139,18 +133,12 @@ function MuteConversation({
 
       <span className="mute-conversation-text">{muteConv.text}</span>
       <span className="mute-conversation-error-msg">{errorMsg}</span>
-      <div className="mute-oconversation-btns-container">
+      <div className="mute-conversation-btns-container">
         {" "}
-        <button
-          className="cancel-button confirmation-modal-btn"
-          onClick={closeModal}
-        >
+        <button className="cancel-button confirmation-modal-btn" onClick={closeModal}>
           Annuler
         </button>
-        <button
-          className="confirm-button confirmation-modal-btn"
-          onClick={submitMute}
-        >
+        <button className="confirm-button confirmation-modal-btn" onClick={submitMute}>
           Confirmer
         </button>
       </div>
