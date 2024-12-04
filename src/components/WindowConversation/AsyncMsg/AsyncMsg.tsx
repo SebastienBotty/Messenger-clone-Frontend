@@ -64,6 +64,7 @@ function AsyncMsg({ message }: { message: MessageType }) {
           <div>
             {
               <img
+                className="gif-img"
                 src={gifUrl}
                 alt="gif"
                 onClick={() => window.open(gifUrl)}
