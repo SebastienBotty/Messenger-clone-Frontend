@@ -17,6 +17,7 @@ import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { isConvMuted } from "../../functions/conversation";
 import ConversationParams from "./ConversationParams/ConversationParams";
+import { getMessageText } from "../../functions/StrFormatter";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const { user } = useUserContext();
@@ -251,6 +252,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
    * @return {JSX.Element} The rendered conversation item.
    */
   const conversationsMap = (conversation: ConversationType, index: number) => {
+    if (!user) return null;
     return (
       <div
         key={conversation._id + "-" + index}
@@ -288,17 +290,19 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
               {conversation.lastMessage.author === "System/" + conversation._id ? (
                 <ConvSystemMsg textProps={conversation.lastMessage.text} />
               ) : conversation.isGroupConversation ? (
-                (conversation.lastMessage.author === user?.userName
-                  ? "Vous"
-                  : conversation.lastMessage.author) +
-                ": " +
-                (conversation.lastMessage.text.startsWith("PATHIMAGE/" + conversation._id)
-                  ? " Fichier joint"
-                  : conversation.lastMessage.text)
-              ) : conversation.lastMessage.text.startsWith("PATHIMAGE/" + conversation._id) ? (
-                " Fichier joint"
+                getMessageText(
+                  conversation._id,
+                  user?.userName,
+                  conversation.lastMessage.author,
+                  conversation.lastMessage.text
+                )
               ) : (
-                conversation.lastMessage.text
+                getMessageText(
+                  conversation._id,
+                  user?.userName,
+                  conversation.lastMessage.author,
+                  conversation.lastMessage.text
+                )
               )}
             </div>{" "}
             &nbsp;- {timeSince(conversation.lastMessage.date)} &nbsp;

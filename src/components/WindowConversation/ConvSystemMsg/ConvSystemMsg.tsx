@@ -1,8 +1,7 @@
-import React, { useContext } from "react";
 import { convMemberMsg } from "../../../functions/StrFormatter";
 import { useUserContext } from "../../../constants/context";
 function ConvSystemMsg({ textProps }: { textProps: string }) {
-  const { user, setUser } = useUserContext();
+  const { user } = useUserContext();
   const event = textProps.split("-");
   const agent = event[0];
   const action = event[1];
