@@ -61,7 +61,16 @@ function AsyncMsg({ message }: { message: MessageType }) {
       if (text.startsWith("GIF/" + convId + ":")) {
         const gifUrl = text.split("GIF/" + convId + ":")[1];
         setContent(
-          <span>{<img src={gifUrl} alt="gif" onClick={() => window.open(gifUrl)} />}</span>
+          <div>
+            {
+              <img
+                src={gifUrl}
+                alt="gif"
+                onClick={() => window.open(gifUrl)}
+                style={{ cursor: "pointer" }}
+              />
+            }
+          </div>
         );
       } else if (!text.startsWith("PATHIMAGE/" + convId + ":")) {
         setContent(<span>{<LinkFormatter text={text} />}</span>); // <span>{text}</span>);

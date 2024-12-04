@@ -288,6 +288,9 @@
 #message-others .msg-date {
   left: 100% !important;
 }
+.message:has(.async-msg .msg-file-container div img) {
+  background-color: transparent !important;
+}
 
 .selectedFoundMsg {
   border: 2px double black;
