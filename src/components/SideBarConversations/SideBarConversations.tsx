@@ -363,6 +363,15 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       console.log(data[0]);
       const currentMsg = data[0];
       const conversation = data[1];
+      setConversations((prev) => {
+        return prev.map((conv) => {
+          if (conv._id === currentMsg.conversationId) {
+            return { ...conv, lastMessage: { ...currentMsg, date: new Date(currentMsg.date) } };
+          } else {
+            return conv;
+          }
+        });
+      });
 
       if (displayedConv?._id === currentMsg.conversationId) {
         // On new message, if the displayed conversation is the one with the new message, update the last message and mark it as seen

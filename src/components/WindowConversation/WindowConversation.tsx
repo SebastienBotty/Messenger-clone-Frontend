@@ -34,6 +34,7 @@ import {
   ConversationMediasContext,
   useUserContext,
   useMessagesContext,
+  useConversationsContext,
 } from "../../constants/context";
 import TypingDots from "../Utiles/TypingDots/TypingdDots";
 import _ from "lodash";
@@ -45,7 +46,7 @@ import ConversationDetails from "./ConversationDetails/ConversationDetails";
 import ConvSystemMsg from "./ConvSystemMsg/ConvSystemMsg";
 import { checkCacheFile } from "../../functions/cache";
 import { getFileTypeFromPathName } from "../../functions/file";
-import { updateDeletedMsg } from "../../functions/updateMessage";
+import { updateConvLastMsgDelete, updateDeletedMsg } from "../../functions/updateMessage";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { formatDateMsg, timeSince } from "../../functions/time";
 import { statusTranslate } from "../../constants/status";
@@ -64,6 +65,7 @@ function WindowConversation() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
+  const { setConversations } = useConversationsContext();
   const { trigger, setTrigger } = useTriggerContext();
   const [inputMessage, setInputMessage] = useState<string>("");
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
@@ -780,14 +782,17 @@ function WindowConversation() {
             return prev;
           });
         }
-        socket.on("deletedMessage", (data) => {
-          const msg = data[0];
-          const conversationId = data[1];
-          if (conversationId === displayedConv?._id) {
-            updateDeletedMsg(msg._id, setMessages);
-            console.log("SOCKET ON OKLM");
-          }
-        });
+      });
+      socket.on("deletedMessage", (data) => {
+        const msg: MessageType = data[0];
+        const conversationId: string = data[1];
+        console.log(msg, conversationId);
+        if (conversationId === displayedConv?._id) {
+          console.log("SOCKET ON OKLM");
+
+          updateDeletedMsg(msg, setMessages);
+        }
+        updateConvLastMsgDelete(msg, setConversations);
       });
       document.addEventListener("mousedown", handleGifPickerContainerClick);
 

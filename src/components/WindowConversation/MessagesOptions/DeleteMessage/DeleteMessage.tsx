@@ -4,12 +4,13 @@ import "./DeleteMessage.css";
 import { deleteMessage } from "../../../../constants/ConfirmationMessage";
 import { MessageType } from "../../../../typescript/types";
 import { deleteMessageForEveryone, deleteMessageForUser } from "../../../../api/message";
-import { useUserContext } from "../../../../constants/context";
+import { useConversationsContext, useUserContext } from "../../../../constants/context";
 import { useMessagesContext } from "../../../../constants/context";
-import { updateDeletedMsg } from "../../../../functions/updateMessage";
+import { updateConvLastMsgDelete, updateDeletedMsg } from "../../../../functions/updateMessage";
 function DeleteMessage({ message, closeModal }: { message: MessageType; closeModal: () => void }) {
   const { user } = useUserContext();
   const { setMessages } = useMessagesContext();
+  const { setConversations } = useConversationsContext();
   const [checkBoxValue, setCheckBoxValue] = useState<"All" | "Me">("All");
 
   const submitDeleteMessage = async () => {
@@ -21,7 +22,8 @@ function DeleteMessage({ message, closeModal }: { message: MessageType; closeMod
       console.log("ICICICICICICICI");
       const res = await deleteMessageForEveryone(message._id, user._id, user.userName);
       if (res) {
-        updateDeletedMsg(message._id, setMessages);
+        updateDeletedMsg(message, setMessages);
+        updateConvLastMsgDelete(message, setConversations);
         closeModal();
       }
     } else if (checkBoxValue === "Me") {
