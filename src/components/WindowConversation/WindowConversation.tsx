@@ -1169,10 +1169,6 @@ function WindowConversation() {
                   </div>
                 );
               }
-              if (message?.deletedBy?.find((deletedByUser) => deletedByUser.userId === user?._id)) {
-                return <></>;
-              }
-
               if (message?.author === user?.userName) {
                 return (
                   <div
