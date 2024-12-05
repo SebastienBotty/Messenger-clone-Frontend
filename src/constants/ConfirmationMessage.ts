@@ -34,3 +34,15 @@ export const muteConv = {
   option4: "Pendant 24 heures",
   option5: "Jusqu'à réactivation",
 };
+export const deleteMessage = {
+  title: "Supprimer le message",
+  deleteAll: {
+    title: "Retirer pour tout le monde",
+    text: "Ce message sera retiré pour tous les participants à la discussion. Il est possible que certains l’aient déjà vu ou transféré.",
+  },
+  deleteMe: {
+    title: "Retirer pour moi",
+    text: "Ce message sera supprimé pour vous. Les autres membres de la discussion pourront encore le voir.",
+  },
+  deletedMessage: "Ce message a été supprimé",
+};

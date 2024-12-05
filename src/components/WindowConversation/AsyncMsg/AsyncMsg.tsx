@@ -109,7 +109,7 @@ function AsyncMsg({ message }: { message: MessageType }) {
     };
 
     fetchData();
-  }, []);
+  }, [message.text]);
 
   if (content === null) {
     return <span>Loading...</span>;
@@ -117,7 +117,12 @@ function AsyncMsg({ message }: { message: MessageType }) {
 
   return (
     <div className="async-msg">
-      <div className="msg-file-container">{content}</div>
+      <div
+        className="msg-file-container"
+        style={message.deletedForEveryone ? { fontStyle: "italic", color: "#4C4C4D" } : {}}
+      >
+        {content}
+      </div>
 
       {showImgVisualizer && (
         <ImageVizualizer closeVisualizer={() => setShowImgVisualizer(false)} imgData={imgData} />

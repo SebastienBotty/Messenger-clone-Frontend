@@ -85,6 +85,11 @@ export type MessageType = {
   date: Date;
   conversationId: string | undefined;
   _id?: string;
+  deletedBy?: Array<{
+    username: string;
+    userId: string;
+  }>;
+  deletedForEveryone?: boolean;
 };
 
 export type LastMsgSeenByMembersType = {
@@ -143,4 +148,5 @@ export type ConfirmationModalPropsType = {
   text: string | JSX.Element;
   action: () => void;
   closeModal: () => void;
+  width?: string;
 };

@@ -1,0 +1,40 @@
+.message-more-options {
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.1), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.message-container:hover .message-options {
+  display: flex;
+}
+.message-container .message-options {
+  z-index: 1;
+  display: none;
+  align-items: center;
+}
+.message-container .message-options .icons {
+  display: flex;
+  gap: 0.5rem;
+}
+.message-options .icons .icon {
+  position: relative;
+}
+
+.message-more-options-li {
+  list-style-type: none;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  width: 7.5rem;
+  font-weight: 500;
+  color: #65676b;
+}
+.message-more-options-li:hover {
+  background-color: #f2f2f2;
+}

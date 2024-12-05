@@ -17,6 +17,9 @@ import {
   Send,
   Close,
   ArrowDown,
+  EllipsisVertical,
+  ArrowUndo,
+  HappyOutline,
 } from "react-ionicons";
 
 import "./WindowConversation.css";
@@ -47,6 +50,7 @@ import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { formatDateMsg, timeSince } from "../../functions/time";
 import { statusTranslate } from "../../constants/status";
 import GifPicker, { TenorImage } from "gif-picker-react";
+import MessagesOptions from "./MessagesOptions/MessagesOptions";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -1165,6 +1169,10 @@ function WindowConversation() {
                   </div>
                 );
               }
+              if (message?.deletedBy?.find((deletedByUser) => deletedByUser.userId === user?._id)) {
+                return <></>;
+              }
+
               if (message?.author === user?.userName) {
                 return (
                   <div
@@ -1179,6 +1187,7 @@ function WindowConversation() {
                       </div>
                     )}
                     <div className="message-container" id="message-me">
+                      <MessagesOptions message={message} />
                       <div
                         className={`message ${
                           selectedFoundMsgId === message._id ? "selectedFoundMsg" : ""
@@ -1215,6 +1224,8 @@ function WindowConversation() {
                   >
                     {checkMsgTime.isMoreThan15Minutes && (
                       <div className="message-container" id="Time-center-display">
+                        {" "}
+                        <MessagesOptions message={message} />
                         {compareNowToDate(checkMsgTime.date) ||
                           checkMsgTime.hours + " : " + checkMsgTime.minutes}
                       </div>
@@ -1261,6 +1272,7 @@ function WindowConversation() {
                       </div>
                     )}
                   <div className="message-container" id="message-others">
+                    {" "}
                     <div className="img-container">
                       <img src={image} />
                     </div>
@@ -1277,7 +1289,8 @@ function WindowConversation() {
                         <div className="msg-date">{formatDateMsg(new Date(message.date))}</div>
                       )}
                       <AsyncMsg message={message} />
-                    </div>
+                    </div>{" "}
+                    <MessagesOptions message={message} />
                   </div>
                   <div className="seen-by">
                     {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
@@ -1301,13 +1314,17 @@ function WindowConversation() {
           {(user && displayedConv?.members.includes(user.userName)) || displayedConv == null ? (
             <>
               <div className="icons">
-                <AddCircle
-                  color={"#00000"}
-                  title="Ouvrir plus d'actions"
-                  height="3vh"
-                  width="3vh"
-                  style={{ marginRight: "0.5rem" }}
-                />
+                <div className="icon">
+                  {" "}
+                  <AddCircle
+                    color={"black"}
+                    title="Ouvrir plus d'actions"
+                    height="3vh"
+                    width="3vh"
+                    style={{ marginRight: "0.5rem" }}
+                  />
+                </div>
+
                 {!inputMessage && (
                   <>
                     <div className="icon">
@@ -1315,7 +1332,7 @@ function WindowConversation() {
                       <ImagesOutline
                         onClick={openFileInput}
                         title="Joindre un fichier"
-                        color={"#00000"}
+                        color={"black"}
                         width={"1.5rem"}
                         height={"1.5rem"}
                         style={{ transform: "rotate(270deg)" }}
@@ -1325,7 +1342,7 @@ function WindowConversation() {
                       {" "}
                       <ImagesOutline
                         onClick={() => console.log(droppedFiles)}
-                        color={"#00000"}
+                        color={"black"}
                         width={"1.5rem"}
                         height={"1.5rem"}
                         style={{ transform: "rotate(270deg)" }}
@@ -1340,7 +1357,7 @@ function WindowConversation() {
                       <ImagesOutline
                         width={"1.5rem"}
                         height={"1.5rem"}
-                        color={"#00000"}
+                        color={"black"}
                         title={"Envoyer un GIF"}
                         style={{ transform: "rotate(270deg)" }}
                       />

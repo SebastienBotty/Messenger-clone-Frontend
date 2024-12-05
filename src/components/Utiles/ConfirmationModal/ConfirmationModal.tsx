@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 import "./ConfirmationModal.css";
 import "../../Modal/Modal.css";
@@ -16,12 +16,28 @@ export default function ConfirmationModal({
   closeModal: () => void;
   width?: string;
 }) {
+  const confirmationModalRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        confirmationModalRef.current &&
+        !confirmationModalRef.current.contains(event.target as Node)
+      ) {
+        closeModal();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  });
   return (
     <div className="modal">
       <div className="modal-overlay">
         <div
           className="modal-content modal-content-confirmation"
           style={{ width }}
+          ref={confirmationModalRef}
         >
           <div className="modal-content-inner modal-content-inner-confirmation">
             <div className="modal-title modal-confirmation-title">
@@ -42,16 +58,10 @@ export default function ConfirmationModal({
             <div className="modal-confirmation-text">{text}</div>
             {typeof text === "string" && (
               <div className="modal-confirmation-action">
-                <button
-                  className="cancel-button confirmation-modal-btn"
-                  onClick={closeModal}
-                >
+                <button className="cancel-button confirmation-modal-btn" onClick={closeModal}>
                   Annuler
                 </button>
-                <button
-                  className="confirm-button confirmation-modal-btn"
-                  onClick={action}
-                >
+                <button className="confirm-button confirmation-modal-btn" onClick={action}>
                   Confirmer
                 </button>
               </div>
