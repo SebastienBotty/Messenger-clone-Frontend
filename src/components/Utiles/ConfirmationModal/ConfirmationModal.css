@@ -17,6 +17,7 @@
 .modal-confirmation-title {
   height: auto !important;
   border-color: lightgray !important;
+  padding: 0.5rem !important;
 }
 
 .modal-confirmation-close-button {

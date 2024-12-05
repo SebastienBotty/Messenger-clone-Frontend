@@ -3,7 +3,10 @@
   height: 100%;
   border-left: 1px solid #e6e6e6;
   display: flex;
+  position: relative;
+  background-color: white;
 }
+
 .conversation-container {
   width: 100%;
   height: 100%;
@@ -68,8 +71,10 @@
   width: 100%;
 }
 
-.img-container:has(svg) {
+.img-container:has(svg),
+.img-container:has(img) {
   background-color: #f0f2f5;
+  z-index: 1;
 }
 
 .conversation-member-name {
@@ -238,6 +243,7 @@
   width: 100%;
   margin-top: 0.125rem;
   min-height: 2.5rem;
+  gap: 0.5rem;
 }
 
 #Time-center-display {
@@ -245,10 +251,20 @@
 }
 .message-container .img-container {
   display: flex;
-  align-items: end;
   margin-left: 0.75rem;
   width: 1.75rem;
+  height: 100%;
 }
+
+.icons .icon {
+  cursor: pointer;
+}
+.icons .icon > svg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .message-container .img-container img {
   border-radius: 50%; /* Rend l'image ronde */
   width: 1.75rem; /* Définit la largeur de l'image */
@@ -284,12 +300,14 @@
   color: white;
   background-color: #333333;
   border-radius: 0.75rem;
+  z-index: 1;
 }
 #message-others .msg-date {
   left: 100% !important;
 }
 .message:has(.async-msg .msg-file-container div img) {
   background-color: transparent !important;
+  z-index: 1;
 }
 
 .selectedFoundMsg {
@@ -322,9 +340,10 @@
 
   margin: 0 auto;
   text-align: center;
-  color: gray;
+  color: gray !important;
   font-size: small;
   overflow: hidden;
+  z-index: 1;
 }
 
 .conversation-body-bottom {
@@ -401,7 +420,7 @@
   justify-content: center;
   align-items: center;
 }
-.conversation-footer .icons .icon {
+.icons .icon {
   width: 1.5rem;
   cursor: pointer;
   border-radius: 50%; /* Rend l'image ronde */
@@ -410,7 +429,8 @@
   justify-content: center;
   align-items: center;
 }
-.conversation-footer .icons .icon:hover {
+
+.icons .icon:hover {
   background-color: #f0f2f5;
 }
 
