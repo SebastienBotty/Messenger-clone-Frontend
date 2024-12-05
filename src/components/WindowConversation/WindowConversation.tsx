@@ -29,7 +29,6 @@ import {
   useTriggerContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
 import {
-  MessagesContext,
   SelectedFoundMsgIdContext,
   ConversationFilesContext,
   ConversationMediasContext,
@@ -46,6 +45,7 @@ import ConversationDetails from "./ConversationDetails/ConversationDetails";
 import ConvSystemMsg from "./ConvSystemMsg/ConvSystemMsg";
 import { checkCacheFile } from "../../functions/cache";
 import { getFileTypeFromPathName } from "../../functions/file";
+import { updateDeletedMsg } from "../../functions/updateMessage";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { formatDateMsg, timeSince } from "../../functions/time";
 import { statusTranslate } from "../../constants/status";
@@ -780,6 +780,14 @@ function WindowConversation() {
             return prev;
           });
         }
+        socket.on("deletedMessage", (data) => {
+          const msg = data[0];
+          const conversationId = data[1];
+          if (conversationId === displayedConv?._id) {
+            updateDeletedMsg(msg._id, setMessages);
+            console.log("SOCKET ON OKLM");
+          }
+        });
       });
       document.addEventListener("mousedown", handleGifPickerContainerClick);
 
@@ -799,6 +807,7 @@ function WindowConversation() {
       socket.off("newFile");
       socket.off("changeStatus");
       socket.off("isUserONline");
+      socket.off("deletedMessage");
       document.removeEventListener("mousedown", handleGifPickerContainerClick);
     };
   }, [displayedConv?._id]);

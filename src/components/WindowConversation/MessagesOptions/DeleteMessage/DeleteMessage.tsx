@@ -6,6 +6,7 @@ import { MessageType } from "../../../../typescript/types";
 import { deleteMessageForEveryone, deleteMessageForUser } from "../../../../api/message";
 import { useUserContext } from "../../../../constants/context";
 import { useMessagesContext } from "../../../../constants/context";
+import { updateDeletedMsg } from "../../../../functions/updateMessage";
 function DeleteMessage({ message, closeModal }: { message: MessageType; closeModal: () => void }) {
   const { user } = useUserContext();
   const { setMessages } = useMessagesContext();
@@ -20,7 +21,7 @@ function DeleteMessage({ message, closeModal }: { message: MessageType; closeMod
       console.log("ICICICICICICICI");
       const res = await deleteMessageForEveryone(message._id, user._id, user.userName);
       if (res) {
-        updateDeletedMsg(message._id);
+        updateDeletedMsg(message._id, setMessages);
         closeModal();
       }
     } else if (checkBoxValue === "Me") {
@@ -35,36 +36,7 @@ function DeleteMessage({ message, closeModal }: { message: MessageType; closeMod
 
   const updateDeletedMsgByUser = (messageId: string) => {
     if (!user) return;
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg._id === messageId
-          ? {
-              ...msg,
-              deleteByUser: msg.deletedBy?.push({ userId: user._id, username: user.userName }),
-            }
-          : msg
-      )
-    );
-  };
-  const updateDeletedMsg = (messageId: string) => {
-    console.log("UPDATE DELETED MESSAGE CALLED");
-    setMessages((prev) =>
-      prev.map((msg) => {
-        if (msg._id === messageId) {
-          console.log("MEME ID ICICICICICIC");
-          console.log(msg.deletedForEveryone, msg.text);
-          const oui = {
-            ...msg,
-            deletedForEveryone: true,
-            text: deleteMessage.deletedMessage,
-          };
-          console.log(oui);
-          return oui;
-        } else {
-          return msg;
-        }
-      })
-    );
+    setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
   };
 
   return (
