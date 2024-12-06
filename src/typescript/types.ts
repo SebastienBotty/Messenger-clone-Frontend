@@ -90,6 +90,7 @@ export type MessageType = {
     userId: string;
   }>;
   deletedForEveryone?: boolean;
+  deletedForEveryoneDate?: Date | null;
 };
 
 export type LastMsgSeenByMembersType = {

@@ -11,6 +11,7 @@ export const updateDeletedMsg = (
     deletedForEveryone: true,
     text: deleteMessage.deletedMessage,
     date: new Date(message.date),
+    deletedForEveryoneDate: new Date(),
   };
   console.log(newMsg);
   setMessages((prev) =>

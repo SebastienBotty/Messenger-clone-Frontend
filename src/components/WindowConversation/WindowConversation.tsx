@@ -1207,7 +1207,17 @@ function WindowConversation() {
                         onMouseLeave={handleMouseLeave}
                       >
                         {hoveredId === message._id && (
-                          <div className="msg-date">{formatDateMsg(new Date(message.date))}</div>
+                          <div className="msg-date">
+                            <div className="sent-date">
+                              {message.deletedForEveryoneDate && "Envoyé: "}
+                              {formatDateMsg(new Date(message.date))}
+                            </div>
+                            {message.deletedForEveryoneDate && (
+                              <div className="delete-date">
+                                Retiré: {formatDateMsg(new Date(message.deletedForEveryoneDate))}
+                              </div>
+                            )}
+                          </div>
                         )}
 
                         <AsyncMsg message={message} />
@@ -1258,7 +1268,17 @@ function WindowConversation() {
                         onMouseLeave={handleMouseLeave}
                       >
                         {hoveredId === message._id && (
-                          <div className="msg-date">{formatDateMsg(new Date(message.date))}</div>
+                          <div className="msg-date">
+                            <div className="sent-date">
+                              {message.deletedForEveryoneDate && "Envoyé: "}
+                              {formatDateMsg(new Date(message.date))}
+                            </div>
+                            {message.deletedForEveryoneDate && (
+                              <div className="delete-date">
+                                Retiré: {formatDateMsg(new Date(message.deletedForEveryoneDate))}
+                              </div>
+                            )}
+                          </div>
                         )}
                         <AsyncMsg message={message} />
                       </div>
@@ -1297,7 +1317,17 @@ function WindowConversation() {
                       onMouseLeave={handleMouseLeave}
                     >
                       {hoveredId === message._id && (
-                        <div className="msg-date">{formatDateMsg(new Date(message.date))}</div>
+                        <div className="msg-date">
+                          <div className="sent-date">
+                            {message.deletedForEveryoneDate && "Envoyé: "}
+                            {formatDateMsg(new Date(message.date))}
+                          </div>
+                          {message.deletedForEveryoneDate && (
+                            <div className="delete-date">
+                              Retiré: {formatDateMsg(new Date(message.deletedForEveryoneDate))}
+                            </div>
+                          )}
+                        </div>
                       )}
                       <AsyncMsg message={message} />
                     </div>{" "}
