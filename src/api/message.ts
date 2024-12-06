@@ -1,4 +1,5 @@
 import { ApiToken } from "../localStorage";
+import { MessageType } from "../typescript/types";
 const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
 export const deleteMessageForUser = async (
@@ -83,3 +84,5 @@ export const deleteMessageForEveryone = async (
     return false;
   }
 };
+
+export const transferMsg = async (message: MessageType, conversationIdTarget: string) => {};

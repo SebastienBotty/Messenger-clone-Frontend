@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 
 import "./ConfirmationModal.css";
-import "../../Modal/Modal.css";
+import "../../TransferModal/TransferModal.css";
 import { Close } from "react-ionicons";
 export default function ConfirmationModal({
   title,

@@ -11,7 +11,7 @@ import {
   LogOutOutline,
 } from "react-ionicons";
 import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn";
-import Modal from "..//Modal/Modal";
+import TransferModal from "../TransferModal/TransferModal";
 import { ImgS3DataType } from "../../typescript/types";
 import { useUserContext } from "../../constants/context";
 
@@ -267,7 +267,9 @@ function ImageVizualizer({
           )}
         </div>
       </div>
-      {showModal && <Modal closeModal={closeTransferModal} selectedImg={selectedImg?.src} />}
+      {showModal && (
+        <TransferModal closeModal={closeTransferModal} selectedImg={selectedImg?.src} />
+      )}
     </div>
   );
 }

@@ -1,41 +1,32 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useContext,
-  useRef,
-} from "react";
-import "./Modal.css";
+import React, { useState, useEffect, useCallback, useContext, useRef } from "react";
+import "./TransferModal.css";
 import { SearchOutline, Close } from "react-ionicons";
 import { useRecentConversationContext } from "../../screens/userLoggedIn/userLoggedIn";
 import { useUserContext } from "../../constants/context";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
-import { ConversationType } from "../../typescript/types";
+import { ConversationType, MessageType } from "../../typescript/types";
 import ConversationLi from "./ConversationLi";
 
-function Modal({
+function TransferModal({
   closeModal,
   selectedImg,
+  selectedMsg,
 }: {
   closeModal: () => void;
   selectedImg: string | undefined;
+  selectedMsg?: MessageType;
 }) {
   const { user, setUser } = useUserContext();
 
-  const [searchConversationInput, setSearchConversationInput] =
-    useState<string>("");
+  const [searchConversationInput, setSearchConversationInput] = useState<string>("");
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [conversationsList, setConversationsList] = useState<
-    ConversationType[]
-  >([]);
+  const [conversationsList, setConversationsList] = useState<ConversationType[]>([]);
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const { recentConversations } = useRecentConversationContext();
 
-  const handleOverlayClick = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     // Si le clic est sur l'overlay (et non sur le contenu du modal), fermer le modal
     if ((e.target as HTMLDivElement).classList.contains("modal-overlay")) {
       closeModal();
@@ -149,10 +140,7 @@ function Modal({
             </div>
             <div className="modal-search-section">
               <div className="modal-searchbar">
-                <label
-                  htmlFor="search-conversations"
-                  className="modal-search-conversations-label"
-                >
+                <label htmlFor="search-conversations" className="modal-search-conversations-label">
                   <div className="modal-search-icon-container">
                     {" "}
                     <SearchOutline color={"#65676b"} />
@@ -185,6 +173,7 @@ function Modal({
                       conversation={conversation}
                       user={user}
                       selectedImg={selectedImg}
+                      selectedMsg={selectedMsg}
                     />
                   ))}
               </div>
@@ -196,4 +185,4 @@ function Modal({
   );
 }
 
-export default Modal;
+export default TransferModal;

@@ -1,25 +1,23 @@
 import React, { useState } from "react";
 import "./ConversationLi.css";
-import {
-  ConversationType,
-  MessageType,
-  UserDataType,
-} from "../../typescript/types";
+import { ConversationType, MessageType, UserDataType } from "../../typescript/types";
 import { ApiToken } from "../../localStorage";
 import { socket } from "../../socket";
 import { useMostRecentConvContext } from "../../screens/userLoggedIn/userLoggedIn";
-import { PeopleOutline } from "react-ionicons";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
+import { transferMsg } from "../../api/message";
 
 function ConversationLi(props: {
   conversation: ConversationType;
   user: UserDataType | null;
   selectedImg: string;
+  selectedMsg?: MessageType;
 }) {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const conversation = props.conversation;
   const user = props.user;
   const selectedImg = props.selectedImg;
+  const selectedMsg = props.selectedMsg;
 
   const [sendingStatus, setSendingStatus] = useState<number>(-1);
   const [btnMessage, setBtnMessage] = useState<string>("Envoyer");
@@ -40,17 +38,14 @@ function ConversationLi(props: {
         date: new Date(),
       };
       try {
-        const response = await fetch(
-          RESTAPIUri + "/file/userId/" + user?._id + "/transferImage",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              authorization: `Bearer ${ApiToken()}`,
-            },
-            body: JSON.stringify(postData),
-          }
-        );
+        const response = await fetch(RESTAPIUri + "/file/userId/" + user?._id + "/transferImage", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${ApiToken()}`,
+          },
+          body: JSON.stringify(postData),
+        });
 
         if (!response.ok) {
           console.log(response.statusText);
@@ -76,19 +71,17 @@ function ConversationLi(props: {
     }
     return false;
   };
+
   const getUsersSocket = async (conversation: ConversationType | null) => {
     const convMembersStr = conversation?.members
       ?.filter((member) => member !== user?.userName)
       .join("-");
     try {
-      const response = await fetch(
-        RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr,
-        {
-          headers: {
-            Authorization: "Bearer " + ApiToken(),
-          },
-        }
-      );
+      const response = await fetch(RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr, {
+        headers: {
+          Authorization: "Bearer " + ApiToken(),
+        },
+      });
       const jsonData = await response.json();
       console.log("ICI SOCKET");
       console.log(jsonData);
@@ -116,13 +109,11 @@ function ConversationLi(props: {
 
   const handleSend = async () => {
     const convMembersSocket = await getUsersSocket(conversation);
-    const messageData = await transferImage();
+    const messageData = selectedMsg
+      ? await transferMsg(selectedMsg, conversation._id)
+      : await transferImage();
     if (messageData) {
-      emitMsgTransferedMsgToSocket(
-        messageData,
-        convMembersSocket,
-        conversation
-      );
+      emitMsgTransferedMsgToSocket(messageData, convMembersSocket, conversation);
     }
     setMostRecentConv(conversation);
   };
@@ -146,9 +137,7 @@ function ConversationLi(props: {
         {conversation.isGroupConversation
           ? conversation.customization.conversationName
             ? conversation.customization.conversationName
-            : conversation.members
-                .filter((item) => item !== user?.userName)
-                .join(", ")
+            : conversation.members.filter((item) => item !== user?.userName).join(", ")
           : conversation.members.filter((item) => item !== user?.userName)}
       </div>
       <div className="modal-send-button">

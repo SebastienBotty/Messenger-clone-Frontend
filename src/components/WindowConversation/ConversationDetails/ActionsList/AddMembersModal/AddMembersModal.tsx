@@ -4,7 +4,7 @@ import {
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
 import "./AddMembersModal.css";
-import "../../../../Modal/Modal.css";
+import "../../../../TransferModal/TransferModal.css";
 import { ConversationType, UserDataType } from "../../../../../typescript/types";
 import { AddCircleOutline, CheckmarkCircleOutline, Close, SearchOutline } from "react-ionicons";
 import { ApiToken } from "../../../../../localStorage";
