@@ -1235,11 +1235,11 @@ function WindowConversation() {
                     {checkMsgTime.isMoreThan15Minutes && (
                       <div className="message-container" id="Time-center-display">
                         {" "}
-                        <MessagesOptions message={message} />
                         {compareNowToDate(checkMsgTime.date) ||
                           checkMsgTime.hours + " : " + checkMsgTime.minutes}
                       </div>
                     )}
+
                     {messages[currentMsg]?.author !== messages[currentMsg - 1]?.author &&
                       displayedConv?.isGroupConversation && (
                         <div className="message-author-name">
@@ -1262,6 +1262,7 @@ function WindowConversation() {
                         )}
                         <AsyncMsg message={message} />
                       </div>
+                      <MessagesOptions message={message} />
                     </div>
                     <div className="seen-by">
                       {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
