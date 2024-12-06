@@ -289,13 +289,6 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
               }
               {conversation.lastMessage.author === "System/" + conversation._id ? (
                 <ConvSystemMsg textProps={conversation.lastMessage.text} />
-              ) : conversation.isGroupConversation ? (
-                getMessageText(
-                  conversation._id,
-                  user?.userName,
-                  conversation.lastMessage.author,
-                  conversation.lastMessage.text
-                )
               ) : (
                 getMessageText(
                   conversation._id,

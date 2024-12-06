@@ -42,6 +42,9 @@ export const getMessageText = (
   text: string | undefined
 ) => {
   if (!text) return "";
+  if (text === "Ce message a été supprimé") {
+    return author === username ? "Vous avez retiré ce message" : `${author} a retiré ce message.`;
+  }
   if (text.startsWith("GIF/" + conversationId)) {
     return author === username ? "Vous avez envoyé un gif" : `${author} a envoyé un GIF.`;
   }

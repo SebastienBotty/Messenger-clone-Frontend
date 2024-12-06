@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import "./DeleteMessage.css";
 
 import { deleteMessage } from "../../../../constants/ConfirmationMessage";
-import { MessageType } from "../../../../typescript/types";
+import { ConversationType, MessageType } from "../../../../typescript/types";
 import { deleteMessageForEveryone, deleteMessageForUser } from "../../../../api/message";
 import { useConversationsContext, useUserContext } from "../../../../constants/context";
 import { useMessagesContext } from "../../../../constants/context";
 import { updateConvLastMsgDelete, updateDeletedMsg } from "../../../../functions/updateMessage";
 function DeleteMessage({ message, closeModal }: { message: MessageType; closeModal: () => void }) {
   const { user } = useUserContext();
-  const { setMessages } = useMessagesContext();
+  const { messages, setMessages } = useMessagesContext();
   const { setConversations } = useConversationsContext();
   const [checkBoxValue, setCheckBoxValue] = useState<"All" | "Me">("All");
 
@@ -38,7 +38,27 @@ function DeleteMessage({ message, closeModal }: { message: MessageType; closeMod
 
   const updateDeletedMsgByUser = (messageId: string) => {
     if (!user) return;
+    const isLastMsg = messages[messages.length - 1]._id === messageId;
+    let beforeLastMsg: MessageType;
+    if (isLastMsg) {
+      beforeLastMsg = messages[messages.length - 2];
+      console.log("avant dernier msg ");
+      console.log(beforeLastMsg);
+      setConversations((prev) =>
+        prev.map((conv) => {
+          if (conv._id === beforeLastMsg.conversationId) {
+            return {
+              ...conv,
+              lastMessage: { ...beforeLastMsg, date: new Date(beforeLastMsg.date) },
+            };
+          } else {
+            return conv;
+          }
+        })
+      );
+    }
     setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+    console.log(messages[messages.length - 1]);
   };
 
   return (
