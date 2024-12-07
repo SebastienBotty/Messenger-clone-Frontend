@@ -6,13 +6,27 @@ export const convMemberMsg = (
   eventName: string,
   target?: string
 ) => {
-  const agentName = agent === username ? "Vous avez " : agent + " a ";
-  if (target && target?.split(",").length > 2) {
-    target = target?.split(",")[0] + " et " + (target?.split(",").length - 1) + " autres";
+  const agentName = agent === username ? "Vous avez " : `${agent} a `;
+
+  if (target === username && (eventName === "addUser" || eventName === "removeUser")) {
+    if (eventName === "addUser") {
+      return agent === username
+        ? `Vous avez été ajouté à la conversation.`
+        : `${agent} vous a ajouté à la conversation.`;
+    }
+    if (eventName === "removeUser") {
+      return agent === username
+        ? `Vous avez été retiré de la conversation.`
+        : `${agent} vous a retiré de la conversation.`;
+    }
   }
 
-  if (target && target?.split(",").length === 2) {
-    target = target?.split(",")[0] + " et " + target?.split(",")[1];
+  if (target && target.split(",").length > 2) {
+    target = `${target.split(",")[0]} et ${target.split(",").length - 1} autres`;
+  }
+
+  if (target && target.split(",").length === 2) {
+    target = `${target.split(",")[0]} et ${target.split(",")[1]}`;
   }
 
   switch (eventName) {
@@ -32,6 +46,8 @@ export const convMemberMsg = (
       return `${agentName}envoyé un fichier.`;
     case "sendGif":
       return `${agentName}envoyé un gif.`;
+    default:
+      return "";
   }
 };
 

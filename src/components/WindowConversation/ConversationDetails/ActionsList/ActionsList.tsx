@@ -12,6 +12,7 @@ import { useMessagesContext, useUserContext } from "../../../../constants/contex
 import {
   ChevronDownOutline,
   Disc,
+  ExitOutline,
   ImagesOutline,
   Notifications,
   NotificationsOff,
@@ -27,6 +28,7 @@ import { confirmationMessage, muteConv } from "../../../../constants/Confirmatio
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { isConvMuted } from "../../../../functions/conversation";
 import NotificationsDisplay from "../../../Utiles/NotificationsDisplay/NotificationsDisplay";
+import { leaveConv } from "../../../../api/conversation";
 
 function ActionsList({
   openMoreDetailsComp,
@@ -93,6 +95,21 @@ function ActionsList({
           action: () => {},
           closeModal: () => setShowConfirmationModal(false),
           width: "auto",
+        });
+        break;
+      case "leaveConv":
+        setShowConfirmationModal(true);
+        setConfirmationModalAction({
+          title: confirmationMessage.leaveConv.title,
+          text: confirmationMessage.leaveConv.text,
+          action: async () => {
+            const req = await leaveConv(displayedConv._id, user.userName, user._id);
+            if (req) {
+              console.log("c ok");
+              setShowConfirmationModal(false);
+            }
+          },
+          closeModal: () => setShowConfirmationModal(false),
         });
         break;
     }
@@ -369,12 +386,14 @@ function ActionsList({
             </div>
             <span>Bloquer</span>
           </li>
-          <li className="li-actions">
-            <div className="li-icon">
-              <Disc color={"#00000"} />
-            </div>
-            <span>Signaler</span>
-          </li>
+          {displayedConv.isGroupConversation && (
+            <li className="li-actions" onClick={() => handleActionsClick("leaveConv")}>
+              <div className="li-icon">
+                <ExitOutline color={"#00000"} />
+              </div>
+              <span>Quitter le groupe</span>
+            </li>
+          )}
         </ul>
       </ul>
 

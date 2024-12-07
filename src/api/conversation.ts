@@ -26,8 +26,7 @@ export const leaveConv = async (
       throw new Error(errorMsg.message);
     }
     const jsonData = await response.json();
-    //console.log(jsonData.members);
-    return jsonData.members;
+    return jsonData;
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);
