@@ -16,7 +16,7 @@
 }
 .message-container .message-options {
   z-index: 1;
-  display: flex;
+  display: none;
   align-items: center;
 }
 .message-container .message-options .icons {
