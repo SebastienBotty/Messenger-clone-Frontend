@@ -51,3 +51,41 @@ export const updateConvLastMsgDelete = (
     })
   );
 };
+
+export const updateMsgReactions = (
+  messageId: string,
+  reactions: MessageType["reactions"],
+  setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>
+) => {
+  setMessages((prev) =>
+    prev.map((msg) => {
+      if (msg._id === messageId) {
+        return {
+          ...msg,
+          reactions: reactions,
+        };
+      } else {
+        return msg;
+      }
+    })
+  );
+};
+
+export const updateRemoveMsgReaction = (
+  messageId: string,
+  userId: string,
+  setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>
+) => {
+  setMessages((prev) =>
+    prev.map((msg) => {
+      if (msg._id === messageId) {
+        return {
+          ...msg,
+          reactions: msg.reactions?.filter((reaction) => reaction.userId !== userId),
+        };
+      } else {
+        return msg;
+      }
+    })
+  );
+};

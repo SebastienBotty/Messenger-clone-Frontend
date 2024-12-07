@@ -350,7 +350,6 @@
   color: gray !important;
   font-size: small;
   overflow: hidden;
-  z-index: 1;
 }
 
 .conversation-body-bottom {

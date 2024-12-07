@@ -16,7 +16,7 @@
 }
 .message-container .message-options {
   z-index: 1;
-  display: none;
+  display: flex;
   align-items: center;
 }
 .message-container .message-options .icons {
@@ -37,4 +37,54 @@
 }
 .message-more-options-li:hover {
   background-color: #f2f2f2;
+}
+
+.reactions-container {
+  position: absolute;
+
+  bottom: 100%;
+
+  margin-bottom: 0.5rem;
+  background-color: #ffffff;
+  border-radius: 5rem;
+  padding: 0.75rem;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.1), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  font-size: x-large;
+  cursor: initial;
+}
+
+#message-me .reactions-container {
+  right: 50%;
+  transform: translateX(10%);
+}
+
+#message-other .reactions-container {
+  left: 50%;
+  transform: translateX(-10%);
+}
+
+.reactions-container .reaction {
+  cursor: pointer;
+  padding: 0.125rem;
+  text-align: center;
+}
+
+.reaction.icon {
+  position: relative;
+}
+.selected-emoji {
+  background-color: #c9ccd1;
+  border-radius: 0.5rem;
+}
+
+#message-me .reactions-emoji-picker {
+  position: absolute;
+  top: 100%;
+  right: 0;
+}
+#message-others .reactions-emoji-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
 }

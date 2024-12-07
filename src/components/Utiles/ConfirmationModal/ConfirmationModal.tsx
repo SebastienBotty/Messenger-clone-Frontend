@@ -32,7 +32,7 @@ export default function ConfirmationModal({
     };
   });
   return (
-    <div className="modal">
+    <div className="modal" onClick={(e) => e.stopPropagation()}>
       <div className="modal-overlay">
         <div
           className="modal-content modal-content-confirmation"

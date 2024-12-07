@@ -46,12 +46,17 @@ import ConversationDetails from "./ConversationDetails/ConversationDetails";
 import ConvSystemMsg from "./ConvSystemMsg/ConvSystemMsg";
 import { checkCacheFile } from "../../functions/cache";
 import { getFileTypeFromPathName } from "../../functions/file";
-import { updateConvLastMsgDelete, updateDeletedMsg } from "../../functions/updateMessage";
+import {
+  updateConvLastMsgDelete,
+  updateDeletedMsg,
+  updateMsgReactions,
+} from "../../functions/updateMessage";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { formatDateMsg, timeSince } from "../../functions/time";
 import { statusTranslate } from "../../constants/status";
 import GifPicker, { TenorImage } from "gif-picker-react";
 import MessagesOptions from "./MessagesOptions/MessagesOptions";
+import MessageReactions from "./MessageReactions/MessageReactions";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -794,6 +799,16 @@ function WindowConversation() {
         }
         updateConvLastMsgDelete(msg, setConversations);
       });
+
+      socket.on("changeReaction", (data) => {
+        const reactionsArr = data[0];
+        const messageId = data[1];
+        const conversationId = data[2];
+        if (conversationId === displayedConv?._id) {
+          updateMsgReactions(messageId, reactionsArr, setMessages);
+        }
+      });
+
       document.addEventListener("mousedown", handleGifPickerContainerClick);
 
       //Close conversatoin details every time a new conversation is selected
@@ -1221,6 +1236,7 @@ function WindowConversation() {
                         )}
 
                         <AsyncMsg message={message} />
+                        <MessageReactions message={message} />
                       </div>
                     </div>
                     <div className="seen-by">
@@ -1281,6 +1297,7 @@ function WindowConversation() {
                           </div>
                         )}
                         <AsyncMsg message={message} />
+                        <MessageReactions message={message} />
                       </div>
                       <MessagesOptions message={message} />
                     </div>
@@ -1330,6 +1347,7 @@ function WindowConversation() {
                         </div>
                       )}
                       <AsyncMsg message={message} />
+                      <MessageReactions message={message} />
                     </div>{" "}
                     <MessagesOptions message={message} />
                   </div>

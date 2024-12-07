@@ -1,0 +1,57 @@
+.emoji-header {
+  font-size: x-large;
+}
+.emoji-header-number {
+  font-size: medium;
+  font-weight: bold;
+}
+
+.msg-reactions-modal-list {
+  height: 20vh;
+  margin: 1rem 0;
+  overflow-y: auto;
+}
+
+.msg-reactions-user-li-container {
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.msg-reactions-user-pic {
+  height: 100%;
+  aspect-ratio: 1/1;
+}
+.msg-reactions-username {
+  width: 80%;
+  font-size: larger;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.msg-reactions-username-text {
+  margin-left: 0.5rem;
+  width: calc(100% - 0.5rem);
+}
+.msg-reactions-username-click-me {
+  margin-left: 0.5rem;
+  width: calc(100% - 0.5rem);
+  font-size: small;
+  color: #0084ff;
+}
+.msg-reactions-user-li-container:hover .msg-reactions-username-click-me {
+  color: #65676b;
+}
+
+.msg-reactions-user-reaction {
+  width: 10%;
+  align-items: center;
+  font-size: xx-large;
+}
+
+.msg-reactions-user-li-container-me:hover {
+  cursor: pointer;
+}

@@ -91,6 +91,11 @@ export type MessageType = {
   }>;
   deletedForEveryone?: boolean;
   deletedForEveryoneDate?: Date | null;
+  reactions?: Array<{
+    username: string;
+    userId: string;
+    reaction: string;
+  }>;
 };
 
 export type LastMsgSeenByMembersType = {

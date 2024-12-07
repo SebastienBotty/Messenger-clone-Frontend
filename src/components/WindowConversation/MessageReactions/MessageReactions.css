@@ -1,0 +1,45 @@
+.msg-reactions-container {
+  position: absolute;
+  right: 0;
+  color: black;
+  z-index: 1;
+  padding: 0.125rem 0.25rem;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.1), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  font-size: small;
+  cursor: pointer;
+  text-wrap: nowrap;
+}
+.msg-reactions-container:hover .msg-reactions-users-list {
+  display: block;
+}
+
+.message-container:has(.msg-reactions-container) {
+  margin-bottom: 1rem;
+}
+
+.msg-reactions-users-list {
+  display: none;
+  font-size: medium;
+  position: absolute;
+  width: 5rem;
+  max-height: 7.5rem;
+  bottom: 100%;
+  right: 0;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  color: white;
+  background-color: #333333;
+  border-radius: 0.75rem;
+  z-index: 1;
+  cursor: initial;
+}
+
+.msg-reactions-users-list ul li {
+  list-style-type: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-wrap: nowrap;
+}

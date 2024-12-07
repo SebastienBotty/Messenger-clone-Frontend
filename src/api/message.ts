@@ -86,3 +86,80 @@ export const deleteMessageForEveryone = async (
 };
 
 export const transferMsg = async (message: MessageType, conversationIdTarget: string) => {};
+
+export const changeMsgReaction = async (
+  messageId: string,
+  reaction: string,
+  userId: string,
+  username: string
+): Promise<{ userId: string; reaction: string; username: string }[] | false> => {
+  try {
+    const response = await fetch(RESTAPIUri + "/message/changeReaction", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${ApiToken()}`,
+      },
+      body: JSON.stringify({
+        messageId: messageId,
+        reaction: reaction,
+        userId: userId,
+        username: username,
+      }),
+    });
+
+    if (!response.ok) {
+      console.log("ERREUR ICI");
+      const errorMsg = await response.json();
+      throw new Error(errorMsg.message);
+    }
+    const jsonData = await response.json();
+    console.log(jsonData);
+
+    return jsonData.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
+
+export const removeMsgReaction = async (
+  messageId: string,
+  userId: string,
+  username: string
+): Promise<boolean> => {
+  try {
+    const response = await fetch(RESTAPIUri + "/message/removeReaction", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${ApiToken()}`,
+      },
+      body: JSON.stringify({
+        messageId: messageId,
+        userId: userId,
+        username: username,
+      }),
+    });
+
+    if (!response.ok) {
+      console.log("ERREUR ICI");
+      const errorMsg = await response.json();
+      throw new Error(errorMsg.message);
+    }
+    const jsonData = await response.json();
+    console.log(jsonData);
+    return true;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
