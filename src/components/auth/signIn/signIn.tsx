@@ -16,7 +16,7 @@ function SignIn() {
         throw new Error("Erreur lors de la recherche de données");
       }
       const jsonData = await response.json();
-      console.log("Mail : " + jsonData.mailExists);
+      //console.log("Mail : " + jsonData.mailExists);
       return jsonData.mailExists;
     } catch (error: unknown) {
       if (error instanceof Error) {

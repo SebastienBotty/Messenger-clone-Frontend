@@ -53,7 +53,7 @@ export const unmuteConversation = async (conversationId: string, userId: string)
       const error = await response.json();
       throw new Error(error.message);
     }
-    console.log("conversation unmuted");
+    //console.log("conversation unmuted");
     return true;
   } catch (error) {
     if (error instanceof Error) {

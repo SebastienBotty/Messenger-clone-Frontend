@@ -54,10 +54,10 @@ function ImageVizualizer({
     if (selectedImg !== null) {
       let indexDifference: number = image.index - selectedImg.index;
       if (thumbnailsRef.current) {
-        console.log("précedent: " + selectedImg.index);
+        //console.log("précedent: " + selectedImg.index);
 
-        console.log("new :" + image.index);
-        console.log(indexDifference);
+        // console.log("new :" + image.index);
+        //console.log(indexDifference);
         if (indexDifference > 0) {
           // slide left
           thumbnailsRef.current.style.transform = `translateX(${

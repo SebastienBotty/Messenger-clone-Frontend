@@ -7,8 +7,8 @@ export const deleteMessageForUser = async (
   userId: string,
   username: string
 ): Promise<boolean> => {
-  console.log(messageId, userId, username);
-  console.log();
+  /*  console.log(messageId, userId, username);
+  console.log(); */
   if (!messageId) return false;
   console.log(RESTAPIUri + "/message/userId/" + userId + "/markMessageAsDeletedByUser");
   try {
@@ -26,7 +26,7 @@ export const deleteMessageForUser = async (
         }),
       }
     );
-    console.log("ALOALOALOALO");
+    //console.log("ALOALOALOALO");
 
     if (!response.ok) {
       console.log("ERREUR ICI");
@@ -34,7 +34,7 @@ export const deleteMessageForUser = async (
       throw new Error(errorMsg.message);
     }
     const data = await response.json();
-    console.log(data.message);
+    //console.log(data.message);
     return true;
   } catch (error) {
     if (error instanceof Error) {
