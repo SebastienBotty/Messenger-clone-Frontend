@@ -314,12 +314,15 @@ function ActionsList({
             {displayedConv.members.map((member) => (
               <ConvMembersLi key={member} member={member} />
             ))}
-            <li className="li-actions" onClick={() => setShowAddMembersModal(true)}>
-              <div className="li-icon">
-                <PersonAdd color={"#00000"} />
-              </div>
-              <span>Ajouter des membres</span>
-            </li>
+
+            {displayedConv.admin.includes(user.userName) && (
+              <li className="li-actions" onClick={() => setShowAddMembersModal(true)}>
+                <div className="li-icon">
+                  <PersonAdd color={"#00000"} />
+                </div>
+                <span>Ajouter des membres</span>
+              </li>
+            )}
           </ul>
         </ul>
       )}
