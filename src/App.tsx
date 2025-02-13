@@ -19,9 +19,7 @@ function App() {
       //console.log(firebaseUser);
       //console.log(firebaseUser.email);
       try {
-        const response = await fetch(
-          RESTAPIUri + "/user/mail/" + firebaseUser.email
-        );
+        const response = await fetch(RESTAPIUri + "/user/mail/" + firebaseUser.email);
         if (!response.ok) {
           const error = await response.json();
           throw new Error(error.message);
@@ -29,7 +27,7 @@ function App() {
         const jsonData = await response.json();
         //console.log("JSON DATA SET ");
         //console.log(jsonData);
-        localStorage.setItem("ApiToken", JSON.stringify(jsonData[1].ApiToken));
+        localStorage.setItem("ApiToken", JSON.stringify(jsonData[1].apiToken));
         //console.log(localStorage.getItem("ApiToken"));
         navigate("/MyMessages", { state: jsonData[0] });
       } catch (error: unknown) {
@@ -74,10 +72,7 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<UserNotLogged />}></Route>
-        <Route
-          path="/MyMessages"
-          element={<UserLoggedIn handleSignOut={handleSignOut} />}
-        />
+        <Route path="/MyMessages" element={<UserLoggedIn handleSignOut={handleSignOut} />} />
       </Routes>
     </>
   );
