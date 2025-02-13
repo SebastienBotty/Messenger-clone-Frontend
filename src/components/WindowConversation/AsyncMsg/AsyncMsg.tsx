@@ -111,10 +111,6 @@ function AsyncMsg({ message }: { message: MessageType }) {
     fetchData();
   }, [message.text]);
 
-  if (content === null) {
-    return <span>Loading...</span>;
-  }
-
   return (
     <div className="async-msg">
       <div
