@@ -17,9 +17,6 @@ import {
   Send,
   Close,
   ArrowDown,
-  EllipsisVertical,
-  ArrowUndo,
-  HappyOutline,
 } from "react-ionicons";
 
 import "./WindowConversation.css";
@@ -80,7 +77,10 @@ function WindowConversation() {
   >([]);
   const firstMessageRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
   const scrollViewRef = useRef<HTMLDivElement | null>(null);
+  const [hasScroll, setHasScroll] = useState(false);
+
   const inputMessageRef = useRef<HTMLTextAreaElement>(null);
   const { user, setUser } = useUserContext();
 
@@ -841,6 +841,28 @@ function WindowConversation() {
     }
   }, [messages, displayedConv?._id]);
 
+  /* Scroll Management --------------------------------------------------------------------------------------------
+    Check if the scroll height is greater than the client height and update the hasScroll state
+  */
+  useEffect(() => {
+    const checkScroll = () => {
+      if (scrollViewRef.current) {
+        setHasScroll(scrollViewRef.current.scrollHeight > scrollViewRef.current.clientHeight);
+        console.log("CHEKC ICI");
+        console.log(scrollViewRef.current.scrollHeight > scrollViewRef.current.clientHeight);
+      }
+    };
+
+    checkScroll();
+
+    const observer = new MutationObserver(checkScroll);
+    if (scrollViewRef.current) {
+      observer.observe(scrollViewRef.current, { childList: true, subtree: true });
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   // Files Management ----------------------------------------------------------------------------------------------
   const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -1152,25 +1174,24 @@ function WindowConversation() {
               <div className="load-more-messages">
                 <span onClick={() => fetchMessages()}>Charger plus de message</span>
               </div>
-              <div
-                className="button-go-to-last-message"
-                style={isAtBottom ? { display: "none" } : { display: "block" }}
-              >
-                <button
-                  onClick={() =>
-                    scrollViewRef.current?.scrollTo({
-                      top: scrollViewRef.current.scrollHeight,
-                    })
-                  }
-                >
-                  <ArrowDown
-                    color={"#00000"}
-                    title="Défiler tout en bas"
-                    height="3vh"
-                    width="3vh"
-                  />
-                </button>
-              </div>
+              {!isAtBottom && hasScroll && (
+                <div className="button-go-to-last-message">
+                  <button
+                    onClick={() =>
+                      scrollViewRef.current?.scrollTo({
+                        top: scrollViewRef.current.scrollHeight,
+                      })
+                    }
+                  >
+                    <ArrowDown
+                      color={"#00000"}
+                      title="Défiler tout en bas"
+                      height="3vh"
+                      width="3vh"
+                    />
+                  </button>
+                </div>
+              )}
             </>
           )}
 

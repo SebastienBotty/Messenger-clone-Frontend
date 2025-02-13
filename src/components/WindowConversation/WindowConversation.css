@@ -381,6 +381,7 @@
 }
 
 .button-go-to-last-message {
+  display: block;
   position: absolute;
   bottom: 0;
   margin-bottom: 7.5rem;
