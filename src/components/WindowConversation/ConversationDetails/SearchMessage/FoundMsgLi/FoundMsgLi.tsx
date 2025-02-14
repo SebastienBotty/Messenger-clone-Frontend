@@ -62,11 +62,7 @@ function FoundMsgLi({
     const beforeAndAfterMsg = await fetchMessagesBeforeAndAfter(msg);
     setSelectedFoundMsgId(msg._id);
     if (beforeAndAfterMsg) {
-      const messagesAround = [
-        ...beforeAndAfterMsg[0].reverse(),
-        msg,
-        ...beforeAndAfterMsg[1],
-      ];
+      const messagesAround = [...beforeAndAfterMsg[0].reverse(), msg, ...beforeAndAfterMsg[1]];
       console.log(messagesAround);
 
       console.log(messages);
@@ -128,12 +124,10 @@ function FoundMsgLi({
           <div className="found-msg-text">
             <div className="trunc-text">
               {" "}
-              {extractSurroundingText(msg.text, word)}
+              {extractSurroundingText(msg.text[msg.text.length - 1], word)}
             </div>
           </div>
-          <div className="found-msg-time-since">
-            - {timeSince(new Date(msg.date))}
-          </div>
+          <div className="found-msg-time-since">- {timeSince(new Date(msg.date))}</div>
         </div>
       </div>
     </li>

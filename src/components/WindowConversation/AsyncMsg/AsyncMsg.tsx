@@ -8,7 +8,7 @@ import { ImgS3DataType, MessageType } from "../../../typescript/types";
 
 function AsyncMsg({ message }: { message: MessageType }) {
   const convId = message.conversationId;
-  const text = message.text;
+  const text = message.text[message.text.length - 1];
   const [content, setContent] = useState<ReactNode | null | JSX.Element[]>(null);
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const [showImgVisualizer, setShowImgVisualizer] = useState<boolean | null>(false);

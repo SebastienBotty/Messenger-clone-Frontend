@@ -12,7 +12,7 @@ import {
 } from "../../screens/userLoggedIn/userLoggedIn";
 import { useConversationsContext, useUserContext } from "../../constants/context";
 import { timeSince } from "../../functions/time";
-import { socket } from "../../socket";
+import { socket } from "../../Sockets/socket";
 import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { isConvMuted } from "../../functions/conversation";
@@ -288,13 +288,17 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                 //Kinda messy yeah
               }
               {conversation.lastMessage.author === "System/" + conversation._id ? (
-                <ConvSystemMsg textProps={conversation.lastMessage.text} />
+                <ConvSystemMsg
+                  textProps={
+                    conversation.lastMessage.text[conversation.lastMessage.text.length - 1]
+                  }
+                />
               ) : (
                 getMessageText(
                   conversation._id,
                   user?.userName,
                   conversation.lastMessage.author,
-                  conversation.lastMessage.text
+                  conversation.lastMessage.text[conversation.lastMessage.text.length - 1]
                 )
               )}
             </div>{" "}

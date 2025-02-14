@@ -80,7 +80,7 @@ export type RecentConversationsContextType = {
 export type MessageType = {
   author: string | undefined;
   authorId?: string;
-  text: string;
+  text: string[];
   seenBy: (string | undefined)[];
   date: Date;
   conversationId: string | undefined;

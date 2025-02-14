@@ -9,7 +9,7 @@ export const updateDeletedMsg = (
   const newMsg: MessageType = {
     ...message,
     deletedForEveryone: true,
-    text: deleteMessage.deletedMessage,
+    text: [deleteMessage.deletedMessage],
     date: new Date(message.date),
     deletedForEveryoneDate: new Date(),
   };
@@ -32,7 +32,7 @@ export const updateConvLastMsgDelete = (
   const newMsg: MessageType = {
     ...message,
     deletedForEveryone: true,
-    text: deleteMessage.deletedMessage,
+    text: [deleteMessage.deletedMessage],
     date: new Date(message.date),
   };
   console.log("----------------");
