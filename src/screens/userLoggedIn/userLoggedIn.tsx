@@ -13,7 +13,7 @@ import {
   MessageType,
 } from "../../typescript/types";
 import { ConversationsContext, MessagesContext, UserContext } from "../../constants/context";
-import { socket } from "../../socket";
+import { socket } from "../../Sockets/socket";
 import { useLocation } from "react-router-dom";
 import { ApiToken } from "../../localStorage";
 

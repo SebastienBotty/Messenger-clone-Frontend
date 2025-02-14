@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./ConversationLi.css";
 import { ConversationType, MessageType, UserDataType } from "../../typescript/types";
 import { ApiToken } from "../../localStorage";
-import { socket } from "../../socket";
+import { socket } from "../../Sockets/socket";
 import { useMostRecentConvContext } from "../../screens/userLoggedIn/userLoggedIn";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { transferMsg } from "../../api/message";

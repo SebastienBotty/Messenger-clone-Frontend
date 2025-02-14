@@ -7,7 +7,7 @@ import { ExitOutline } from "react-ionicons";
 import UserStatus from "../UserStatus/UserStatus";
 import { timeSince } from "../../functions/time";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
-import { socket } from "../../socket";
+import { socket } from "../../Sockets/socket";
 import { statusTranslate } from "../../constants/status";
 
 function NavBar(props: NavBarProps) {
@@ -21,17 +21,14 @@ function NavBar(props: NavBarProps) {
   const changeStatus = async (status: string) => {
     if (!user || status === user.status) return;
     try {
-      const response = await fetch(
-        RESTAPIUri + "/user/" + user._id + "/changeStatus",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: "Bearer " + ApiToken(),
-          },
-          body: JSON.stringify({ status: status }),
-        }
-      );
+      const response = await fetch(RESTAPIUri + "/user/" + user._id + "/changeStatus", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: "Bearer " + ApiToken(),
+        },
+        body: JSON.stringify({ status: status }),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -66,9 +63,7 @@ function NavBar(props: NavBarProps) {
       profilePicInputRef.current.click();
     }
   };
-  const changeProfilePic = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const changeProfilePic = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
@@ -88,16 +83,13 @@ function NavBar(props: NavBarProps) {
     formData.append("profilePic", file);
     console.log("allo");
     try {
-      const response = await fetch(
-        RESTAPIUri + "/file/profilePic/" + user._id,
-        {
-          method: "POST",
-          headers: {
-            authorization: "Bearer " + ApiToken(),
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(RESTAPIUri + "/file/profilePic/" + user._id, {
+        method: "POST",
+        headers: {
+          authorization: "Bearer " + ApiToken(),
+        },
+        body: formData,
+      });
       console.log("iciii");
       if (!response.ok) {
         const error = await response.json();
@@ -155,8 +147,7 @@ function NavBar(props: NavBarProps) {
                     <div className="user-profile-name">{user.userName}</div>
                     <div className="user-profile-status">
                       {user.status === "Offline"
-                        ? "En ligne il y a " +
-                          timeSince(new Date(user.lastSeen))
+                        ? "En ligne il y a " + timeSince(new Date(user.lastSeen))
                         : statusTranslate(user.status)}
                     </div>
                   </div>
@@ -165,10 +156,7 @@ function NavBar(props: NavBarProps) {
               <div className="separator"></div>
               <ul>
                 {" "}
-                <li
-                  className="profile-dropdown-menu-options "
-                  id="status-title"
-                >
+                <li className="profile-dropdown-menu-options " id="status-title">
                   <div className="options-icon">
                     <div id="profile-pic-status-container">
                       {" "}
@@ -177,10 +165,7 @@ function NavBar(props: NavBarProps) {
                   </div>
                   <div className="options-text ">Changer de statut</div>
                   <ul className="status-left-side-menu">
-                    <li
-                      className="status-options"
-                      onClick={() => changeStatus("Online")}
-                    >
+                    <li className="status-options" onClick={() => changeStatus("Online")}>
                       <div className="options-icon">
                         <div className="status-container">
                           <UserStatus status={"Online"} />
@@ -188,10 +173,7 @@ function NavBar(props: NavBarProps) {
                       </div>
                       <div className="options-text">En ligne</div>
                     </li>
-                    <li
-                      className="status-options"
-                      onClick={() => changeStatus("Busy")}
-                    >
+                    <li className="status-options" onClick={() => changeStatus("Busy")}>
                       <div className="options-icon">
                         <div className="status-container">
                           <UserStatus status={"Busy"} />
@@ -199,10 +181,7 @@ function NavBar(props: NavBarProps) {
                       </div>
                       <div className="options-text">Ne pas déranger</div>
                     </li>{" "}
-                    <li
-                      className="status-options"
-                      onClick={() => changeStatus("Offline")}
-                    >
+                    <li className="status-options" onClick={() => changeStatus("Offline")}>
                       <div className="options-icon">
                         <div className="status-container">
                           <UserStatus status={"Offline"} />

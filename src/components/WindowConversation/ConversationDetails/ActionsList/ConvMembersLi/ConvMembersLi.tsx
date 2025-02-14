@@ -3,10 +3,7 @@ import {
   useDisplayedConvContext,
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
-import {
-  useMessagesContext,
-  useUserContext,
-} from "../../../../../constants/context";
+import { useMessagesContext, useUserContext } from "../../../../../constants/context";
 import "./ConvMembersLi.css";
 import {
   ChatbubbleOutline,
@@ -21,21 +18,12 @@ import {
 import ConfirmationModal from "../../../../Utiles/ConfirmationModal/ConfirmationModal";
 import { confirmationMessage } from "../../../../../constants/ConfirmationMessage";
 import { ApiToken } from "../../../../../localStorage";
-import {
-  ConfirmationModalPropsType,
-  ConversationType,
-} from "../../../../../typescript/types";
-import { socket } from "../../../../../socket";
+import { ConfirmationModalPropsType, ConversationType } from "../../../../../typescript/types";
+import { socket } from "../../../../../Sockets/socket";
 import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
 import { leaveConv } from "../../../../../api/conversation";
 
-export function ConvMembersLi({
-  member,
-  key,
-}: {
-  member: string;
-  key: string;
-}): JSX.Element {
+export function ConvMembersLi({ member, key }: { member: string; key: string }): JSX.Element {
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
   const { messages, setMessages } = useMessagesContext();
@@ -43,8 +31,7 @@ export function ConvMembersLi({
   const [showModal, setShowModal] = useState(false);
   const showModalRef = useRef(showModal);
   const { user, setUser } = useUserContext();
-  const [showConfirmationModal, setShowConfirmationModal] =
-    useState<boolean>(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
   const [confirmationModalAction, setConfirmationModalAction] =
     useState<ConfirmationModalPropsType>({
       title: "",
@@ -218,8 +205,7 @@ export function ConvMembersLi({
         setConfirmationModalAction({
           title: confirmationMessage.setAdmin.title,
           text: confirmationMessage.setAdmin.text,
-          action: () =>
-            setUserAdmin(displayedConv._id, member, user._id, user.userName),
+          action: () => setUserAdmin(displayedConv._id, member, user._id, user.userName),
           closeModal: () => setShowConfirmationModal(false),
         });
         break;
@@ -229,8 +215,7 @@ export function ConvMembersLi({
         setConfirmationModalAction({
           title: confirmationMessage.removeAdmin.title,
           text: confirmationMessage.removeAdmin.text,
-          action: () =>
-            removeUserAdmin(displayedConv._id, user.userName, user._id, member),
+          action: () => removeUserAdmin(displayedConv._id, user.userName, user._id, member),
           closeModal: () => setShowConfirmationModal(false),
         });
         break;
@@ -239,8 +224,7 @@ export function ConvMembersLi({
         setConfirmationModalAction({
           title: confirmationMessage.removeMember.title,
           text: confirmationMessage.removeMember.text,
-          action: () =>
-            removeUser(displayedConv._id, user.userName, user._id, member),
+          action: () => removeUser(displayedConv._id, user.userName, user._id, member),
           closeModal: () => setShowConfirmationModal(false),
         });
         break;
@@ -266,14 +250,11 @@ export function ConvMembersLi({
       ?.filter((member) => member !== user.userName)
       .join("-");
     try {
-      const response = await fetch(
-        RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr,
-        {
-          headers: {
-            Authorization: "Bearer " + ApiToken(),
-          },
-        }
-      );
+      const response = await fetch(RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr, {
+        headers: {
+          Authorization: "Bearer " + ApiToken(),
+        },
+      });
       const jsonData = await response.json();
       //console.log("ICI SOCKET");
       //console.log(jsonData);
@@ -325,14 +306,10 @@ export function ConvMembersLi({
 
   if (members) {
     members.sort((a, b) => {
-      if (displayedConv.admin[0] === a && displayedConv.admin[0] !== b)
-        return -1;
-      if (displayedConv.admin[0] === b && displayedConv.admin[0] !== a)
-        return 1;
-      if (displayedConv.admin.includes(a) && !displayedConv.admin.includes(b))
-        return -1;
-      if (!displayedConv.admin.includes(a) && displayedConv.admin.includes(b))
-        return 1;
+      if (displayedConv.admin[0] === a && displayedConv.admin[0] !== b) return -1;
+      if (displayedConv.admin[0] === b && displayedConv.admin[0] !== a) return 1;
+      if (displayedConv.admin.includes(a) && !displayedConv.admin.includes(b)) return -1;
+      if (!displayedConv.admin.includes(a) && displayedConv.admin.includes(b)) return 1;
       return a.localeCompare(b);
     });
   }
@@ -357,10 +334,7 @@ export function ConvMembersLi({
         </div>
 
         <div className="li-members-icon" ref={btnRef}>
-          <div
-            className="li-members-icon-btn"
-            onClick={() => setShowModal(!showModal)}
-          >
+          <div className="li-members-icon-btn" onClick={() => setShowModal(!showModal)}>
             <EllipsisHorizontal color={"#00000"} />
           </div>
           {showModal &&
@@ -374,11 +348,7 @@ export function ConvMembersLi({
                     }}
                   >
                     <div className="members-options-icon">
-                      <ExitOutline
-                        color={"#00000"}
-                        height={"1.75rem"}
-                        width={"1.75rem"}
-                      />
+                      <ExitOutline color={"#00000"} height={"1.75rem"} width={"1.75rem"} />
                     </div>
                     Quitter le groupe
                   </li>
@@ -389,21 +359,13 @@ export function ConvMembersLi({
                 <ul className="ul-members-options">
                   <li className="li-members-options">
                     <div className="members-options-icon">
-                      <ChatbubbleOutline
-                        color={"#00000"}
-                        height={"1.75rem"}
-                        width={"1.75rem"}
-                      />
+                      <ChatbubbleOutline color={"#00000"} height={"1.75rem"} width={"1.75rem"} />
                     </div>
                     Envoyer un message
                   </li>
                   <li className="li-members-options">
                     <div className="members-options-icon">
-                      <CloseCircleOutline
-                        color={"#00000"}
-                        height={"1.75rem"}
-                        width={"1.75rem"}
-                      />
+                      <CloseCircleOutline color={"#00000"} height={"1.75rem"} width={"1.75rem"} />
                     </div>
                     Bloquer
                   </li>
@@ -417,11 +379,7 @@ export function ConvMembersLi({
                           onClick={() => handleActions("removeAdmin", member)}
                         >
                           <div className="members-options-icon">
-                            <ShieldOutline
-                              color={"#00000"}
-                              height={"1.75rem"}
-                              width={"1.75rem"}
-                            />
+                            <ShieldOutline color={"#00000"} height={"1.75rem"} width={"1.75rem"} />
                           </div>
                           Retirer l'admin
                         </li>
