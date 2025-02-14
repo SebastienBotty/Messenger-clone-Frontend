@@ -13,3 +13,7 @@ export const formatFileSize = (bytes: number) => {
 export const getFileTypeFromPathName = (pathName: string) => {
   return pathName.split("/")[1];
 };
+
+export const calculateTotalSize = (files: File[]): number => {
+  return files.reduce((totalSize, file) => totalSize + file.size, 0);
+};

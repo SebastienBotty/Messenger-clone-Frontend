@@ -45,3 +45,11 @@ export const formatDateMsg = (date: Date | undefined): string => {
 
   return newdate.toLocaleDateString("fr-FR", options);
 };
+
+export const moreThanXmins = (startDate: Date, nbMins: number) => {
+  startDate = new Date(startDate);
+  const currentDate = new Date();
+  const timeDifference = currentDate.getTime() - startDate.getTime();
+  const minutesPassed = Math.floor(timeDifference / (1000 * 60));
+  return minutesPassed >= nbMins;
+};
