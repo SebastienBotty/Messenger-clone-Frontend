@@ -10,8 +10,15 @@ import { useMessagesContext, useUserContext } from "../../../constants/context";
 import { changeMsgReaction, deleteMessageForUser, removeMsgReaction } from "../../../api/message";
 import EmojiPicker from "emoji-picker-react";
 import { updateMsgReactions, updateRemoveMsgReaction } from "../../../functions/updateMessage";
+import { moreThanXmins } from "../../../functions/time";
 
-function MessagesOptions({ message }: { message: MessageType }) {
+function MessagesOptions({
+  message,
+  setEditingMsgId,
+}: {
+  message: MessageType;
+  setEditingMsgId?: React.Dispatch<React.SetStateAction<string>>;
+}) {
   const { user } = useUserContext();
   const { setMessages } = useMessagesContext();
 
@@ -152,6 +159,12 @@ function MessagesOptions({ message }: { message: MessageType }) {
     }
   };
 
+  const editMessage = async () => {
+    if (!message._id || !setEditingMsgId) return;
+    setEditingMsgId(message._id);
+    console.log("set editingMsgId: " + message._id);
+  };
+
   useEffect(() => {
     if (message.reactions) {
       setSelectedEmoji(message.reactions.find((r) => r.userId === user?._id)?.reaction || "");
@@ -168,6 +181,11 @@ function MessagesOptions({ message }: { message: MessageType }) {
           {showMoreOptions && (
             <div className="message-more-options">
               <ul className="message-more-options-ul">
+                {!moreThanXmins(message.date, 10) && setEditingMsgId && (
+                  <li className="message-more-options-li" onClick={editMessage}>
+                    Modifier
+                  </li>
+                )}{" "}
                 <li
                   className="message-more-options-li"
                   onClick={() =>

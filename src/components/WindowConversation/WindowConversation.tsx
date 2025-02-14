@@ -8,16 +8,7 @@ import {
   MediasType,
 } from "../../typescript/types";
 import { dayNames, monthNames } from "../../constants/time";
-import {
-  AddCircle,
-  Call,
-  Videocam,
-  InformationCircle,
-  ImagesOutline,
-  Send,
-  Close,
-  ArrowDown,
-} from "react-ionicons";
+import { Call, Videocam, InformationCircle, Close, ArrowDown } from "react-ionicons";
 
 import "./WindowConversation.css";
 import {
@@ -36,24 +27,28 @@ import {
 import TypingDots from "../Utiles/TypingDots/TypingdDots";
 import _ from "lodash";
 import { ApiToken } from "../../localStorage";
-import { socket } from "../../socket";
+import { socket } from "../../Sockets/socket";
 
 import AsyncMsg from "./AsyncMsg/AsyncMsg";
 import ConversationDetails from "./ConversationDetails/ConversationDetails";
 import ConvSystemMsg from "./ConvSystemMsg/ConvSystemMsg";
 import { checkCacheFile } from "../../functions/cache";
-import { getFileTypeFromPathName } from "../../functions/file";
+import { calculateTotalSize, formatFileSize, getFileTypeFromPathName } from "../../functions/file";
 import {
   updateConvLastMsgDelete,
   updateDeletedMsg,
   updateMsgReactions,
 } from "../../functions/updateMessage";
+import { getUsersSocket } from "../../api/user";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { formatDateMsg, timeSince } from "../../functions/time";
 import { statusTranslate } from "../../constants/status";
 import GifPicker, { TenorImage } from "gif-picker-react";
 import MessagesOptions from "./MessagesOptions/MessagesOptions";
 import MessageReactions from "./MessageReactions/MessageReactions";
+import DisabledFooter from "./WindowConvFooter/DisabledFooter/DisabledFooter";
+import NormalFooter from "./WindowConvFooter/NormalFooter/NormalFooter";
+import CreateConvFooter from "./WindowConvFooter/CreateConvFooter/CreateConvFooter";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -69,7 +64,6 @@ function WindowConversation() {
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
   const { setConversations } = useConversationsContext();
   const { trigger, setTrigger } = useTriggerContext();
-  const [inputMessage, setInputMessage] = useState<string>("");
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
   const [convMembersTyping, setConvMembersTyping] = useState<string[]>([]);
   const [lastMsgSeenByConvMembers, setLastMsgSeenByConvMembers] = useState<
@@ -81,7 +75,6 @@ function WindowConversation() {
   const scrollViewRef = useRef<HTMLDivElement | null>(null);
   const [hasScroll, setHasScroll] = useState(false);
 
-  const inputMessageRef = useRef<HTMLTextAreaElement>(null);
   const { user, setUser } = useUserContext();
 
   // POST Files handling
@@ -103,7 +96,8 @@ function WindowConversation() {
 
   const [showConvDetails, setShowConvDetails] = useState<boolean>(false); //Displays conversation details
 
-  const [selectedFoundMsgId, setSelectedFoundMsgId] = useState<string>(""); //Stocks the id of the message that was found by the search bar
+  const [selectedFoundMsgId, setSelectedFoundMsgId] = useState<string>(""); //Stocks the id of the message that was found by the search barµ
+  const [editingMsgId, setEditingMsgId] = useState<string>("");
 
   const [showGifPicker, setShowGifPicker] = useState<boolean>(false);
   const gifPickerRef = useRef<HTMLDivElement>(null);
@@ -229,98 +223,6 @@ function WindowConversation() {
     }
   };
 
-  // Check if a private conversation between 2 users already exists
-  const isPrivateConvExisting = async () => {
-    try {
-      const response = await fetch(
-        RESTAPIUri +
-          "/conversation/userId/" +
-          user?._id +
-          "/privateConversation?username=" +
-          user?.userName +
-          "&recipient=" +
-          addedMembers[0],
-        {
-          headers: { authorization: `Bearer ${ApiToken()}` },
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Erreur de la vérif isPrivateConvExisting");
-      }
-
-      const jsonData = await response.json();
-      //console.log(jsonData);
-      if (jsonData === false) {
-        postConversation();
-      } else {
-        setDisplayedConv(jsonData);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  };
-
-  const postConversation = async () => {
-    const postData = {
-      members: [user?.userName, ...addedMembers],
-      admin: user?.userName,
-      creationDate: new Date(),
-    };
-    try {
-      const response = await fetch(RESTAPIUri + "/conversation/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${ApiToken()}`,
-        },
-        body: JSON.stringify(postData),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-      const jsonData = await response.json();
-      //console.log(jsonData);
-      if (jsonData._id) {
-        const messageData = {
-          author: user?.userName,
-          authorId: user?._id,
-          text: inputMessage,
-          seenBy: [user?.userName],
-          date: new Date(),
-          conversationId: jsonData._id,
-        };
-        setInputMessage("");
-        //console.log(" CONVERSATION DANS POST CONVERSATION");
-        //console.log(jsonData);
-        postMessage(messageData, jsonData);
-        setDisplayedConv(jsonData);
-        setAddedMembers([]);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        //console.log(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  };
-  const createConversation = async () => {
-    if (addedMembers.length > 1) {
-      postConversation();
-    } else if (addedMembers.length == 1) {
-      //If user wants to create a conversation with only one person, it first checks in his conversations
-      isPrivateConvExisting(); //if he doesn't already have a private (not a group where ppl left and they are only 2 left) conversation with the selected person.
-      //If not, creates the conversation, if yes,displays the conversation
-    } else {
-      //console.log("pas assez de membre");
-    }
-  };
-
   const isMoreThan15Minutes = (
     currentDateToForm: Date,
     previousDateToForm: Date
@@ -443,51 +345,6 @@ function WindowConversation() {
     debouncedFetchUsers(e.target.value);
   };
 
-  const sendMessage = (fileNames?: string[]) => {
-    const trimmedString = inputMessage.replace(/^\s+|\s+$/g, "");
-
-    const messageData = {
-      author: user?.userName,
-      authorId: user?._id,
-
-      text: fileNames
-        ? "PATHIMAGE/" + displayedConv?._id + ":" + fileNames.map((name) => name).join(",")
-        : trimmedString,
-      seenBy: [user?.userName],
-      date: new Date(),
-      conversationId: displayedConv?._id,
-    };
-    //console.log("iciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
-    //console.log(messageData.text);
-    setInputMessage("");
-
-    postMessage(messageData);
-  };
-
-  const sendEmoji = () => {
-    if (!displayedConv) return;
-    const messageData = {
-      author: user?.userName,
-      authorId: user?._id,
-      text: displayedConv.customization.emoji,
-      seenBy: [user?.userName],
-      date: new Date(),
-      conversationId: displayedConv?._id,
-    };
-    postMessage(messageData);
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === "Enter" && inputMessage.trim() != "" && !event.shiftKey) {
-      event.preventDefault();
-      if (displayedConv) {
-        sendMessage();
-      } else {
-        createConversation();
-      }
-    }
-  };
-
   const postMessage = async (messageData: MessageType, conversationData?: ConversationType) => {
     try {
       const response = await fetch(RESTAPIUri + "/message/", {
@@ -509,35 +366,11 @@ function WindowConversation() {
       setTrigger(!trigger);
       if (conversationData) {
         setMostRecentConv(conversationData);
-        emitMsgToSocket(jsonData, await getUsersSocket(conversationData), conversationData);
+        emitMsgToSocket(jsonData, await getUsersSocket(conversationData, user), conversationData);
       } else {
         setMostRecentConv(displayedConv);
-        emitMsgToSocket(jsonData, await getUsersSocket(displayedConv), displayedConv);
+        emitMsgToSocket(jsonData, await getUsersSocket(displayedConv, user), displayedConv);
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  };
-
-  const getUsersSocket = async (conversation: ConversationType | null) => {
-    const convMembersStr = conversation?.members
-      ?.filter((member) => member !== user?.userName)
-      .join("-");
-    try {
-      const response = await fetch(RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr, {
-        headers: {
-          Authorization: "Bearer " + ApiToken(),
-        },
-      });
-      const jsonData = await response.json();
-      //console.log("ICI SOCKET");
-      //console.log(jsonData);
-
-      return jsonData;
     } catch (error) {
       if (error instanceof Error) {
         console.error(error.message);
@@ -564,7 +397,7 @@ function WindowConversation() {
     messageData: MessageType,
     conversation: ConversationType | null
   ) => {
-    const convMembersSocket = await getUsersSocket(conversation);
+    const convMembersSocket = await getUsersSocket(conversation, user);
     const seenMsgData = messageData;
     messageData.seenBy = [user?.userName];
     const socketData = [convMembersSocket, seenMsgData, conversation];
@@ -573,7 +406,7 @@ function WindowConversation() {
 
   const emitUserWrittingToSocket = async (isWriting: boolean) => {
     if (displayedConv) {
-      const convMembersSocket = await getUsersSocket(displayedConv);
+      const convMembersSocket = await getUsersSocket(displayedConv, user);
       const socketData = [convMembersSocket, isWriting, user?.userName, displayedConv];
       socket.emit("typing", socketData);
     }
@@ -649,7 +482,7 @@ function WindowConversation() {
     const messageData = {
       author: user.userName,
       authorId: user._id,
-      text: "GIF/" + displayedConv._id + ":" + gif.preview.url,
+      text: ["GIF/" + displayedConv._id + ":" + gif.preview.url],
       seenBy: [user.userName],
       date: new Date(),
       conversationId: displayedConv._id,
@@ -659,7 +492,6 @@ function WindowConversation() {
   };
 
   useEffect(() => {
-    setInputMessage("");
     if (displayedConv) {
       fetchMsgIndex.current = 0;
       setDroppedFiles([]);
@@ -872,10 +704,6 @@ function WindowConversation() {
     }
   }, []);
 
-  const calculateTotalSize = (files: File[]): number => {
-    return files.reduce((totalSize, file) => totalSize + file.size, 0);
-  };
-
   const handleDrop = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
@@ -943,109 +771,30 @@ function WindowConversation() {
       );
     }
   };
-  const formatFileSize = (size: number): string => {
-    if (size === 0) return "0 o";
 
-    const units = ["o", "Ko", "Mo", "Go", "To"];
-    const digitGroups = Math.floor(Math.log(size) / Math.log(1024));
-
-    return `${(size / Math.pow(1024, digitGroups)).toFixed(2)} ${units[digitGroups]}`;
-  };
-
-  const deleteSelectedFile = (index: number) => {
-    setDroppedFiles((prev) => prev.filter((_, i) => i !== index));
-    if (inputFileRef.current) {
-      inputFileRef.current.value = "";
-    }
-  };
-  const filePreview = () => {
-    return (
-      <div className="file-preview-container">
-        {droppedFiles.map((file, index) => (
-          <div key={index} className="file-preview-item">
-            <div className="delete-file" onClick={() => deleteSelectedFile(index)}>
-              <Close color={"red"} title={"Supprimer"} height="1.5rem" width="1.5rem" />
-            </div>
-            {file.type.startsWith("image/") ? (
-              <img
-                src={URL.createObjectURL(file)}
-                alt={`Preview ${file.name}`}
-                className="file-preview-image"
-              />
-            ) : (
-              <div className="file-icon">
-                <img src="/file-icon.png" alt={`File Icon`} className="file-icon-img" />
-                <div className="file-name">{file.name}</div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const filesArr = Array.from(files);
-      checkFiles(filesArr);
+  const renderWindowConvFooter = () => {
+    if (displayedConv === null)
+      return <CreateConvFooter addedMembers={addedMembers} setAddedMembers={setAddedMembers} />;
+    else if (user && displayedConv.members && displayedConv.members.includes(user.userName)) {
+      return (
+        <NormalFooter
+          setShowDragOverOverlay={setShowDragOverOverlay}
+          droppedFiles={droppedFiles}
+          setDroppedFiles={setDroppedFiles}
+        />
+      );
+    } else {
+      return <DisabledFooter />;
     }
   };
 
-  const openFileInput = (e: React.MouseEvent) => {
-    if (inputFileRef.current) {
-      inputFileRef.current.click();
-    }
-  };
-
-  const uploadFiles = async () => {
-    if (droppedFiles.length < 1) {
-      return;
-    }
-    const filesFormData = new FormData();
-    for (const file of droppedFiles) {
-      filesFormData.append("files", file);
-    }
-    //console.log(droppedFiles);
-    //console.log(filesFormData);
-
-    try {
-      const response = await fetch(RESTAPIUri + "/file/upload/" + displayedConv?._id, {
-        method: "POST",
-
-        headers: {
-          authorization: `Bearer ${ApiToken()}`,
-        },
-        body: filesFormData,
-      });
-      if (!response.ok) {
-        throw new Error("Error uploading files");
-      }
-      const data = await response.json();
-      //console.log(data);
-      if (inputFileRef.current) {
-        inputFileRef.current.value = "";
-      }
-      setDroppedFiles([]);
-      return data;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  };
-
-  const sendFile = async () => {
-    const fileNamesTimeStamped = await uploadFiles();
-    console.log("fichiers envoyés");
-    console.log(fileNamesTimeStamped);
-    await sendMessage(fileNamesTimeStamped.fileNames);
-    //console.log("msg envoyé");
-  };
   return (
     <div className="WindowConversation" onDragOver={handleDragOver} onDrop={handleDrop}>
+      {editingMsgId && (
+        <div className="editingMsgOverlay" onClick={() => setEditingMsgId("")}>
+          {" "}
+        </div>
+      )}
       <div className={`conversation-container ${showConvDetails ? "retracted" : ""}`}>
         {showDragOverOverlay && (
           <div className="drag-overlay">
@@ -1215,7 +964,7 @@ function WindowConversation() {
               if (message.author === "System/" + displayedConv?._id) {
                 return (
                   <div className="message-container" id="message-system">
-                    <ConvSystemMsg textProps={message.text} />
+                    <ConvSystemMsg textProps={message.text[message.text.length - 1]} />
                   </div>
                 );
               }
@@ -1232,8 +981,14 @@ function WindowConversation() {
                           checkMsgTime.hours + " : " + checkMsgTime.minutes}
                       </div>
                     )}
-                    <div className="message-container" id="message-me">
-                      <MessagesOptions message={message} />
+                    <div
+                      className="message-container"
+                      id="message-me"
+                      style={
+                        editingMsgId === message._id ? { zIndex: 1, backgroundColor: "red" } : {}
+                      }
+                    >
+                      <MessagesOptions message={message} setEditingMsgId={setEditingMsgId} />
                       <div
                         className={`message ${
                           selectedFoundMsgId === message._id ? "selectedFoundMsg" : ""
@@ -1369,7 +1124,7 @@ function WindowConversation() {
                       )}
                       <AsyncMsg message={message} />
                       <MessageReactions message={message} />
-                    </div>{" "}
+                    </div>
                     <MessagesOptions message={message} />
                   </div>
                   <div className="seen-by">
@@ -1390,126 +1145,7 @@ function WindowConversation() {
             )}{" "}
           </div>
         </div>
-        <div className="conversation-footer">
-          {(user && displayedConv?.members.includes(user.userName)) || displayedConv == null ? (
-            <>
-              <div className="icons">
-                <div className="icon">
-                  {" "}
-                  <AddCircle
-                    color={"black"}
-                    title="Ouvrir plus d'actions"
-                    height="3vh"
-                    width="3vh"
-                    style={{ marginRight: "0.5rem" }}
-                  />
-                </div>
-
-                {!inputMessage && (
-                  <>
-                    <div className="icon">
-                      {" "}
-                      <ImagesOutline
-                        onClick={openFileInput}
-                        title="Joindre un fichier"
-                        color={"black"}
-                        width={"1.5rem"}
-                        height={"1.5rem"}
-                        style={{ transform: "rotate(270deg)" }}
-                      />
-                    </div>
-                    <div className="icon">
-                      {" "}
-                      <ImagesOutline
-                        onClick={() => console.log(droppedFiles)}
-                        color={"black"}
-                        width={"1.5rem"}
-                        height={"1.5rem"}
-                        style={{ transform: "rotate(270deg)" }}
-                      />
-                    </div>
-
-                    <div
-                      className="gif-icon icon"
-                      ref={gifPickerRef}
-                      onClick={() => setShowGifPicker(!showGifPicker)}
-                    >
-                      <ImagesOutline
-                        width={"1.5rem"}
-                        height={"1.5rem"}
-                        color={"black"}
-                        title={"Envoyer un GIF"}
-                        style={{ transform: "rotate(270deg)" }}
-                      />
-                      <div className="gif-picker-container" onClick={(e) => e.stopPropagation()}>
-                        {" "}
-                        {showGifPicker && (
-                          <GifPicker
-                            tenorApiKey={process.env.REACT_APP_TENOR_API_KEY as string}
-                            onGifClick={(gif) => handleGifClick(gif)}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-              <div className="message-input" style={inputMessage ? { flex: "auto" } : {}}>
-                <input
-                  type="file"
-                  ref={inputFileRef}
-                  style={{ display: "none" }}
-                  multiple
-                  onChange={handleFileChange}
-                />
-                {droppedFiles.length > 0 ? (
-                  <div>{filePreview()}</div>
-                ) : (
-                  <textarea
-                    className="send-message"
-                    placeholder="Aa"
-                    value={inputMessage}
-                    rows={3}
-                    onKeyDown={handleKeyDown}
-                    ref={inputMessageRef}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setInputMessage(e.target.value)
-                    }
-                    onFocus={() => emitUserWrittingToSocket(true)}
-                    onBlur={() => emitUserWrittingToSocket(false)}
-                  />
-                )}
-              </div>
-              <div className="like-icon">
-                {inputMessage || droppedFiles.length > 0 ? (
-                  <Send
-                    color={"#00000"}
-                    height="3vh"
-                    width="3vh"
-                    onClick={() =>
-                      droppedFiles
-                        ? sendFile()
-                        : displayedConv
-                        ? sendMessage()
-                        : createConversation()
-                    }
-                  />
-                ) : (
-                  <div
-                    style={{ cursor: "pointer", fontSize: "1.5rem" }}
-                    onClick={() => sendEmoji()}
-                  >
-                    {displayedConv?.customization.emoji}
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="disabled-footer">
-              <div>Vous ne pouvez pas envoyer de message dans cette discussion</div>
-            </div>
-          )}
-        </div>
+        <div className="conversation-footer">{renderWindowConvFooter()}</div>
       </div>
       <div className={`conversation-details ${showConvDetails ? "expanded" : ""}`}>
         {showConvDetails && (

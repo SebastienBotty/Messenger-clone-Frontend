@@ -1,4 +1,5 @@
 import { ApiToken } from "../localStorage";
+import { ConversationType, UserDataType } from "../typescript/types";
 
 const REST_API_URI = process.env.REACT_APP_REST_API_URI;
 export const deleteConversation = async (
@@ -34,5 +35,32 @@ export const deleteConversation = async (
       console.error("An unknown error occurred");
     }
     return false;
+  }
+};
+
+export const getUsersSocket = async (
+  conversation: ConversationType | null,
+  user: UserDataType | null
+) => {
+  const convMembersStr = conversation?.members
+    ?.filter((member) => member !== user?.userName)
+    .join("-");
+  try {
+    const response = await fetch(REST_API_URI + "/user/getSockets?convMembers=" + convMembersStr, {
+      headers: {
+        Authorization: "Bearer " + ApiToken(),
+      },
+    });
+    const jsonData = await response.json();
+    //console.log("ICI SOCKET");
+    //console.log(jsonData);
+
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
   }
 };

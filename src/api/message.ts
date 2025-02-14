@@ -1,7 +1,38 @@
 import { ApiToken } from "../localStorage";
-import { MessageType } from "../typescript/types";
+import { ConversationType, MessageType } from "../typescript/types";
 const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
+export const postMessage = async (
+  messageData: MessageType,
+  conversationData?: ConversationType
+) => {
+  console.log("post message called");
+  try {
+    const response = await fetch(RESTAPIUri + "/message/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + ApiToken(),
+      },
+      body: JSON.stringify(messageData),
+    });
+    if (!response.ok) {
+      throw new Error("Erreur lors du POST MEssage");
+    }
+    const jsonData = await response.json();
+    console.log(jsonData);
+    //console.log(displayedConv);
+    //Reload the sideBar component to fetch the latest conversation
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
 export const deleteMessageForUser = async (
   messageId: string | undefined,
   userId: string,
