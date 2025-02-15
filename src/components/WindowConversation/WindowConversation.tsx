@@ -6,16 +6,13 @@ import {
   ConversationType,
   LastMsgSeenByMembersType,
   MediasType,
+  ConfirmationModalPropsType,
 } from "../../typescript/types";
 import { dayNames, monthNames } from "../../constants/time";
 import { Call, Videocam, InformationCircle, Close, ArrowDown } from "react-ionicons";
 
 import "./WindowConversation.css";
-import {
-  useDisplayedConvContext,
-  useMostRecentConvContext,
-  useTriggerContext,
-} from "../../screens/userLoggedIn/userLoggedIn";
+import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn";
 import {
   SelectedFoundMsgIdContext,
   ConversationFilesContext,
@@ -43,13 +40,14 @@ import { getUsersSocket } from "../../api/user";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { formatDateMsg, timeSince } from "../../functions/time";
 import { statusTranslate } from "../../constants/status";
-import GifPicker, { TenorImage } from "gif-picker-react";
 import MessagesOptions from "./MessagesOptions/MessagesOptions";
 import MessageReactions from "./MessageReactions/MessageReactions";
 import DisabledFooter from "./WindowConvFooter/DisabledFooter/DisabledFooter";
 import NormalFooter from "./WindowConvFooter/NormalFooter/NormalFooter";
 import CreateConvFooter from "./WindowConvFooter/CreateConvFooter/CreateConvFooter";
 import EditingMsgFooter from "./WindowConvFooter/EditingMsgFooter/EditingMsgFooter";
+import EditedMsgHistory from "../EditedMsgHistory/EditedMsgHistory";
+import ConfirmationModal from "../Utiles/ConfirmationModal/ConfirmationModal";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -62,9 +60,7 @@ function WindowConversation() {
   // Displayed conversation
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
-  const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
   const { setConversations } = useConversationsContext();
-  const { trigger, setTrigger } = useTriggerContext();
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
   const [convMembersTyping, setConvMembersTyping] = useState<string[]>([]);
   const [lastMsgSeenByConvMembers, setLastMsgSeenByConvMembers] = useState<
@@ -97,11 +93,16 @@ function WindowConversation() {
 
   const [showConvDetails, setShowConvDetails] = useState<boolean>(false); //Displays conversation details
 
+  //Edit Message
   const [selectedFoundMsgId, setSelectedFoundMsgId] = useState<string>(""); //Stocks the id of the message that was found by the search barµ
   const [editingMsg, setEditingMsg] = useState<MessageType | null>(null);
-
-  const [showGifPicker, setShowGifPicker] = useState<boolean>(false);
-  const gifPickerRef = useRef<HTMLDivElement>(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
+  const [confirmationModalProps, setConfirmationModalProps] = useState<ConfirmationModalPropsType>({
+    title: "",
+    text: "",
+    action: () => {},
+    closeModal: () => {},
+  });
 
   const [bodyHeight, setBodyHeight] = useState<string>("85%");
   const [footerHeight, setFooterHeight] = useState<string>("7.5%");
@@ -349,54 +350,6 @@ function WindowConversation() {
     debouncedFetchUsers(e.target.value);
   };
 
-  const postMessage = async (messageData: MessageType, conversationData?: ConversationType) => {
-    try {
-      const response = await fetch(RESTAPIUri + "/message/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + ApiToken(),
-        },
-        body: JSON.stringify(messageData),
-      });
-      if (!response.ok) {
-        throw new Error("Erreur lors du POST MEssage");
-      }
-      const jsonData = await response.json();
-      //console.log(jsonData);
-      //console.log(displayedConv);
-      setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
-      //Reload the sideBar component to fetch the latest conversation
-      setTrigger(!trigger);
-      if (conversationData) {
-        setMostRecentConv(conversationData);
-        emitMsgToSocket(jsonData, await getUsersSocket(conversationData, user), conversationData);
-      } else {
-        setMostRecentConv(displayedConv);
-        emitMsgToSocket(jsonData, await getUsersSocket(displayedConv, user), displayedConv);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  };
-
-  const emitMsgToSocket = (
-    messageData: MessageType,
-    convMembersSocket: Promise<any>,
-    conversation: ConversationType | null
-  ) => {
-    const socketData =
-      conversation == displayedConv
-        ? [convMembersSocket, messageData, conversation, messages[messages.length - 1]]
-        : [convMembersSocket, messageData, conversation];
-    //console.log(messages[messages.length - 1]);
-    //console.log(socketData);
-    socket.emit("message", socketData);
-  };
   const emitSeenMsgToSocket = async (
     messageData: MessageType,
     conversation: ConversationType | null
@@ -406,14 +359,6 @@ function WindowConversation() {
     messageData.seenBy = [user?.userName];
     const socketData = [convMembersSocket, seenMsgData, conversation];
     socket.emit("seenMessage", socketData);
-  };
-
-  const emitUserWrittingToSocket = async (isWriting: boolean) => {
-    if (displayedConv) {
-      const convMembersSocket = await getUsersSocket(displayedConv, user);
-      const socketData = [convMembersSocket, isWriting, user?.userName, displayedConv];
-      socket.emit("typing", socketData);
-    }
   };
 
   /* useEffect(() => {
@@ -470,12 +415,6 @@ function WindowConversation() {
       clearTimeout(hoverTimer);
     }
     setHoveredId(null);
-  };
-
-  const handleGifPickerContainerClick = (event: MouseEvent) => {
-    if (gifPickerRef.current && !gifPickerRef.current.contains(event.target as Node)) {
-      setShowGifPicker(false);
-    }
   };
 
   const handleTextareaResize = (newTextareaHeight: number) => {
@@ -646,8 +585,6 @@ function WindowConversation() {
         }
       });
 
-      document.addEventListener("mousedown", handleGifPickerContainerClick);
-
       //Close conversatoin details every time a new conversation is selected
     } else if (searchInputRef.current) {
       setMessages([]);
@@ -665,7 +602,6 @@ function WindowConversation() {
       socket.off("changeStatus");
       socket.off("isUserONline");
       socket.off("deletedMessage");
-      document.removeEventListener("mousedown", handleGifPickerContainerClick);
     };
   }, [displayedConv?._id]);
   useEffect(() => {
@@ -775,6 +711,16 @@ function WindowConversation() {
           alreadyDroppedFiles.join("\n")
       );
     }
+  };
+
+  const handleModifiedMsgClick = (message: MessageType) => {
+    setConfirmationModalProps({
+      title: "Historique du message",
+      text: <EditedMsgHistory message={message} />,
+      action: () => {},
+      closeModal: () => setShowConfirmationModal(false),
+    });
+    setShowConfirmationModal(true);
   };
 
   const renderWindowConvFooter = () => {
@@ -978,6 +924,7 @@ function WindowConversation() {
               const firstMessage = index === 0;
               const lastMessage = index === messages.length - 1;
               const currentMsg = index;
+              const isgMsgEdit = message.text.length > 1;
               if (message.author === "System/" + displayedConv?._id) {
                 return (
                   <div className="message-container" id="message-system">
@@ -998,6 +945,16 @@ function WindowConversation() {
                           checkMsgTime.hours + " : " + checkMsgTime.minutes}
                       </div>
                     )}
+                    <div className="message-author-name message-author-name-me">
+                      {isgMsgEdit && (
+                        <div
+                          className="edited-msg "
+                          onClick={() => handleModifiedMsgClick(message)}
+                        >
+                          Modifié
+                        </div>
+                      )}
+                    </div>
                     <div
                       className="message-container"
                       id="message-me"
@@ -1027,7 +984,6 @@ function WindowConversation() {
                             )}
                           </div>
                         )}
-
                         <AsyncMsg message={message} />
                         <MessageReactions message={message} />
                       </div>
@@ -1063,6 +1019,14 @@ function WindowConversation() {
                       displayedConv?.isGroupConversation && (
                         <div className="message-author-name">
                           <div className="message-author">{message.author}</div>
+                          {isgMsgEdit && (
+                            <div
+                              className="edited-msg"
+                              onClick={() => handleModifiedMsgClick(message)}
+                            >
+                              Modifié
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -1110,6 +1074,14 @@ function WindowConversation() {
                     displayedConv?.isGroupConversation && (
                       <div className="message-author-name">
                         <div className="message-author">{message.author}</div>
+                        {isgMsgEdit && (
+                          <div
+                            className="edited-msg"
+                            onClick={() => handleModifiedMsgClick(message)}
+                          >
+                            Modifié
+                          </div>
+                        )}
                       </div>
                     )}
                   <div className="message-container" id="message-others">
@@ -1179,6 +1151,7 @@ function WindowConversation() {
           </ConversationMediasContext.Provider>
         )}
       </div>
+      {showConfirmationModal && <ConfirmationModal {...confirmationModalProps} />}
     </div>
   );
 }

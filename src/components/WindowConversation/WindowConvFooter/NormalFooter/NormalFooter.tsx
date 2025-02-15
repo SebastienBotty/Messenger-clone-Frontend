@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { AddCircle, Close, ImagesOutline, Send } from "react-ionicons";
 import { useMessagesContext, useUserContext } from "../../../../constants/context";
 import {
@@ -182,6 +182,11 @@ function NormalFooter({
     }
   };
 
+  const handleGifPickerContainerClick = (event: MouseEvent) => {
+    if (gifPickerRef.current && !gifPickerRef.current.contains(event.target as Node)) {
+      setShowGifPicker(false);
+    }
+  };
   const handleGifClick = (gif: TenorImage) => {
     if (!user || !displayedConv) return;
     console.log(gif);
@@ -299,6 +304,12 @@ function NormalFooter({
     postMessage(messageData);
   };
 
+  useEffect(() => {
+    document.addEventListener("mousedown", handleGifPickerContainerClick);
+    return () => {
+      document.removeEventListener("mousedown", handleGifPickerContainerClick);
+    };
+  }, []);
   return (
     <>
       <div className="icons">

@@ -21,7 +21,9 @@ function MessagesOptions({
 }) {
   const { user } = useUserContext();
   const { setMessages } = useMessagesContext();
-
+  const isImg =
+    message.text[message.text.length - 1].startsWith("PATHIMAGE/" + message.conversationId + ":") ||
+    message.text[message.text.length - 1].startsWith("GIF/" + message.conversationId + ":");
   const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
   const [showReactPicker, setShowReactPicker] = useState<boolean>(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
@@ -181,7 +183,7 @@ function MessagesOptions({
           {showMoreOptions && (
             <div className="message-more-options">
               <ul className="message-more-options-ul">
-                {!moreThanXmins(message.date, 10) && setEditingMsg && (
+                {!moreThanXmins(message.date, 10) && setEditingMsg && !isImg && (
                   <li className="message-more-options-li" onClick={editMessage}>
                     Modifier
                   </li>

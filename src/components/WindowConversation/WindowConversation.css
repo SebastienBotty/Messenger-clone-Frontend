@@ -226,7 +226,6 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  pointer-events: auto;
 }
 
 .editingMsgOverlay {
@@ -289,6 +288,27 @@
   font-size: small;
   margin-top: 0.75rem;
 }
+.message-author-name-me {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  justify-content: end;
+  color: #65676b;
+  font-size: small;
+  margin-top: 0.75rem;
+  margin-right: 1rem;
+}
+.edited-msg {
+  color: #0084ff;
+  font-size: small;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.edited-msg:hover {
+  color: #65676b;
+}
+
 .message {
   max-width: 40%;
   border-radius: 1.75rem;
@@ -421,6 +441,9 @@
   justify-content: space-between;
   padding: 0.5rem 0;
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
+  background-color: white;
+
+  z-index: 2;
 }
 
 .conversation-footer .icons {
@@ -462,7 +485,9 @@
   left: 50%;
   transform: translateX(-50%);
 }
-
+.message-input {
+  max-height: 10vh;
+}
 .conversation-footer .message-input {
   width: 85%;
   transition: flex 0.3s ease-in;
@@ -549,7 +574,7 @@
   padding-left: 0.75rem;
   resize: none;
   font-size: 1.25rem;
-  padding-top: 0.5rem;
+  padding: 0.75rem;
 }
 
 input.send-message:hover {

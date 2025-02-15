@@ -1,0 +1,28 @@
+.edited-msg-history {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.edited-msg-history ul {
+  width: 100%;
+  max-height: 25vh;
+  height: 25vh;
+  overflow-y: auto;
+}
+
+.edited-msg-history ul li {
+  background-color: #f0f2f5;
+  list-style-type: none;
+  min-height: 4vh;
+  height: auto;
+  margin: 0.5rem 0 0 0;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  overflow: hidden;
+  word-break: break-word;
+  display: flex;
+  justify-content: space-between;
+  text-wrap: wrap;
+}
