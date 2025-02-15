@@ -49,6 +49,7 @@ import MessageReactions from "./MessageReactions/MessageReactions";
 import DisabledFooter from "./WindowConvFooter/DisabledFooter/DisabledFooter";
 import NormalFooter from "./WindowConvFooter/NormalFooter/NormalFooter";
 import CreateConvFooter from "./WindowConvFooter/CreateConvFooter/CreateConvFooter";
+import EditingMsgFooter from "./WindowConvFooter/EditingMsgFooter/EditingMsgFooter";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -97,10 +98,13 @@ function WindowConversation() {
   const [showConvDetails, setShowConvDetails] = useState<boolean>(false); //Displays conversation details
 
   const [selectedFoundMsgId, setSelectedFoundMsgId] = useState<string>(""); //Stocks the id of the message that was found by the search barµ
-  const [editingMsgId, setEditingMsgId] = useState<string>("");
+  const [editingMsg, setEditingMsg] = useState<MessageType | null>(null);
 
   const [showGifPicker, setShowGifPicker] = useState<boolean>(false);
   const gifPickerRef = useRef<HTMLDivElement>(null);
+
+  const [bodyHeight, setBodyHeight] = useState<string>("85%");
+  const [footerHeight, setFooterHeight] = useState<string>("7.5%");
 
   const fetchMessages = async (): Promise<MessageType[] | false> => {
     const response = await fetch(
@@ -474,22 +478,23 @@ function WindowConversation() {
     }
   };
 
-  const handleGifClick = (gif: TenorImage) => {
-    if (!user || !displayedConv) return;
-    console.log(gif);
-    setShowGifPicker(false);
+  const handleTextareaResize = (newTextareaHeight: number) => {
+    const maxFooterHeight = 20; //Percentage
+    const newFooterHeight = Math.min(newTextareaHeight, maxFooterHeight);
+    const newBodyHeight = `calc(100% - ${newFooterHeight}%)`;
 
-    const messageData = {
-      author: user.userName,
-      authorId: user._id,
-      text: ["GIF/" + displayedConv._id + ":" + gif.preview.url],
-      seenBy: [user.userName],
-      date: new Date(),
-      conversationId: displayedConv._id,
-    };
-
-    postMessage(messageData);
+    setFooterHeight(`${newFooterHeight}%`);
+    setBodyHeight(newBodyHeight);
   };
+  useEffect(() => {
+    if (editingMsg) {
+      setFooterHeight("12.5%");
+      setBodyHeight("80%");
+    } else {
+      setFooterHeight("7.5%");
+      setBodyHeight("85%");
+    }
+  }, [editingMsg]);
 
   useEffect(() => {
     if (displayedConv) {
@@ -775,6 +780,15 @@ function WindowConversation() {
   const renderWindowConvFooter = () => {
     if (displayedConv === null)
       return <CreateConvFooter addedMembers={addedMembers} setAddedMembers={setAddedMembers} />;
+    else if (editingMsg !== null)
+      return (
+        <EditingMsgFooter
+          message={editingMsg}
+          setEditingMsg={setEditingMsg}
+          onTextAreaResize={handleTextareaResize}
+          height={footerHeight}
+        />
+      );
     else if (user && displayedConv.members && displayedConv.members.includes(user.userName)) {
       return (
         <NormalFooter
@@ -783,18 +797,11 @@ function WindowConversation() {
           setDroppedFiles={setDroppedFiles}
         />
       );
-    } else {
-      return <DisabledFooter />;
-    }
+    } else return <DisabledFooter />;
   };
 
   return (
     <div className="WindowConversation" onDragOver={handleDragOver} onDrop={handleDrop}>
-      {editingMsgId && (
-        <div className="editingMsgOverlay" onClick={() => setEditingMsgId("")}>
-          {" "}
-        </div>
-      )}
       <div className={`conversation-container ${showConvDetails ? "retracted" : ""}`}>
         {showDragOverOverlay && (
           <div className="drag-overlay">
@@ -917,7 +924,17 @@ function WindowConversation() {
             </div>
           )}
         </div>
-        <div className="conversation-body" ref={scrollViewRef} onScroll={handleScroll}>
+        <div
+          className="conversation-body"
+          ref={scrollViewRef}
+          onScroll={handleScroll}
+          style={{ height: bodyHeight }}
+        >
+          {editingMsg && (
+            <div className="editingMsgOverlay" onClick={() => setEditingMsg(null)}>
+              {" "}
+            </div>
+          )}
           {displayedConv && (
             <>
               <div className="load-more-messages">
@@ -985,10 +1002,10 @@ function WindowConversation() {
                       className="message-container"
                       id="message-me"
                       style={
-                        editingMsgId === message._id ? { zIndex: 1, backgroundColor: "red" } : {}
+                        editingMsg?._id === message._id ? { zIndex: 1, backgroundColor: "red" } : {}
                       }
                     >
-                      <MessagesOptions message={message} setEditingMsgId={setEditingMsgId} />
+                      <MessagesOptions message={message} setEditingMsg={setEditingMsg} />
                       <div
                         className={`message ${
                           selectedFoundMsgId === message._id ? "selectedFoundMsg" : ""
@@ -1145,7 +1162,9 @@ function WindowConversation() {
             )}{" "}
           </div>
         </div>
-        <div className="conversation-footer">{renderWindowConvFooter()}</div>
+        <div className="conversation-footer" style={{ height: footerHeight, maxHeight: "15vh" }}>
+          {renderWindowConvFooter()}
+        </div>
       </div>
       <div className={`conversation-details ${showConvDetails ? "expanded" : ""}`}>
         {showConvDetails && (

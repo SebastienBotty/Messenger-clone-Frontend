@@ -14,10 +14,10 @@ import { moreThanXmins } from "../../../functions/time";
 
 function MessagesOptions({
   message,
-  setEditingMsgId,
+  setEditingMsg,
 }: {
   message: MessageType;
-  setEditingMsgId?: React.Dispatch<React.SetStateAction<string>>;
+  setEditingMsg?: React.Dispatch<React.SetStateAction<MessageType | null>>;
 }) {
   const { user } = useUserContext();
   const { setMessages } = useMessagesContext();
@@ -160,8 +160,8 @@ function MessagesOptions({
   };
 
   const editMessage = async () => {
-    if (!message._id || !setEditingMsgId) return;
-    setEditingMsgId(message._id);
+    if (!message._id || !setEditingMsg) return;
+    setEditingMsg(message);
     console.log("set editingMsgId: " + message._id);
   };
 
@@ -181,7 +181,7 @@ function MessagesOptions({
           {showMoreOptions && (
             <div className="message-more-options">
               <ul className="message-more-options-ul">
-                {!moreThanXmins(message.date, 10) && setEditingMsgId && (
+                {!moreThanXmins(message.date, 10) && setEditingMsg && (
                   <li className="message-more-options-li" onClick={editMessage}>
                     Modifier
                   </li>

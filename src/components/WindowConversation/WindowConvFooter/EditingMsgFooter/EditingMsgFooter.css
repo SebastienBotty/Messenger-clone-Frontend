@@ -1,0 +1,30 @@
+.editing-msg-footer {
+  height: 5rem;
+  font-size: medium;
+  width: 100%;
+}
+
+.editing-msg-header {
+  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+}
+.close-icon {
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.close-icon > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.close-icon:hover {
+  cursor: pointer;
+  background-color: #f2f2f2;
+}
+
+.disabled-click:hover {
+  cursor: not-allowed !important;
+}

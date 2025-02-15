@@ -36,6 +36,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const authApiToken = ApiToken();
 
   const fetchConversationLastMsg = async (conversationArr: ConversationType[]) => {
+    //Disgusting code i gotta modify later
     const responseArr: ConversationType[] = [];
     for (let conversation of conversationArr) {
       try {
@@ -56,10 +57,12 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           throw new Error(error.message);
         }
         const jsonData = await response.json();
-        let conversationObject = conversation;
-        conversationObject.lastMessage = jsonData;
-        conversationObject.lastMessage.date = new Date(conversationObject.lastMessage.date);
-        responseArr.push(conversationObject);
+        if (jsonData) {
+          let conversationObject = conversation;
+          conversationObject.lastMessage = jsonData;
+          conversationObject.lastMessage.date = new Date(conversationObject.lastMessage.date);
+          responseArr.push(conversationObject);
+        }
       } catch (error) {
         if (error instanceof Error) {
           console.error(error.message);
@@ -253,6 +256,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
    */
   const conversationsMap = (conversation: ConversationType, index: number) => {
     if (!user) return null;
+    console.log(conversation.lastMessage);
+
     return (
       <div
         key={conversation._id + "-" + index}

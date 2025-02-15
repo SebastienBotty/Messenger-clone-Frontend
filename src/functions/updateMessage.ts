@@ -38,13 +38,28 @@ export const updateConvLastMsgDelete = (
   console.log("----------------");
   setConversations((prev) =>
     prev.map((conv) => {
-      console.log(conv._id, message.conversationId, conv.lastMessage._id, message._id);
+      //console.log(conv._id, message.conversationId, conv.lastMessage._id, message._id);
       if (conv._id === message.conversationId && conv.lastMessage._id === message._id) {
         console.log(
           "update du dernier msg xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         );
         console.log(conv.lastMessage);
         return { ...conv, lastMessage: newMsg };
+      } else {
+        return conv;
+      }
+    })
+  );
+};
+
+export const updateConvLastMsgEdited = (
+  message: MessageType,
+  setConversations: React.Dispatch<React.SetStateAction<ConversationType[]>>
+) => {
+  setConversations((prev) =>
+    prev.map((conv) => {
+      if (conv._id === message.conversationId && conv.lastMessage._id === message._id) {
+        return { ...conv, lastMessage: message };
       } else {
         return conv;
       }
@@ -82,6 +97,25 @@ export const updateRemoveMsgReaction = (
         return {
           ...msg,
           reactions: msg.reactions?.filter((reaction) => reaction.userId !== userId),
+        };
+      } else {
+        return msg;
+      }
+    })
+  );
+};
+
+export const updateMsgText = (
+  messageId: string,
+  newText: string,
+  setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>
+) => {
+  setMessages((prev) =>
+    prev.map((msg) => {
+      if (msg._id === messageId) {
+        return {
+          ...msg,
+          text: [...msg.text, newText],
         };
       } else {
         return msg;

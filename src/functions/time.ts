@@ -1,6 +1,7 @@
 export const timeSince = (date: Date): string => {
+  const newDate = new Date(date);
   const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  const seconds = Math.floor((now.getTime() - newDate.getTime()) / 1000);
 
   const intervals = [
     { label: "semaine", seconds: 604800 },

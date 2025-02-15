@@ -194,3 +194,42 @@ export const removeMsgReaction = async (
     return false;
   }
 };
+
+export const editTextMessage = async (
+  messageId: string,
+  newText: string,
+  userId: string,
+  username: string
+) => {
+  try {
+    const response = await fetch(RESTAPIUri + "/message/editMessage", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${ApiToken()}`,
+      },
+      body: JSON.stringify({
+        messageId: messageId,
+        text: newText,
+        userId: userId,
+        username: username,
+      }),
+    });
+
+    if (!response.ok) {
+      console.log("ERREUR LORS DU PATCH MESSAGE TEXT");
+      const errorMsg = await response.json();
+      throw new Error(errorMsg.message);
+    }
+    const jsonData = await response.json();
+    console.log(jsonData);
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
