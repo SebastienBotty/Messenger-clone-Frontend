@@ -4,10 +4,11 @@ import { MessageType } from "../../typescript/types";
 
 function EditedMsgHistory({ message }: { message: MessageType }) {
   const texts = message.text;
+  texts.reverse();
   return (
     <div className="edited-msg-history">
       <ul>
-        {texts.toReversed().map((text, index) => (
+        {texts.map((text: string, index: number) => (
           <li key={index}>{text}</li>
         ))}
       </ul>
