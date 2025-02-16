@@ -279,6 +279,7 @@
   border-radius: 50%; /* Rend l'image ronde */
   width: 1.75rem; /* Définit la largeur de l'image */
   height: 1.75rem;
+  align-self: self-end;
 }
 
 .message-author-name {
