@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Close, CreateOutline, EllipsisHorizontal, NotificationsOff, Search } from "react-ionicons";
-import { ConversationType, SideBarPropsType } from "../../typescript/types";
+import { ConversationType, MessageType, SideBarPropsType } from "../../typescript/types";
 import "./SideBarConversations.css";
 
 import { ApiToken } from "../../localStorage";
@@ -18,6 +18,7 @@ import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { isConvMuted } from "../../functions/conversation";
 import ConversationParams from "./ConversationParams/ConversationParams";
 import { getMessageText } from "../../functions/StrFormatter";
+import { updateConvLastMsgEdited } from "../../functions/updateMessage";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const { user } = useUserContext();
@@ -256,7 +257,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
    */
   const conversationsMap = (conversation: ConversationType, index: number) => {
     if (!user) return null;
-    console.log(conversation.lastMessage);
+    //console.log(conversation.lastMessage);
 
     return (
       <div
@@ -361,15 +362,18 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   };
   useEffect(() => {
     socket.on("message", (data) => {
-      //console.log("Message reçu");
+      console.log("Message reçu");
       console.log(data[0]);
       const currentMsg = data[0];
       const conversation = data[1];
       setConversations((prev) => {
         return prev.map((conv) => {
           if (conv._id === currentMsg.conversationId) {
+            console.log("CONVO ICI");
+
             return { ...conv, lastMessage: { ...currentMsg, date: new Date(currentMsg.date) } };
           } else {
+            console.log("là");
             return conv;
           }
         });
@@ -460,6 +464,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       socket.off("convUpdate");
       socket.off("adminChange");
       socket.off("changeStatus");
+      socket.off("isUserOnline");
     };
   }, [displayedConv?._id, user?.status]);
 
