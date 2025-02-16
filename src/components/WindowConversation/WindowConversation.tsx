@@ -33,8 +33,10 @@ import { checkCacheFile } from "../../functions/cache";
 import { calculateTotalSize, formatFileSize, getFileTypeFromPathName } from "../../functions/file";
 import {
   updateConvLastMsgDelete,
+  updateConvLastMsgEdited,
   updateDeletedMsg,
   updateMsgReactions,
+  updateMsgText,
 } from "../../functions/updateMessage";
 import { getUsersSocket } from "../../api/user";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
@@ -585,6 +587,18 @@ function WindowConversation() {
         }
       });
 
+      socket.on("editedMessage", (message: MessageType) => {
+        console.log("received edit msg in windowConv");
+        console.log(message);
+
+        if (!message._id) return;
+        if (message.conversationId === displayedConv?._id) {
+          console.log("c'est égal");
+          updateMsgText(message._id, message.text[message.text.length - 1], setMessages);
+        }
+        updateConvLastMsgEdited(message, setConversations);
+      });
+
       //Close conversatoin details every time a new conversation is selected
     } else if (searchInputRef.current) {
       setMessages([]);
@@ -600,8 +614,10 @@ function WindowConversation() {
       socket.off("convUpdate");
       socket.off("newFile");
       socket.off("changeStatus");
-      socket.off("isUserONline");
+      socket.off("isUserOnline");
       socket.off("deletedMessage");
+      socket.off("changeReaction");
+      socket.off("editedMessage");
     };
   }, [displayedConv?._id]);
   useEffect(() => {
@@ -945,16 +961,16 @@ function WindowConversation() {
                           checkMsgTime.hours + " : " + checkMsgTime.minutes}
                       </div>
                     )}
-                    <div className="message-author-name message-author-name-me">
-                      {isgMsgEdit && (
+                    {isgMsgEdit && (
+                      <div className="message-author-name message-author-name-me">
                         <div
                           className="edited-msg "
                           onClick={() => handleModifiedMsgClick(message)}
                         >
                           Modifié
-                        </div>
-                      )}
-                    </div>
+                        </div>{" "}
+                      </div>
+                    )}
                     <div
                       className="message-container"
                       id="message-me"
@@ -1074,16 +1090,15 @@ function WindowConversation() {
                     displayedConv?.isGroupConversation && (
                       <div className="message-author-name">
                         <div className="message-author">{message.author}</div>
-                        {isgMsgEdit && (
-                          <div
-                            className="edited-msg"
-                            onClick={() => handleModifiedMsgClick(message)}
-                          >
-                            Modifié
-                          </div>
-                        )}
                       </div>
                     )}
+                  {isgMsgEdit && (
+                    <div className="message-author-name">
+                      <div className="edited-msg" onClick={() => handleModifiedMsgClick(message)}>
+                        Modifié
+                      </div>
+                    </div>
+                  )}
                   <div className="message-container" id="message-others">
                     {" "}
                     <div className="img-container">

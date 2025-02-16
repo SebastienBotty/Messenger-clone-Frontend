@@ -65,12 +65,13 @@ function EditingMsgFooter({
     }
   };
   const editMsg = async () => {
-    if (!message._id || !displayedConv || !user) return;
+    if (!message._id || !message.conversationId || !displayedConv || !user) return;
     const editedMsg = await editTextMessage(
       message._id,
       inputMessage.trim(),
       user._id,
-      user.userName
+      user.userName,
+      message.conversationId
     );
     if (editedMsg) {
       setEditingMsg(null);

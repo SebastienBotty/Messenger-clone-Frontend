@@ -199,7 +199,8 @@ export const editTextMessage = async (
   messageId: string,
   newText: string,
   userId: string,
-  username: string
+  username: string,
+  conversationId: string
 ) => {
   try {
     const response = await fetch(RESTAPIUri + "/message/editMessage", {
@@ -213,6 +214,7 @@ export const editTextMessage = async (
         text: newText,
         userId: userId,
         username: username,
+        conversationId: conversationId,
       }),
     });
 

@@ -52,21 +52,6 @@ export const updateConvLastMsgDelete = (
   );
 };
 
-export const updateConvLastMsgEdited = (
-  message: MessageType,
-  setConversations: React.Dispatch<React.SetStateAction<ConversationType[]>>
-) => {
-  setConversations((prev) =>
-    prev.map((conv) => {
-      if (conv._id === message.conversationId && conv.lastMessage._id === message._id) {
-        return { ...conv, lastMessage: message };
-      } else {
-        return conv;
-      }
-    })
-  );
-};
-
 export const updateMsgReactions = (
   messageId: string,
   reactions: MessageType["reactions"],
@@ -119,6 +104,21 @@ export const updateMsgText = (
         };
       } else {
         return msg;
+      }
+    })
+  );
+};
+
+export const updateConvLastMsgEdited = (
+  message: MessageType,
+  setConversations: React.Dispatch<React.SetStateAction<ConversationType[]>>
+) => {
+  setConversations((prev) =>
+    prev.map((conv) => {
+      if (conv._id === message.conversationId && conv.lastMessage._id === message._id) {
+        return { ...conv, lastMessage: message };
+      } else {
+        return conv;
       }
     })
   );
