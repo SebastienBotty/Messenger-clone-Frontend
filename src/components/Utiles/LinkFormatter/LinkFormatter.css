@@ -1,6 +1,9 @@
 #message-me a {
   color: white !important;
 }
+#message-me .msg-file-container a {
+  color: black !important;
+}
 
 #message-others a {
   color: black !important;
