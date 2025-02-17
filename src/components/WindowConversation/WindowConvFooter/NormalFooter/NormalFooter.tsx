@@ -46,6 +46,7 @@ function NormalFooter({
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [textareaHeight, setTextareaHeight] = useState<number>(0);
+  const [initialTextAreaHeight, setInitialTextAreaHeight] = useState<number>(0);
   console.log("CCCCCCCC");
   console.log(height);
   const handleValueChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -59,7 +60,7 @@ function NormalFooter({
     const maxHeightInPixels = (maxHeight * window.innerHeight) / 100; // Convertir 10vh en pixels
     if (!textarea) return;
     console.log(textarea.scrollHeight, textareaHeight);
-    if (textarea.scrollHeight !== textareaHeight && textarea.scrollHeight <= maxHeightInPixels) {
+    if (textarea.scrollHeight <= maxHeightInPixels) {
       textarea.style.overflowY = "hidden";
 
       const newHeight = textarea.scrollHeight; // Obtenir la hauteur du contenu
@@ -73,7 +74,10 @@ function NormalFooter({
       textarea.style.height = newHeight + "px";
 
       // Appeler la fonction du parent pour mettre à jour les hauteurs
-      onTextAreaResize(newHeightPercentage);
+      if (textarea.scrollHeight !== textareaHeight) {
+        setTextareaHeight(textarea.scrollHeight);
+        onTextAreaResize(newHeightPercentage);
+      }
     } else if (textarea.scrollHeight > maxHeightInPixels) {
       textarea.style.overflowY = "scroll";
     }
@@ -143,6 +147,7 @@ function NormalFooter({
       setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
       onTextAreaResize(0, "reset"); //Reload the sideBar component to fetch the latest conversation
       if (textAreaRef.current) textAreaRef.current.style.height = "4vh";
+
       setTrigger(!trigger);
       if (conversationData) {
         setMostRecentConv(conversationData);
@@ -350,6 +355,11 @@ function NormalFooter({
 
   useEffect(() => {
     document.addEventListener("mousedown", handleGifPickerContainerClick);
+    if (textAreaRef.current) {
+      textAreaRef.current.focus();
+      setTextareaHeight(textAreaRef.current.scrollHeight);
+      setInitialTextAreaHeight(textAreaRef.current.scrollHeight);
+    }
     return () => {
       document.removeEventListener("mousedown", handleGifPickerContainerClick);
     };
@@ -417,10 +427,7 @@ function NormalFooter({
           </>
         )}
       </div>
-      <div
-        className="message-input"
-        style={inputMessage ? { flex: "auto" } : { backgroundColor: "blue" }}
-      >
+      <div className="message-input" style={inputMessage ? { flex: "auto" } : {}}>
         <input
           type="file"
           ref={inputFileRef}
