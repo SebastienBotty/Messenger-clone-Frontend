@@ -13,20 +13,26 @@ import { getUsersSocket } from "../../../../api/user";
 import { socket } from "../../../../Sockets/socket";
 import { calculateTotalSize, formatFileSize } from "../../../../functions/file";
 
+import "./NormalFooter.css";
+import { text } from "stream/consumers";
+
 function NormalFooter({
   setShowDragOverOverlay,
   droppedFiles,
   setDroppedFiles,
+  onTextAreaResize,
+  height,
 }: {
   setShowDragOverOverlay: React.Dispatch<React.SetStateAction<boolean>>;
   droppedFiles: File[];
   setDroppedFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  onTextAreaResize: (newTextareaHeight: number, reset?: string) => void;
+  height: string;
 }) {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const { user } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
   const [inputMessage, setInputMessage] = useState<string>("");
-  const inputMessageRef = useRef<HTMLTextAreaElement>(null);
 
   const { messages, setMessages } = useMessagesContext();
   const { trigger, setTrigger } = useTriggerContext();
@@ -37,6 +43,43 @@ function NormalFooter({
 
   const [showGifPicker, setShowGifPicker] = useState<boolean>(false);
   const gifPickerRef = useRef<HTMLDivElement>(null);
+
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [textareaHeight, setTextareaHeight] = useState<number>(0);
+  console.log("CCCCCCCC");
+  console.log(height);
+  const handleValueChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputMessage(e.target.value);
+    adjustTextareaHeight();
+    console.log("ALLO");
+  };
+  const adjustTextareaHeight = () => {
+    const textarea = textAreaRef.current;
+    const maxHeight = 10; // 10vh
+    const maxHeightInPixels = (maxHeight * window.innerHeight) / 100; // Convertir 10vh en pixels
+    if (!textarea) return;
+    console.log(textarea.scrollHeight, textareaHeight);
+    if (textarea.scrollHeight !== textareaHeight && textarea.scrollHeight <= maxHeightInPixels) {
+      textarea.style.overflowY = "hidden";
+
+      const newHeight = textarea.scrollHeight; // Obtenir la hauteur du contenu
+      console.log(textarea.scrollHeight, "xxxxxxxxxxxxxx");
+
+      // Convertir la hauteur en pourcentage (par rapport à la hauteur du parent)
+      const parentHeight = textarea.parentElement?.clientHeight || 0;
+      console.log("ICICICIC");
+      console.log(textarea.parentElement?.clientHeight);
+      const newHeightPercentage = (newHeight / parentHeight) * 100;
+      textarea.style.height = newHeight + "px";
+
+      // Appeler la fonction du parent pour mettre à jour les hauteurs
+      onTextAreaResize(newHeightPercentage);
+    } else if (textarea.scrollHeight > maxHeightInPixels) {
+      textarea.style.overflowY = "scroll";
+    }
+
+    setTextareaHeight(textarea.scrollHeight);
+  };
 
   const emitMsgToSocket = (
     messageData: MessageType,
@@ -98,7 +141,8 @@ function NormalFooter({
       //console.log(jsonData);
       //console.log(displayedConv);
       setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
-      //Reload the sideBar component to fetch the latest conversation
+      onTextAreaResize(0, "reset"); //Reload the sideBar component to fetch the latest conversation
+      if (textAreaRef.current) textAreaRef.current.style.height = "4vh";
       setTrigger(!trigger);
       if (conversationData) {
         setMostRecentConv(conversationData);
@@ -311,7 +355,7 @@ function NormalFooter({
     };
   }, []);
   return (
-    <>
+    <div className="normal-footer">
       <div className="icons">
         <div className="icon">
           {" "}
@@ -373,7 +417,10 @@ function NormalFooter({
           </>
         )}
       </div>
-      <div className="message-input" style={inputMessage ? { flex: "auto" } : {}}>
+      <div
+        className="message-input"
+        style={inputMessage ? { flex: "auto" } : { backgroundColor: "blue" }}
+      >
         <input
           type="file"
           ref={inputFileRef}
@@ -390,10 +437,8 @@ function NormalFooter({
             value={inputMessage}
             rows={3}
             onKeyDown={handleKeyDown}
-            ref={inputMessageRef}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setInputMessage(e.target.value)
-            }
+            ref={textAreaRef}
+            onChange={handleValueChange}
             onFocus={() => emitUserWrittingToSocket(true)}
             onBlur={() => emitUserWrittingToSocket(false)}
           />
@@ -413,7 +458,7 @@ function NormalFooter({
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 

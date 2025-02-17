@@ -419,13 +419,21 @@ function WindowConversation() {
     setHoveredId(null);
   };
 
-  const handleTextareaResize = (newTextareaHeight: number) => {
-    const maxFooterHeight = 20; //Percentage
+  const handleTextareaResize = (newTextareaHeight: number, reset?: string) => {
+    if (reset) {
+      setFooterHeight("7.5%");
+      setBodyHeight("85%");
+      return;
+    }
+    const maxFooterHeight = 30; //Percentage
+    console.log("xx");
+    console.log(newTextareaHeight);
     const newFooterHeight = Math.min(newTextareaHeight, maxFooterHeight);
-    const newBodyHeight = `calc(100% - ${newFooterHeight}%)`;
-
+    const newBodyHeight = 100 - newFooterHeight;
+    console.log("làlàlà");
+    console.log(newBodyHeight);
+    setBodyHeight(`${newBodyHeight}%`);
     setFooterHeight(`${newFooterHeight}%`);
-    setBodyHeight(newBodyHeight);
   };
   useEffect(() => {
     if (editingMsg) {
@@ -443,6 +451,7 @@ function WindowConversation() {
       setDroppedFiles([]);
       setShowDragOverOverlay(false);
       setMessages([]);
+      setEditingMsg(null);
       console.log("MESSSSSSSAGE RESET");
       console.log(displayedConv._id);
       asyncFetchMsg();
@@ -757,6 +766,8 @@ function WindowConversation() {
           setShowDragOverOverlay={setShowDragOverOverlay}
           droppedFiles={droppedFiles}
           setDroppedFiles={setDroppedFiles}
+          onTextAreaResize={handleTextareaResize}
+          height={footerHeight}
         />
       );
     } else return <DisabledFooter />;

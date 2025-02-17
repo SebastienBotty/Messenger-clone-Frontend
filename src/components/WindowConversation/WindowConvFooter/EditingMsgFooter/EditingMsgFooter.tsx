@@ -30,21 +30,31 @@ function EditingMsgFooter({
   const [inputMessage, setInputMessage] = useState<string>(message.text[message.text.length - 1]);
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const [validEdit, setValidEdit] = useState<boolean>(false);
+  const [textareaHeight, setTextareaHeight] = useState<number>(0);
 
   const adjustTextareaHeight = () => {
     const textarea = textAreaRef.current;
-    if (textarea) {
-      const maxHeight = "10vh";
-      textarea.style.height = "auto"; // Réinitialiser la hauteur
+    const maxHeight = 10; // 10vh
+    const maxHeightInPixels = (maxHeight * window.innerHeight) / 100; // Convertir 10vh en pixels
+    if (!textarea) return;
+    console.log(textarea.scrollHeight, textareaHeight);
+    if (textarea.scrollHeight !== textareaHeight && textarea.scrollHeight <= maxHeightInPixels) {
+      textarea.style.overflowY = "hidden";
+
       const newHeight = textarea.scrollHeight; // Obtenir la hauteur du contenu
-      textarea.style.height = `${newHeight}px`; // Appliquer la nouvelle hauteur
+      console.log(textarea.scrollHeight, "xxxxxxxxxxxxxx");
 
       // Convertir la hauteur en pourcentage (par rapport à la hauteur du parent)
       const parentHeight = textarea.parentElement?.clientHeight || 0;
+      console.log("ICICICIC");
+      console.log(textarea.parentElement?.clientHeight);
       const newHeightPercentage = (newHeight / parentHeight) * 100;
+      textarea.style.height = newHeight + "px";
 
       // Appeler la fonction du parent pour mettre à jour les hauteurs
       onTextAreaResize(newHeightPercentage);
+    } else if (textarea.scrollHeight > maxHeightInPixels) {
+      textarea.style.overflowY = "scroll";
     }
   };
 
@@ -57,6 +67,7 @@ function EditingMsgFooter({
 
   const handleValueChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(e.target.value);
+    adjustTextareaHeight();
 
     if (e.target.value.trim() != "" && e.target.value !== message.text[message.text.length - 1]) {
       setValidEdit(true);
@@ -84,10 +95,11 @@ function EditingMsgFooter({
     const textarea = textAreaRef.current;
     if (textarea) {
       textarea.focus();
+      setTextareaHeight(textarea.scrollHeight);
+      adjustTextareaHeight();
+      console.log(textarea.scrollHeight, "xxxxxxxxxxxxxx");
       textarea.setSelectionRange(textarea.value.length, textarea.value.length); //Place the focus at the end of the text
-
-      textarea.addEventListener("input", adjustTextareaHeight);
-      return () => textarea.removeEventListener("input", adjustTextareaHeight);
+      console.log(textarea.parentElement?.clientHeight);
     }
   }, []);
   return (
@@ -108,7 +120,7 @@ function EditingMsgFooter({
             rows={3}
             onKeyDown={handleKeyDown}
             ref={textAreaRef}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleValueChange(e)}
+            onChange={handleValueChange}
           />
         </div>
         <div className="like-icon">

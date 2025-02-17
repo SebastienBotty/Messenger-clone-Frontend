@@ -575,6 +575,7 @@
   resize: none;
   font-size: 1.25rem;
   padding: 0.75rem;
+  overflow-y: hidden;
 }
 
 input.send-message:hover {
