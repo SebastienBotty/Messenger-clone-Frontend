@@ -368,8 +368,9 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       const conversation = data[1];
       setConversations((prev) => {
         return prev.map((conv) => {
+          console.log("conv: " + conv._id + " currentMsg: " + currentMsg.conversationId);
           if (conv._id === currentMsg.conversationId) {
-            console.log("CONVO ICI");
+            console.log("CONVO ICI XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
             return { ...conv, lastMessage: { ...currentMsg, date: new Date(currentMsg.date) } };
           } else {
@@ -448,11 +449,18 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       });
     });
     socket.on("isUserOnline", (data) => {
+      console.log("isUserOnline listened");
+      console.log(data.userId);
       setConversations((prev) => {
         return prev.map((conv) => {
+          if (!conv.isGroupConversation) {
+            console.log(conv.partnerInfos?.username, conv.partnerInfos?.userId, data.userId);
+          }
           if (conv.partnerInfos && conv.partnerInfos?.userId === data.userId) {
             conv.partnerInfos.isOnline = data.isOnline;
             conv.partnerInfos.lastSeen = data.lastSeen;
+            console.log("ICICICIC IDEEIN");
+            console.log(data.isOnline);
           }
           return conv;
         });

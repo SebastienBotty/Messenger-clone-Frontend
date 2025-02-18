@@ -47,8 +47,7 @@ function NormalFooter({
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [textareaHeight, setTextareaHeight] = useState<number>(0);
   const [initialTextAreaHeight, setInitialTextAreaHeight] = useState<number>(0);
-  console.log("CCCCCCCC");
-  console.log(height);
+
   const handleValueChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(e.target.value);
     adjustTextareaHeight();
