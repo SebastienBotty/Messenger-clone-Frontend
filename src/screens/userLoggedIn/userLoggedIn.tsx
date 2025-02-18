@@ -43,27 +43,7 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
   const [recentConversations, setRecentConversations] = useState<ConversationType[] | null>(null);
 
   const setUserOnline = async (socketId: string | undefined) => {
-    try {
-      const response = await fetch(RESTAPIUri + "/user/userId/" + user?._id + "/socketId", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: "Bearer " + ApiToken(),
-        },
-        body: JSON.stringify({ socketId: socketId }),
-      });
-      if (!response.ok) {
-        throw new Error("Erreur lors du patch socketId");
-      }
-      const jsonData = await response.json();
-      console.log("Socket Id de " + user?.userName + " : " + jsonData);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
+    socket.emit("userConnected", { socketId, userId: user?._id });
   };
 
   useEffect(() => {
