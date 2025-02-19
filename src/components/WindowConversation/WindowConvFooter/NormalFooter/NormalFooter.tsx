@@ -108,18 +108,20 @@ function NormalFooter({
   };
 
   const sendMessage = (fileNames?: string[]) => {
+    if (!user) return;
     const trimmedString = inputMessage.replace(/^\s+|\s+$/g, "");
 
     const messageData = {
-      author: user?.userName,
-      authorId: user?._id,
+      author: user.userName,
+      authorId: user._id,
 
       text: fileNames
         ? ["PATHIMAGE/" + displayedConv?._id + ":" + fileNames.map((name) => name).join(",")]
         : [trimmedString],
-      seenBy: [user?.userName],
+      seenBy: [user.userName],
       date: new Date(),
       conversationId: displayedConv?._id,
+      responseToMsgId: null,
     };
     //console.log("iciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
     //console.log(messageData.text);
@@ -247,6 +249,7 @@ function NormalFooter({
       seenBy: [user.userName],
       date: new Date(),
       conversationId: displayedConv._id,
+      responseToMsgId: null,
     };
 
     postMessage(messageData);
@@ -340,14 +343,15 @@ function NormalFooter({
   };
 
   const sendEmoji = () => {
-    if (!displayedConv) return;
+    if (!displayedConv || !user) return;
     const messageData = {
-      author: user?.userName,
-      authorId: user?._id,
+      author: user.userName,
+      authorId: user._id,
       text: [displayedConv.customization.emoji],
       seenBy: [user?.userName],
       date: new Date(),
       conversationId: displayedConv?._id,
+      responseToMsgId: null,
     };
     postMessage(messageData);
   };
@@ -456,7 +460,7 @@ function NormalFooter({
             color={"#00000"}
             height="3vh"
             width="3vh"
-            onClick={() => (droppedFiles ? sendFile() : sendMessage())}
+            onClick={() => (droppedFiles.length > 0 ? sendFile() : sendMessage())}
           />
         ) : (
           <div style={{ cursor: "pointer", fontSize: "1.5rem" }} onClick={() => sendEmoji()}>
