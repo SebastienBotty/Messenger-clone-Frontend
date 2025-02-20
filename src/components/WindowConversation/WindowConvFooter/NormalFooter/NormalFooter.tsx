@@ -7,14 +7,18 @@ import {
   useTriggerContext,
 } from "../../../../screens/userLoggedIn/userLoggedIn";
 import GifPicker, { TenorImage } from "gif-picker-react";
-import { ConversationType, MessageType } from "../../../../typescript/types";
+import {
+  ConversationType,
+  MessageType,
+  PostMessageType,
+  QuotedMessageType,
+} from "../../../../typescript/types";
 import { ApiToken } from "../../../../localStorage";
 import { getUsersSocket } from "../../../../api/user";
 import { socket } from "../../../../Sockets/socket";
 import { calculateTotalSize, formatFileSize } from "../../../../functions/file";
 
 import "./NormalFooter.css";
-import { text } from "stream/consumers";
 
 function NormalFooter({
   setShowDragOverOverlay,
@@ -22,12 +26,16 @@ function NormalFooter({
   setDroppedFiles,
   onTextAreaResize,
   height,
+  quotedMessage,
+  setQuotedMessage,
 }: {
   setShowDragOverOverlay: React.Dispatch<React.SetStateAction<boolean>>;
   droppedFiles: File[];
   setDroppedFiles: React.Dispatch<React.SetStateAction<File[]>>;
   onTextAreaResize: (newTextareaHeight: number, reset?: string) => void;
   height: string;
+  quotedMessage: QuotedMessageType | null;
+  setQuotedMessage: React.Dispatch<React.SetStateAction<QuotedMessageType | null>>;
 }) {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const { user } = useUserContext();
@@ -121,15 +129,16 @@ function NormalFooter({
       seenBy: [user.userName],
       date: new Date(),
       conversationId: displayedConv?._id,
-      responseToMsgId: null,
+      responseToMsgId: quotedMessage ? quotedMessage._id : null,
     };
+    console.log("msg envoyé : " + messageData.responseToMsgId);
     //console.log("iciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
     //console.log(messageData.text);
     setInputMessage("");
 
     postMessage(messageData);
   };
-  const postMessage = async (messageData: MessageType, conversationData?: ConversationType) => {
+  const postMessage = async (messageData: PostMessageType, conversationData?: ConversationType) => {
     try {
       const response = await fetch(RESTAPIUri + "/message/", {
         method: "POST",
@@ -143,9 +152,10 @@ function NormalFooter({
         throw new Error("Erreur lors du POST MEssage");
       }
       const jsonData = await response.json();
-      //console.log(jsonData);
+      console.log(jsonData);
       //console.log(displayedConv);
       setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
+      setQuotedMessage(null);
       onTextAreaResize(0, "reset"); //Reload the sideBar component to fetch the latest conversation
       if (textAreaRef.current) textAreaRef.current.style.height = "4vh";
 
@@ -356,6 +366,12 @@ function NormalFooter({
     postMessage(messageData);
   };
 
+  const renderQuotedMessageAuthor = () => {
+    if (!quotedMessage) return null;
+    if (quotedMessage.author === user?.userName) return "vous-même";
+    return quotedMessage.author;
+  };
+
   useEffect(() => {
     document.addEventListener("mousedown", handleGifPickerContainerClick);
     if (textAreaRef.current) {
@@ -367,106 +383,133 @@ function NormalFooter({
       document.removeEventListener("mousedown", handleGifPickerContainerClick);
     };
   }, []);
+
+  useEffect(() => {
+    if (textAreaRef.current && quotedMessage) {
+      console.log("focus");
+      textAreaRef.current.focus();
+    }
+    return () => {};
+  }, [quotedMessage]);
+
   return (
-    <div className="normal-footer">
-      <div className="icons">
-        <div className="icon">
-          {" "}
-          <AddCircle
-            color={"black"}
-            title="Ouvrir plus d'actions"
-            height="3vh"
-            width="3vh"
-            style={{ marginRight: "0.5rem" }}
-          />
-        </div>
-
-        {!inputMessage && displayedConv !== null && (
-          <>
-            <div className="icon">
-              {" "}
-              <ImagesOutline
-                onClick={openFileInput}
-                title="Joindre un fichier"
-                color={"black"}
-                width={"1.5rem"}
-                height={"1.5rem"}
-                style={{ transform: "rotate(270deg)" }}
-              />
-            </div>
-            <div className="icon">
-              {" "}
-              <ImagesOutline
-                onClick={() => console.log(droppedFiles)}
-                color={"black"}
-                width={"1.5rem"}
-                height={"1.5rem"}
-                style={{ transform: "rotate(270deg)" }}
-              />
-            </div>
-
-            <div
-              className="gif-icon icon"
-              ref={gifPickerRef}
-              onClick={() => setShowGifPicker(!showGifPicker)}
-            >
-              <ImagesOutline
-                width={"1.5rem"}
-                height={"1.5rem"}
-                color={"black"}
-                title={"Envoyer un GIF"}
-                style={{ transform: "rotate(270deg)" }}
-              />
-              <div className="gif-picker-container" onClick={(e) => e.stopPropagation()}>
-                {" "}
-                {showGifPicker && (
-                  <GifPicker
-                    tenorApiKey={process.env.REACT_APP_TENOR_API_KEY as string}
-                    onGifClick={(gif) => handleGifClick(gif)}
-                  />
-                )}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-      <div className="message-input" style={inputMessage ? { flex: "auto" } : {}}>
-        <input
-          type="file"
-          ref={inputFileRef}
-          style={{ display: "none" }}
-          multiple
-          onChange={handleFileChange}
-        />
-        {droppedFiles.length > 0 ? (
-          <div>{filePreview()}</div>
-        ) : (
-          <textarea
-            className="send-message"
-            placeholder="Aa"
-            value={inputMessage}
-            rows={3}
-            onKeyDown={handleKeyDown}
-            ref={textAreaRef}
-            onChange={handleValueChange}
-            onFocus={() => emitUserWrittingToSocket(true)}
-            onBlur={() => emitUserWrittingToSocket(false)}
-          />
-        )}
-      </div>
-      <div className="like-icon">
-        {inputMessage || droppedFiles.length > 0 ? (
-          <Send
-            color={"#00000"}
-            height="3vh"
-            width="3vh"
-            onClick={() => (droppedFiles.length > 0 ? sendFile() : sendMessage())}
-          />
-        ) : (
-          <div style={{ cursor: "pointer", fontSize: "1.5rem" }} onClick={() => sendEmoji()}>
-            {displayedConv?.customization.emoji}
+    <div className="normal-footer" style={{ height: height }}>
+      {quotedMessage && (
+        <div className="normal-msg-header">
+          <div className="normal-msg-header-author">
+            <span style={{ fontWeight: "bold" }}>Répondre à {renderQuotedMessageAuthor()}</span>
+            <span>{quotedMessage.text[quotedMessage.text.length - 1]}</span>
           </div>
-        )}
+          <div className="close-icon">
+            <Close
+              color={"#00000"}
+              height="3vh"
+              width="3vh"
+              onClick={() => setQuotedMessage(null)}
+            />
+          </div>
+        </div>
+      )}
+      <div className="normal-msg-body">
+        <div className="icons">
+          <div className="icon" onClick={() => console.log(quotedMessage)}>
+            {" "}
+            <AddCircle
+              color={"black"}
+              title="Ouvrir plus d'actions"
+              height="3vh"
+              width="3vh"
+              style={{ marginRight: "0.5rem" }}
+            />
+          </div>
+
+          {!inputMessage && displayedConv !== null && (
+            <>
+              <div className="icon">
+                {" "}
+                <ImagesOutline
+                  onClick={openFileInput}
+                  title="Joindre un fichier"
+                  color={"black"}
+                  width={"1.5rem"}
+                  height={"1.5rem"}
+                  style={{ transform: "rotate(270deg)" }}
+                />
+              </div>
+              <div className="icon">
+                {" "}
+                <ImagesOutline
+                  onClick={() => console.log(droppedFiles)}
+                  color={"black"}
+                  width={"1.5rem"}
+                  height={"1.5rem"}
+                  style={{ transform: "rotate(270deg)" }}
+                />
+              </div>
+
+              <div
+                className="gif-icon icon"
+                ref={gifPickerRef}
+                onClick={() => setShowGifPicker(!showGifPicker)}
+              >
+                <ImagesOutline
+                  width={"1.5rem"}
+                  height={"1.5rem"}
+                  color={"black"}
+                  title={"Envoyer un GIF"}
+                  style={{ transform: "rotate(270deg)" }}
+                />
+                <div className="gif-picker-container" onClick={(e) => e.stopPropagation()}>
+                  {" "}
+                  {showGifPicker && (
+                    <GifPicker
+                      tenorApiKey={process.env.REACT_APP_TENOR_API_KEY as string}
+                      onGifClick={(gif) => handleGifClick(gif)}
+                    />
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="message-input" style={inputMessage ? { flex: "auto" } : {}}>
+          <input
+            type="file"
+            ref={inputFileRef}
+            style={{ display: "none" }}
+            multiple
+            onChange={handleFileChange}
+          />
+          {droppedFiles.length > 0 ? (
+            <div>{filePreview()}</div>
+          ) : (
+            <textarea
+              className="send-message"
+              placeholder="Aa"
+              value={inputMessage}
+              rows={3}
+              onKeyDown={handleKeyDown}
+              ref={textAreaRef}
+              onChange={handleValueChange}
+              onFocus={() => emitUserWrittingToSocket(true)}
+              onBlur={() => emitUserWrittingToSocket(false)}
+            />
+          )}
+        </div>
+        <div className="like-icon">
+          {inputMessage || droppedFiles.length > 0 ? (
+            <Send
+              color={"#00000"}
+              height="3vh"
+              width="3vh"
+              onClick={() => (droppedFiles.length > 0 ? sendFile() : sendMessage())}
+            />
+          ) : (
+            <div style={{ cursor: "pointer", fontSize: "1.5rem" }} onClick={() => sendEmoji()}>
+              {displayedConv?.customization.emoji}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

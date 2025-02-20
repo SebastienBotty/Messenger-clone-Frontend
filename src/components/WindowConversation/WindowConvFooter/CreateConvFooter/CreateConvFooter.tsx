@@ -79,17 +79,19 @@ function CreateConvFooter({
     }
   };
   const sendMessage = async (conversation: ConversationType) => {
+    if (!user) return;
     console.log("ALLOALLOALLAOALAOALAOALO");
     const trimmedString = inputMessage.replace(/^\s+|\s+$/g, "");
     console.log("SEND MSG CALLED");
     const messageData = {
-      author: user?.userName,
-      authorId: user?._id,
+      author: user.userName,
+      authorId: user._id,
 
       text: [trimmedString],
-      seenBy: [user?.userName],
+      seenBy: [user.userName],
       date: new Date(),
       conversationId: conversation._id,
+      responseToMsgId: null,
     };
     //console.log("iciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
     //console.log(messageData.text);

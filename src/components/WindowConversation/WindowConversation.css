@@ -5,6 +5,7 @@
   display: flex;
   position: relative;
   background-color: white;
+  overflow-x: hidden !important;
 }
 
 .conversation-container {
@@ -13,6 +14,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow-x: hidden;
 }
 .conversation-details {
   width: 0;
@@ -223,9 +225,12 @@
 .conversation-body {
   height: 85%;
   overflow-y: scroll;
+  overflow-x: hidden;
   flex: 1;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .editingMsgOverlay {

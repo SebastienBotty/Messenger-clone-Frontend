@@ -39,6 +39,7 @@ export const postConversation = async (
       seenBy: [user.userName],
       date: new Date(),
       conversationId: jsonData._id,
+      responseToMsgId: null,
     };
     //console.log(" CONVERSATION DANS POST CONVERSATION");
     //console.log(jsonData);

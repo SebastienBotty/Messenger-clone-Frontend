@@ -1,5 +1,6 @@
 import { deleteMessage } from "../constants/ConfirmationMessage";
 import { ConversationType, MessageType } from "../typescript/types";
+
 export const updateDeletedMsg = (
   message: MessageType,
   setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>
@@ -18,6 +19,15 @@ export const updateDeletedMsg = (
     prev.map((msg) => {
       if (msg._id === message._id) {
         return newMsg;
+      } else if (msg.responseToMsgId?._id === message._id) {
+        return {
+          ...msg,
+          responseToMsgId: {
+            ...msg.responseToMsgId,
+            text: [deleteMessage.deletedMessage],
+            _id: msg.responseToMsgId?._id,
+          },
+        } as MessageType;
       } else {
         return msg;
       }
@@ -101,6 +111,11 @@ export const updateMsgText = (
         return {
           ...msg,
           text: [...msg.text, newText],
+        };
+      } else if (msg.responseToMsgId?._id === messageId) {
+        return {
+          ...msg,
+          responseToMsgId: { ...msg.responseToMsgId, text: [...msg.responseToMsgId.text, newText] },
         };
       } else {
         return msg;

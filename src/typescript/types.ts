@@ -78,8 +78,8 @@ export type RecentConversationsContextType = {
 };
 
 export type MessageType = {
-  author: string | undefined;
-  authorId?: string;
+  author: string;
+  authorId: string;
   text: string[];
   seenBy: (string | undefined)[];
   date: Date;
@@ -96,6 +96,35 @@ export type MessageType = {
     userId: string;
     reaction: string;
   }>;
+  responseToMsgId: QuotedMessageType | null;
+};
+export type PostMessageType = {
+  author: string;
+  authorId: string;
+  text: string[];
+  seenBy: (string | undefined)[];
+  date: Date;
+  conversationId: string | undefined;
+  deletedBy?: Array<{
+    username: string;
+    userId: string;
+  }>;
+  deletedForEveryone?: boolean;
+  deletedForEveryoneDate?: Date | null;
+  reactions?: Array<{
+    username: string;
+    userId: string;
+    reaction: string;
+  }>;
+  responseToMsgId: string | null;
+};
+
+export type QuotedMessageType = {
+  _id: string;
+  author: string;
+  authorId: string;
+  text: string[];
+  date: Date;
 };
 
 export type LastMsgSeenByMembersType = {

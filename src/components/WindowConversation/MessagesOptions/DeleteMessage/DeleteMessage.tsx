@@ -11,7 +11,9 @@ function DeleteMessage({ message, closeModal }: { message: MessageType; closeMod
   const { user } = useUserContext();
   const { messages, setMessages } = useMessagesContext();
   const { setConversations } = useConversationsContext();
-  const [checkBoxValue, setCheckBoxValue] = useState<"All" | "Me">("All");
+  const [checkBoxValue, setCheckBoxValue] = useState<"All" | "Me">(
+    message.deletedForEveryone ? "Me" : "All"
+  );
 
   const submitDeleteMessage = async () => {
     if (!message._id || !user) return;
@@ -63,23 +65,25 @@ function DeleteMessage({ message, closeModal }: { message: MessageType; closeMod
 
   return (
     <div className="delete-message" onClick={(e) => e.stopPropagation()}>
-      <label>
-        {" "}
-        <input
-          type="checkbox"
-          name="delete-message-all"
-          id="delete-message-all"
-          className="delete-message-checkbox"
-          value={"All"}
-          checked={checkBoxValue === "All"}
-          onChange={(e) => setCheckBoxValue(e.target.value as "All" | "Me")}
-        />
-        <div className="delete-message-text">
+      {!message.deletedForEveryone && (
+        <label>
           {" "}
-          <div className="delete-message-option-title">{deleteMessage.deleteAll.title}</div>
-          <div className="delete-message-option-text">{deleteMessage.deleteAll.text}</div>
-        </div>
-      </label>
+          <input
+            type="checkbox"
+            name="delete-message-all"
+            id="delete-message-all"
+            className="delete-message-checkbox"
+            value={"All"}
+            checked={checkBoxValue === "All"}
+            onChange={(e) => setCheckBoxValue(e.target.value as "All" | "Me")}
+          />
+          <div className="delete-message-text">
+            {" "}
+            <div className="delete-message-option-title">{deleteMessage.deleteAll.title}</div>
+            <div className="delete-message-option-text">{deleteMessage.deleteAll.text}</div>
+          </div>
+        </label>
+      )}
       <label>
         <input
           type="checkbox"
@@ -87,7 +91,7 @@ function DeleteMessage({ message, closeModal }: { message: MessageType; closeMod
           id="delete-message-me"
           className="delete-message-checkbox"
           value="Me"
-          checked={checkBoxValue === "Me"}
+          checked={checkBoxValue === "Me" || message.deletedForEveryone}
           onChange={(e) => setCheckBoxValue(e.target.value as "All" | "Me")}
         />
         <div className="delete-message-text">

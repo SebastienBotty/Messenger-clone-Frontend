@@ -7,10 +7,10 @@ import {
   LastMsgSeenByMembersType,
   MediasType,
   ConfirmationModalPropsType,
+  QuotedMessageType,
 } from "../../typescript/types";
-import { dayNames, monthNames } from "../../constants/time";
 import { Call, Videocam, InformationCircle, Close, ArrowDown } from "react-ionicons";
-
+import { compareNowToDate } from "../../functions/time";
 import "./WindowConversation.css";
 import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn";
 import {
@@ -50,6 +50,7 @@ import CreateConvFooter from "./WindowConvFooter/CreateConvFooter/CreateConvFoot
 import EditingMsgFooter from "./WindowConvFooter/EditingMsgFooter/EditingMsgFooter";
 import EditedMsgHistory from "../EditedMsgHistory/EditedMsgHistory";
 import ConfirmationModal from "../Utiles/ConfirmationModal/ConfirmationModal";
+import QuotedMessage from "./QuotedMessage/QuotedMessage";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -105,6 +106,8 @@ function WindowConversation() {
     action: () => {},
     closeModal: () => {},
   });
+
+  const [quotedMessage, setQuotedMessage] = useState<QuotedMessageType | null>(null);
 
   const [bodyHeight, setBodyHeight] = useState<string>("85%");
   const [footerHeight, setFooterHeight] = useState<string>("7.5%");
@@ -261,30 +264,6 @@ function WindowConversation() {
       fetchMessages();
     }
   }; */
-  const compareNowToDate = (previousDateToForm: Date): string | false => {
-    const currentDate = new Date();
-    const previousDate = new Date(previousDateToForm);
-    const differenceInMilliseconds = Math.abs(previousDate.getTime() - currentDate.getTime());
-    const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
-    const differenceInDays = differenceInMinutes / 60 / 24;
-
-    if (differenceInDays > 7) {
-      const formattedDate = `${previousDate.getDate()} ${monthNames[
-        previousDate.getMonth()
-      ].substring(0, 3)} ${previousDate.getFullYear()}, ${previousDate.getHours()}:${
-        previousDate.getMinutes() < 10 ? "0" + previousDate.getMinutes() : previousDate.getMinutes()
-      }`;
-      return formattedDate;
-    } else if (previousDate.getDate() < currentDate.getDate()) {
-      const formattedDate = `${dayNames[previousDate.getDay()].substring(
-        0,
-        3
-      )} ${previousDate.getHours()}:${previousDate.getMinutes()}`;
-      return formattedDate;
-    } else {
-      return false;
-    }
-  };
 
   const checkPreviousMsgTime = (index: number): Date15minDifference => {
     const currMsgTime = messages[index].date;
@@ -646,8 +625,8 @@ function WindowConversation() {
     const checkScroll = () => {
       if (scrollViewRef.current) {
         setHasScroll(scrollViewRef.current.scrollHeight > scrollViewRef.current.clientHeight);
-        console.log("CHEKC ICI");
-        console.log(scrollViewRef.current.scrollHeight > scrollViewRef.current.clientHeight);
+        /*  console.log("CHEKC ICI");
+        console.log(scrollViewRef.current.scrollHeight > scrollViewRef.current.clientHeight); */
       }
     };
 
@@ -768,10 +747,22 @@ function WindowConversation() {
           setDroppedFiles={setDroppedFiles}
           onTextAreaResize={handleTextareaResize}
           height={footerHeight}
+          quotedMessage={quotedMessage}
+          setQuotedMessage={setQuotedMessage}
         />
       );
     } else return <DisabledFooter />;
   };
+
+  useEffect(() => {
+    if (quotedMessage) {
+      setBodyHeight("75%");
+      setFooterHeight("15%");
+    } else {
+      setFooterHeight("7.5%");
+      setBodyHeight("85%");
+    }
+  }, [quotedMessage]);
 
   return (
     <div className="WindowConversation" onDragOver={handleDragOver} onDrop={handleDrop}>
@@ -982,14 +973,27 @@ function WindowConversation() {
                         </div>{" "}
                       </div>
                     )}
+                    {message.responseToMsgId &&
+                      messages.some((msg) => msg._id === message.responseToMsgId?._id) && (
+                        <QuotedMessage
+                          quotedMessage={message.responseToMsgId}
+                          currentMsgAuthorId={message.authorId}
+                          currentMsgAuthor={message.author}
+                        />
+                      )}
                     <div
                       className="message-container"
                       id="message-me"
                       style={
                         editingMsg?._id === message._id ? { zIndex: 1, backgroundColor: "red" } : {}
                       }
+                      onClick={() => console.log(quotedMessage)}
                     >
-                      <MessagesOptions message={message} setEditingMsg={setEditingMsg} />
+                      <MessagesOptions
+                        message={message}
+                        setEditingMsg={setEditingMsg}
+                        setQuotedMessage={setQuotedMessage}
+                      />
                       <div
                         className={`message ${
                           selectedFoundMsgId === message._id ? "selectedFoundMsg" : ""
@@ -1011,6 +1015,7 @@ function WindowConversation() {
                             )}
                           </div>
                         )}
+
                         <AsyncMsg message={message} />
                         <MessageReactions message={message} />
                       </div>
@@ -1056,7 +1061,13 @@ function WindowConversation() {
                           )}
                         </div>
                       )}
-
+                    {message.responseToMsgId && (
+                      <QuotedMessage
+                        quotedMessage={message.responseToMsgId}
+                        currentMsgAuthorId={message.authorId}
+                        currentMsgAuthor={message.author}
+                      />
+                    )}
                     <div className="message-container" id="message-others">
                       <div className="img-container"> </div>
                       <div
@@ -1083,7 +1094,7 @@ function WindowConversation() {
                         <AsyncMsg message={message} />
                         <MessageReactions message={message} />
                       </div>
-                      <MessagesOptions message={message} />
+                      <MessagesOptions message={message} setQuotedMessage={setQuotedMessage} />
                     </div>
                     <div className="seen-by">
                       {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
@@ -1109,6 +1120,13 @@ function WindowConversation() {
                         Modifié
                       </div>
                     </div>
+                  )}
+                  {message.responseToMsgId && (
+                    <QuotedMessage
+                      quotedMessage={message.responseToMsgId}
+                      currentMsgAuthorId={message.authorId}
+                      currentMsgAuthor={message.author}
+                    />
                   )}
                   <div className="message-container" id="message-others">
                     {" "}
@@ -1140,7 +1158,7 @@ function WindowConversation() {
                       <AsyncMsg message={message} />
                       <MessageReactions message={message} />
                     </div>
-                    <MessagesOptions message={message} />
+                    <MessagesOptions message={message} setQuotedMessage={setQuotedMessage} />
                   </div>
                   <div className="seen-by">
                     {lastMsgSeenByConvMembers.map((lastMsgSeen) => {

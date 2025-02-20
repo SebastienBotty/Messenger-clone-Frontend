@@ -1,7 +1,54 @@
 .normal-footer {
-  height: 100%;
-  font-size: medium;
   width: 100%;
   display: flex;
+  flex-direction: column;
+  transition: height 0.2s ease-in-out;
+}
+
+.normal-msg-header {
+  min-height: 2.5rem;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: small;
+  color: #65676b;
+}
+
+.normal-msg-header-author {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 50%;
+  margin-bottom: 0.25rem;
+}
+
+.normal-msg-header-author span {
+  line-height: 1.2em; /* Ajustez cette valeur en fonction de la hauteur de votre ligne */
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: top; /* Pour aligner correctement le texte */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.close-icon {
+  border-radius: 50%;
+  display: flex;
   justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.close-icon:hover {
+  background-color: #f2f2f2;
+}
+
+.normal-msg-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 4vh;
 }

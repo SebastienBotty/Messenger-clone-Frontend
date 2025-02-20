@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ConfirmationModalPropsType, MessageType } from "../../../typescript/types";
+import {
+  ConfirmationModalPropsType,
+  MessageType,
+  QuotedMessageType,
+} from "../../../typescript/types";
 import { Add, ArrowUndo, EllipsisVertical, HappyOutline } from "react-ionicons";
 
 import "./MessagesOptions.css";
@@ -15,9 +19,11 @@ import { moreThanXmins } from "../../../functions/time";
 function MessagesOptions({
   message,
   setEditingMsg,
+  setQuotedMessage,
 }: {
   message: MessageType;
   setEditingMsg?: React.Dispatch<React.SetStateAction<MessageType | null>>;
+  setQuotedMessage: React.Dispatch<React.SetStateAction<QuotedMessageType | null>>;
 }) {
   const { user } = useUserContext();
   const { setMessages } = useMessagesContext();
@@ -167,6 +173,18 @@ function MessagesOptions({
     console.log("set editingMsgId: " + message._id);
   };
 
+  const openRespondMsg = () => {
+    if (!message?._id) return null;
+
+    setQuotedMessage({
+      _id: message._id,
+      author: message.author,
+      authorId: message.authorId,
+      text: message.text,
+      date: message.date,
+    });
+  };
+
   useEffect(() => {
     if (message.reactions) {
       setSelectedEmoji(message.reactions.find((r) => r.userId === user?._id)?.reaction || "");
@@ -183,11 +201,14 @@ function MessagesOptions({
           {showMoreOptions && (
             <div className="message-more-options">
               <ul className="message-more-options-ul">
-                {!moreThanXmins(message.date, 10) && setEditingMsg && !isImg && (
-                  <li className="message-more-options-li" onClick={editMessage}>
-                    Modifier
-                  </li>
-                )}{" "}
+                {!moreThanXmins(message.date, 10) &&
+                  setEditingMsg &&
+                  !isImg &&
+                  !message.deletedForEveryone && (
+                    <li className="message-more-options-li" onClick={editMessage}>
+                      Modifier
+                    </li>
+                  )}{" "}
                 <li
                   className="message-more-options-li"
                   onClick={() =>
@@ -209,7 +230,7 @@ function MessagesOptions({
         {!message.deletedForEveryone && (
           <>
             <div className="icon">
-              <ArrowUndo title={"Répondre"} color={"#65676b"} />
+              <ArrowUndo title={"Répondre"} color={"#65676b"} onClick={() => openRespondMsg()} />
             </div>
             <div className="icon" ref={reactPickerRef}>
               <HappyOutline title={"Réagir"} onClick={toggleReactPicker} color={"#65676b"} />
