@@ -1,3 +1,5 @@
+import { dayNames, monthNames } from "../constants/time";
+
 export const timeSince = (date: Date): string => {
   const newDate = new Date(date);
   const now = new Date();
@@ -53,4 +55,35 @@ export const moreThanXmins = (startDate: Date, nbMins: number) => {
   const timeDifference = currentDate.getTime() - startDate.getTime();
   const minutesPassed = Math.floor(timeDifference / (1000 * 60));
   return minutesPassed >= nbMins;
+};
+
+const formatMinutes = (minutes: number): string => {
+  return minutes < 10 ? `0${minutes}` : `${minutes}`;
+};
+
+export const compareNowToDate = (previousDateToForm: Date): string | false => {
+  const currentDate = new Date();
+  const previousDate = new Date(previousDateToForm);
+  const differenceInMilliseconds = Math.abs(previousDate.getTime() - currentDate.getTime());
+  const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
+  const differenceInDays = differenceInMinutes / 60 / 24;
+
+  if (differenceInDays > 7) {
+    // Format : "15 Oct 2023, 10:05"
+    const formattedDate = `${previousDate.getDate()} ${monthNames[
+      previousDate.getMonth()
+    ].substring(0, 3)} ${previousDate.getFullYear()}, ${previousDate.getHours()}:${formatMinutes(
+      previousDate.getMinutes()
+    )}`;
+    return formattedDate;
+  } else if (previousDate.getDate() < currentDate.getDate()) {
+    // Format : "Mon 10:05"
+    const formattedDate = `${dayNames[previousDate.getDay()].substring(
+      0,
+      3
+    )} ${previousDate.getHours()}:${formatMinutes(previousDate.getMinutes())}`;
+    return formattedDate;
+  } else {
+    return false;
+  }
 };
