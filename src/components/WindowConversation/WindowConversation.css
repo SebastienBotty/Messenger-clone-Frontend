@@ -487,7 +487,6 @@
   bottom: 100%;
   margin-bottom: 1.5rem;
   left: 50%;
-  transform: translateX(-50%);
 }
 .message-input {
   max-height: 10vh;
