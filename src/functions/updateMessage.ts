@@ -1,5 +1,5 @@
 import { deleteMessage } from "../constants/ConfirmationMessage";
-import { ConversationType, MessageType } from "../typescript/types";
+import { ConversationType, MessageType, QuotedMessageType } from "../typescript/types";
 
 export const updateDeletedMsg = (
   message: MessageType,
@@ -31,6 +31,56 @@ export const updateDeletedMsg = (
       } else {
         return msg;
       }
+    })
+  );
+};
+
+export const updateDeletedMsgByUser = (
+  messageId: string,
+  userId: string,
+  username: string,
+  messages: MessageType[],
+  setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>,
+  setConversations: React.Dispatch<React.SetStateAction<ConversationType[]>>
+) => {
+  console.log("updateDeletedMsgByUser");
+  console.log(messages);
+
+  const isLastMsg = messages[messages.length - 1]._id === messageId;
+  let beforeLastMsg: MessageType;
+  if (isLastMsg) {
+    beforeLastMsg = messages[messages.length - 2];
+    console.log("avant dernier msg ");
+    console.log(beforeLastMsg);
+    setConversations((prev) =>
+      prev.map((conv) => {
+        if (conv._id === beforeLastMsg.conversationId) {
+          return {
+            ...conv,
+            lastMessage: { ...beforeLastMsg, date: new Date(beforeLastMsg.date) },
+          };
+        } else {
+          return conv;
+        }
+      })
+    );
+  }
+  setMessages((prev) =>
+    prev.map((msg) => {
+      if (msg._id === messageId) {
+        return {
+          ...msg,
+          deletedBy: [{ username: username, userId: userId }],
+        };
+      } else if (msg.responseToMsgId?._id === messageId) {
+        return {
+          ...msg,
+          responseToMsgId: {
+            ...msg.responseToMsgId,
+            deletedBy: [{ username: username, userId: userId }],
+          },
+        };
+      } else return msg;
     })
   );
 };
@@ -137,4 +187,8 @@ export const updateConvLastMsgEdited = (
       }
     })
   );
+};
+
+export const isMsgInMessages = (msg: MessageType | QuotedMessageType, messages: MessageType[]) => {
+  return messages.some((m) => m._id === msg._id);
 };

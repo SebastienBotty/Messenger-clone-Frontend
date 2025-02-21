@@ -7,49 +7,47 @@ import { useDisplayedConvContext } from "../../../../screens/userLoggedIn/userLo
 import { ApiToken } from "../../../../localStorage";
 import FoundMsgLi from "./FoundMsgLi/FoundMsgLi";
 import {
+  useMessagesContext,
   useSelectedFoundMsgIdContext,
   useUserContext,
 } from "../../../../constants/context";
+import { searchMsgInConversation } from "../../../../api/message";
 
 function SearchMessage() {
   const [searchMsgInput, setSearchMsgInput] = useState("");
-  const [infoMsg, setInfoMsg] = useState<string>(
-    "Appuyez sur Entrée pour rechercher"
-  );
+  const [infoMsg, setInfoMsg] = useState<string>("Appuyez sur Entrée pour rechercher");
   const [messagesList, setMessagesList] = useState<MessageType[]>([]);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { user, setUser } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
+  const { messages } = useMessagesContext();
   const { setSelectedFoundMsgId } = useSelectedFoundMsgIdContext();
-  const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const getMsgContainingWord = async () => {
+    if (!user || !displayedConv) return [];
     console.log("recherche");
-    try {
-      const response = await fetch(
-        RESTAPIUri +
-          "/message/userId/" +
-          user?._id +
-          "/searchMessages?conversation=" +
-          displayedConv?._id +
-          "&word=" +
-          searchMsgInput,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${ApiToken()}`,
-          },
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error("Erreur lor du fetch");
+    const searchMsgInMessages = messages.find((msg) =>
+      msg.text[msg.text.length - 1].includes(searchMsgInput)
+    );
+    if (searchMsgInMessages) {
+      console.log("msg trouvé dans les messages");
+      return [searchMsgInMessages];
+    }
+    const fetchMsgInConv = await searchMsgInConversation(
+      user._id,
+      displayedConv._id,
+      searchMsgInput
+    );
+    if (fetchMsgInConv) {
+      if (fetchMsgInConv.length > 0) {
+        console.log("msg trouvé dans la conversation");
+        return fetchMsgInConv;
       }
-
-      const jsonData = await response.json();
-      return jsonData;
-    } catch (error) {}
+      return fetchMsgInConv;
+    }
+    return [];
   };
 
   const handleSearchMsg = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,11 +112,7 @@ function SearchMessage() {
         <div className="search-message-list">
           {messagesList.map((message) => (
             <div className="messageList-container">
-              <FoundMsgLi
-                msg={message}
-                key={message._id}
-                word={searchMsgInput}
-              />
+              <FoundMsgLi msg={message} key={message._id} word={searchMsgInput} />
             </div>
           ))}
         </div>

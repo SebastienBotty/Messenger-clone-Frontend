@@ -2,9 +2,16 @@ import React from "react";
 
 import { ArrowUndo, AttachOutline } from "react-ionicons";
 import "./QuotedMessage.css";
-import { QuotedMessageType } from "../../../typescript/types";
-import { useUserContext } from "../../../constants/context";
+import { MessageType, QuotedMessageType } from "../../../typescript/types";
+import {
+  useMessagesContext,
+  useMessagesRefContext,
+  useSelectedFoundMsgIdContext,
+  useUserContext,
+} from "../../../constants/context";
 import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
+import { isMsgInMessages } from "../../../functions/updateMessage";
+import { fetchMessagesBeforeAndAfter, getMessageById } from "../../../api/message";
 
 function QuotedMessage({
   quotedMessage,
@@ -17,9 +24,58 @@ function QuotedMessage({
 }) {
   const { user } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
+  const { messages, setMessages } = useMessagesContext();
+  const { messagesRef } = useMessagesRefContext();
+  const { setSelectedFoundMsgId } = useSelectedFoundMsgIdContext();
+
   if (!user || typeof quotedMessage === "string" || !quotedMessage) return null;
 
-  const goToMessage = (messageId: string) => {};
+  const handleQuotedMsgClick = async (msg: QuotedMessageType) => {
+    console.log(msg);
+    console.log("handleQuotedMsgClick");
+    console.log(messagesRef.current);
+    if (!msg._id || !user?._id || !displayedConv?._id) return;
+    if (!isMsgInMessages(msg, messages)) {
+      const beforeAndAfterMsg = await fetchMessagesBeforeAndAfter(
+        msg._id,
+        msg.conversationId,
+        user._id
+      );
+      const getQuotedMsg: MessageType | false = await getMessageById(
+        msg._id,
+        displayedConv._id,
+        user._id
+      );
+
+      if (beforeAndAfterMsg && getQuotedMsg) {
+        const messagesAround = [
+          ...beforeAndAfterMsg[0].reverse(),
+          getQuotedMsg,
+          ...beforeAndAfterMsg[1],
+        ];
+        console.log(messagesAround);
+
+        console.log(messages);
+
+        setMessages([]); //No idea why it is not working when i instantly setMessages(messagesAround)  but it does if i setMessages([]) then timeout and setMessages(messagesAround)
+        setTimeout(() => {
+          setMessages(messagesAround);
+        }, 500);
+        // Gotta repeat this because scroll doesn't work when i setMessages(messagesAround) (probably because it takes time to set Messages and create new Refs) ---- Not full working
+        if (messagesRef.current && messagesRef.current[msg._id]?.current) {
+          setTimeout(() => {
+            messagesRef.current[msg._id].current?.scrollIntoView({ behavior: "smooth" });
+          }, 1500);
+        }
+      }
+    } else {
+      if (messagesRef.current && messagesRef.current[msg._id]?.current) {
+        messagesRef.current[msg._id].current?.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+
+    setSelectedFoundMsgId(msg._id);
+  };
   const msgInfoTxt = () => {
     if (currentMsgAuthorId === user._id) {
       //If current msg is from user
@@ -54,7 +110,7 @@ function QuotedMessage({
         </div>
       );
     }
-    return <span>text</span>;
+    return <span>{text}</span>;
   };
   return (
     <div className="quoted-message-container">
@@ -62,7 +118,7 @@ function QuotedMessage({
         {" "}
         <ArrowUndo height={"0.8125rem"} width={"0.8125rem"} color={"#65676b"} /> {msgInfoTxt()}
       </div>
-      <div className="quoted-message-text" onClick={() => goToMessage(quotedMessage._id)}>
+      <div className="quoted-message-text" onClick={() => handleQuotedMsgClick(quotedMessage)}>
         {renderQuotedMessageText()}
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { MutableRefObject } from "react";
+
 export type UserDataType = {
   _id: string;
   mail: string;
@@ -85,10 +87,7 @@ export type MessageType = {
   date: Date;
   conversationId: string | undefined;
   _id?: string;
-  deletedBy?: Array<{
-    username: string;
-    userId: string;
-  }>;
+  deletedBy?: DeletedByType[];
   deletedForEveryone?: boolean;
   deletedForEveryoneDate?: Date | null;
   reactions?: Array<{
@@ -125,6 +124,8 @@ export type QuotedMessageType = {
   authorId: string;
   text: string[];
   date: Date;
+  conversationId: string;
+  deletedBy: DeletedByType[];
 };
 
 export type LastMsgSeenByMembersType = {
@@ -171,6 +172,10 @@ export type ConversationContextType = {
   setConversations: React.Dispatch<React.SetStateAction<ConversationType[]>>;
 };
 
+export type MessagesRefContextType = {
+  messagesRef: MutableRefObject<{ [key: string]: React.RefObject<HTMLDivElement> }>;
+};
+
 export type MediasType = {
   Key: string;
   LastModified: Date;
@@ -184,4 +189,9 @@ export type ConfirmationModalPropsType = {
   action: () => void;
   closeModal: () => void;
   width?: string;
+};
+
+export type DeletedByType = {
+  username: string;
+  userId: string;
 };

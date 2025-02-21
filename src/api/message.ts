@@ -33,6 +33,35 @@ export const postMessage = async (
     return false;
   }
 };
+export const getMessageById = async (messageId: string, conversationId: string, userId: string) => {
+  console.log("getMsgById");
+  try {
+    const response = await fetch(
+      RESTAPIUri +
+        "/message/userId/" +
+        userId +
+        "/getMessageById?messageId=" +
+        messageId +
+        "&conversationId=" +
+        conversationId
+    );
+    if (!response.ok) {
+      const errorMsg = await response.json();
+      throw new Error("Erreur lors du get messageById:" + errorMsg.message);
+    }
+    const jsonData = await response.json();
+    console.log(jsonData);
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
+
 export const deleteMessageForUser = async (
   messageId: string | undefined,
   userId: string,
@@ -223,6 +252,83 @@ export const editTextMessage = async (
       const errorMsg = await response.json();
       throw new Error(errorMsg.message);
     }
+    const jsonData = await response.json();
+    console.log(jsonData);
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
+
+export const fetchMessagesBeforeAndAfter = async (
+  messageId: string,
+  conversationId: string,
+  userId: string
+): Promise<[MessageType[], MessageType[]] | false> => {
+  try {
+    const response = await fetch(
+      RESTAPIUri +
+        "/message/userId/" +
+        userId +
+        "/getMessagesBeforeAndAfter?conversationId=" +
+        conversationId +
+        "&messageId=" +
+        messageId,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${ApiToken()}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Erreur lor du fetch");
+    }
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
+
+export const searchMsgInConversation = async (
+  userId: string,
+  conversationId: string,
+  word: string
+) => {
+  try {
+    const response = await fetch(
+      RESTAPIUri +
+        "/message/userId/" +
+        userId +
+        "/searchMessages?conversation=" +
+        conversationId +
+        "&word=" +
+        word,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${ApiToken()}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Erreur lor du fetch");
+    }
+
     const jsonData = await response.json();
     console.log(jsonData);
     return jsonData;

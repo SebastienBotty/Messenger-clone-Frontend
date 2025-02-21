@@ -3,12 +3,14 @@ import { MessageType } from "../../../../../typescript/types";
 import { timeSince } from "../../../../../functions/time";
 
 import "./FoundMsgLi.css";
-import { ApiToken } from "../../../../../localStorage";
 import {
   useMessagesContext,
   useSelectedFoundMsgIdContext,
   useUserContext,
+  useMessagesRefContext,
 } from "../../../../../constants/context";
+import { fetchMessagesBeforeAndAfter } from "../../../../../api/message";
+import { isMsgInMessages } from "../../../../../functions/updateMessage";
 
 function FoundMsgLi({
   msg,
@@ -19,11 +21,11 @@ function FoundMsgLi({
   key: string | undefined;
   word: string;
 }) {
-  const apiUrl = process.env.REACT_APP_REST_API_URI;
   const { user, setUser } = useUserContext();
 
   const { messages, setMessages } = useMessagesContext();
   const { setSelectedFoundMsgId } = useSelectedFoundMsgIdContext();
+  const { messagesRef } = useMessagesRefContext();
 
   const extractSurroundingText = (phrase: string, mot: string): JSX.Element => {
     const indexMot = phrase.search(new RegExp(mot, "i"));
@@ -58,60 +60,32 @@ function FoundMsgLi({
   };
 
   const handleMsgClick = async (msg: MessageType) => {
-    if (!msg._id) return;
-    const beforeAndAfterMsg = await fetchMessagesBeforeAndAfter(msg);
-    setSelectedFoundMsgId(msg._id);
-    if (beforeAndAfterMsg) {
-      const messagesAround = [...beforeAndAfterMsg[0].reverse(), msg, ...beforeAndAfterMsg[1]];
-      console.log(messagesAround);
+    if (!msg._id || !user?._id || !msg.conversationId) return;
+    if (!isMsgInMessages(msg, messages)) {
+      const beforeAndAfterMsg = await fetchMessagesBeforeAndAfter(
+        msg._id,
+        msg.conversationId,
+        user._id
+      );
+      if (beforeAndAfterMsg) {
+        const messagesAround = [...beforeAndAfterMsg[0].reverse(), msg, ...beforeAndAfterMsg[1]];
+        console.log(messagesAround);
 
-      console.log(messages);
+        console.log(messages);
 
-      setMessages([]); //No idea why it is not working when i instantly setMessages(messagesAround)  but it does if i setMessages([]) then timeout and setMessages(messagesAround)
-      setTimeout(() => {
-        setMessages(messagesAround);
-      }, 500);
+        setMessages([]); //No idea why it is not working when i instantly setMessages(messagesAround)  but it does if i setMessages([]) then timeout and setMessages(messagesAround)
+        setTimeout(() => {
+          setMessages(messagesAround);
+        }, 500);
+      }
     }
+    if (messagesRef.current && messagesRef.current[msg._id]?.current) {
+      messagesRef.current[msg._id].current?.scrollIntoView({ behavior: "smooth" });
+    }
+    setSelectedFoundMsgId(msg._id);
   };
 
   //Fetches messages before and after a selected message
-  const fetchMessagesBeforeAndAfter = async (
-    msg: MessageType
-  ): Promise<[MessageType[], MessageType[]] | false> => {
-    if (!user) return false;
-    try {
-      const response = await fetch(
-        apiUrl +
-          "/message/userId/" +
-          user._id +
-          "/getMessagesBeforeAndAfter?conversationId=" +
-          msg.conversationId +
-          "&messageId=" +
-          msg._id,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${ApiToken()}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Erreur lor du fetch");
-      }
-      const jsonData = await response.json();
-      return jsonData;
-      console.log(jsonData);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-      return false;
-    }
-  };
 
   return (
     <li key={key} className="found-msg" onClick={() => handleMsgClick(msg)}>

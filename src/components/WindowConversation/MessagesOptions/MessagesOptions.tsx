@@ -10,10 +10,18 @@ import "./MessagesOptions.css";
 import { deleteMessage } from "../../../constants/ConfirmationMessage";
 import DeleteMessage from "./DeleteMessage/DeleteMessage";
 import ConfirmationModal from "../../Utiles/ConfirmationModal/ConfirmationModal";
-import { useMessagesContext, useUserContext } from "../../../constants/context";
+import {
+  useConversationsContext,
+  useMessagesContext,
+  useUserContext,
+} from "../../../constants/context";
 import { changeMsgReaction, deleteMessageForUser, removeMsgReaction } from "../../../api/message";
 import EmojiPicker from "emoji-picker-react";
-import { updateMsgReactions, updateRemoveMsgReaction } from "../../../functions/updateMessage";
+import {
+  updateDeletedMsgByUser,
+  updateMsgReactions,
+  updateRemoveMsgReaction,
+} from "../../../functions/updateMessage";
 import { moreThanXmins } from "../../../functions/time";
 
 function MessagesOptions({
@@ -26,7 +34,8 @@ function MessagesOptions({
   setQuotedMessage: React.Dispatch<React.SetStateAction<QuotedMessageType | null>>;
 }) {
   const { user } = useUserContext();
-  const { setMessages } = useMessagesContext();
+  const { messages, setMessages } = useMessagesContext();
+  const { setConversations } = useConversationsContext();
   const isImg =
     message.text[message.text.length - 1].startsWith("PATHIMAGE/" + message.conversationId + ":") ||
     message.text[message.text.length - 1].startsWith("GIF/" + message.conversationId + ":");
@@ -130,7 +139,16 @@ function MessagesOptions({
           action: async () => {
             const req = await deleteMessageForUser(message._id, user._id, user.userName);
             if (req) {
-              updateDeletedMsgByUser(message._id);
+              if (!message._id) return;
+
+              updateDeletedMsgByUser(
+                message._id,
+                user._id,
+                user.userName,
+                messages,
+                setMessages,
+                setConversations
+              );
               setShowConfirmationModal(false);
             }
           },
@@ -141,10 +159,6 @@ function MessagesOptions({
     }
 
     setShowConfirmationModal(true);
-  };
-  const updateDeletedMsgByUser = (messageId: string | undefined) => {
-    if (!user || !messageId) return;
-    setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
   };
 
   const handleEmojiClick = async (emoji: string) => {
@@ -174,7 +188,7 @@ function MessagesOptions({
   };
 
   const openRespondMsg = () => {
-    if (!message?._id) return null;
+    if (!message?._id || !message.conversationId) return null;
 
     setQuotedMessage({
       _id: message._id,
@@ -182,6 +196,8 @@ function MessagesOptions({
       authorId: message.authorId,
       text: message.text,
       date: message.date,
+      conversationId: message.conversationId,
+      deletedBy: [],
     });
   };
 
