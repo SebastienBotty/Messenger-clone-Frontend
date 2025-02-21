@@ -6,7 +6,7 @@
 }
 /*--------------------------------------------HEADER--------------------------------------*/
 .sideBar-header {
-  height: 20%;
+  height: 15%;
   border: 1px solid #e5e5e5;
 }
 
@@ -120,7 +120,7 @@
 
 /*--------------------------------------------CONVERSATIONS--------------------------------------*/
 .conversations-container {
-  height: calc(80% - 1px);
+  height: calc(85% - 1px);
   width: 100%;
   display: flex;
   overflow-y: auto;
