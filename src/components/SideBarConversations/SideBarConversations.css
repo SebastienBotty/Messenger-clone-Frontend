@@ -1,6 +1,8 @@
 .SideBarConversations {
   width: 21vw;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 /*--------------------------------------------HEADER--------------------------------------*/
 .sideBar-header {
@@ -116,50 +118,21 @@
   background-color: #e4e6eb;
 }
 
-.third-line {
-  padding-top: 0.25rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.buttons-container {
-  width: calc(80% + 1.75rem);
-  display: flex;
-  gap: 1rem;
-}
-.select-conversation-type {
-  background-color: #ffffff;
-  height: 2.5rem;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  border-radius: 2rem;
-  font-size: normal;
-  font-weight: bold;
-  padding: 0.5rem 0.75rem;
-}
-.select-conversation-type:focus {
-  background-color: #ebf5ff;
-  color: #0c6bd3;
-}
-
-.select-conversation-type:hover {
-  filter: brightness(0.9);
-}
 /*--------------------------------------------CONVERSATIONS--------------------------------------*/
 .conversations-container {
   height: calc(80% - 1px);
-  overflow-y: auto;
-
   width: 100%;
+  display: flex;
+  overflow-y: auto;
+  flex-direction: column;
+  align-items: center;
 }
 .conversation {
   display: flex;
   height: 5rem;
   border-radius: 0.5rem;
   cursor: pointer;
-  margin: 0 0.5rem;
-  width: 19vw;
+  width: 95%;
   position: relative;
 }
 
@@ -188,6 +161,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
 .conversation-name {
@@ -243,8 +217,9 @@
   display: none;
   position: absolute;
   top: 50%;
+  margin-top: -1rem;
+  margin-right: 0.25rem;
   right: 0;
-  transform: translate(-50%, -50%);
   cursor: pointer;
   border-radius: 50%;
   padding: 0.25rem;
@@ -252,7 +227,6 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   pointer-events: all;
   border: 1px solid #ccc;
-  z-index: 1;
 }
 .conversation-params .conversation-params-button > * {
   display: flex;
@@ -264,13 +238,9 @@
   background-color: #e4e6eb;
 }
 
-.conversation-params-container {
-  position: relative;
-}
-.conversation-params-menu {
-  margin-top: 1.5rem;
+.conversation-params-menu-container {
+  margin-top: 1rem;
   position: absolute;
-  top: 100%;
-  left: 100%;
-  transform: translateX(-50%);
+  right: 0;
+  z-index: 2;
 }

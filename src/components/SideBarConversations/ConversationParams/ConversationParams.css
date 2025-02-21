@@ -1,20 +1,22 @@
 .conversation-params-dropdown {
-  width: 25rem;
+  width: 20rem;
   height: 100%;
   border-radius: 0.875rem;
   padding: 0.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-
   background-color: white;
+  position: relative;
 }
 
 .conversation-params-dropdown ul {
   list-style-type: none;
   border-radius: 0.375rem;
+  width: 100%;
 }
 .conversation-params-dropdown ul li {
   border-radius: 0.375rem;
   margin: 0 0.25rem;
+  width: 100%;
 }
 .conversation-params-dropdown ul li:hover {
   background-color: #f2f2f2;
@@ -22,6 +24,7 @@
 .conversation-params-action {
   display: flex;
   height: 3rem;
+  width: 100%;
 }
 .conversation-params-action-icon {
   width: 15%;
@@ -59,4 +62,10 @@
 
 .conversation-params-modal {
   cursor: initial;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
 }

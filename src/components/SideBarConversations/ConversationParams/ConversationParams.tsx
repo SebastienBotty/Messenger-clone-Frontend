@@ -102,7 +102,7 @@ function ConversationParams({
 
   if (!user) return null;
   return (
-    <div ref={ref}>
+    <div ref={ref} onClick={(e) => e.stopPropagation()}>
       <div className="conversation-params-dropdown">
         <ul>
           {conversation.isGroupConversation && conversation.admin.includes(user.userName) && (
@@ -147,15 +147,17 @@ function ConversationParams({
           )}
         </ul>
       </div>
-      <div className="conversation-params-modal">
-        {showConfirmationModal && <ConfirmationModal {...confirmationModalProps} />}
-        {showAddMembersModal && (
-          <AddMembersModal
-            conversation={conversation}
-            closeModal={() => setShowAddMembersModal(false)}
-          />
-        )}
-      </div>
+      {(showConfirmationModal || showAddMembersModal) && (
+        <div className="conversation-params-modal">
+          {showConfirmationModal && <ConfirmationModal {...confirmationModalProps} />}
+          {showAddMembersModal && (
+            <AddMembersModal
+              conversation={conversation}
+              closeModal={() => setShowAddMembersModal(false)}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
