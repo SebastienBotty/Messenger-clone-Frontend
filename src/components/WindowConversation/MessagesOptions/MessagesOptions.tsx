@@ -191,7 +191,7 @@ function MessagesOptions({
     }
 
     return () => {};
-  }, []);
+  }, [message.reactions]);
 
   return (
     <div className="message-options" onClick={(e) => e.stopPropagation()}>
