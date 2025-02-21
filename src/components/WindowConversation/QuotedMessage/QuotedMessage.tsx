@@ -1,9 +1,10 @@
 import React from "react";
 
-import { ArrowUndo } from "react-ionicons";
+import { ArrowUndo, AttachOutline } from "react-ionicons";
 import "./QuotedMessage.css";
 import { QuotedMessageType } from "../../../typescript/types";
 import { useUserContext } from "../../../constants/context";
+import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
 
 function QuotedMessage({
   quotedMessage,
@@ -15,6 +16,7 @@ function QuotedMessage({
   currentMsgAuthor: string;
 }) {
   const { user } = useUserContext();
+  const { displayedConv } = useDisplayedConvContext();
   if (!user || typeof quotedMessage === "string" || !quotedMessage) return null;
 
   const goToMessage = (messageId: string) => {};
@@ -39,6 +41,21 @@ function QuotedMessage({
       }
     }
   };
+
+  const renderQuotedMessageText = () => {
+    if (!quotedMessage || !displayedConv) return null;
+    const text = quotedMessage.text[quotedMessage.text.length - 1];
+    if (text.startsWith("GIF/" + displayedConv._id + ":")) {
+      return <span>GIF</span>;
+    } else if (text.startsWith("PATHIMAGE/" + displayedConv._id + ":")) {
+      return (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <AttachOutline /> <span>Pièce jointe </span>
+        </div>
+      );
+    }
+    return <span>text</span>;
+  };
   return (
     <div className="quoted-message-container">
       <div className="quoted-message-info">
@@ -46,7 +63,7 @@ function QuotedMessage({
         <ArrowUndo height={"0.8125rem"} width={"0.8125rem"} color={"#65676b"} /> {msgInfoTxt()}
       </div>
       <div className="quoted-message-text" onClick={() => goToMessage(quotedMessage._id)}>
-        {quotedMessage.text[quotedMessage.text.length - 1]}
+        {renderQuotedMessageText()}
       </div>
     </div>
   );

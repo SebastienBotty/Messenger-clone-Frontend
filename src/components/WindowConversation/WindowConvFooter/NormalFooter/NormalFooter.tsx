@@ -372,6 +372,17 @@ function NormalFooter({
     return quotedMessage.author;
   };
 
+  const renderQuotedMessageText = () => {
+    if (!quotedMessage || !displayedConv) return null;
+    const text = quotedMessage.text[quotedMessage.text.length - 1];
+    if (text.startsWith("GIF/" + displayedConv._id + ":")) {
+      return "GIF";
+    } else if (text.startsWith("PATHIMAGE/" + displayedConv._id + ":")) {
+      return "Pièce jointe";
+    }
+    return text;
+  };
+
   useEffect(() => {
     document.addEventListener("mousedown", handleGifPickerContainerClick);
     if (textAreaRef.current) {
@@ -398,7 +409,7 @@ function NormalFooter({
         <div className="normal-msg-header">
           <div className="normal-msg-header-author">
             <span style={{ fontWeight: "bold" }}>Répondre à {renderQuotedMessageAuthor()}</span>
-            <span>{quotedMessage.text[quotedMessage.text.length - 1]}</span>
+            <span>{renderQuotedMessageText()}</span>
           </div>
           <div className="close-icon">
             <Close
