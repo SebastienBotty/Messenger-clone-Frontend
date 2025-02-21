@@ -530,12 +530,6 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
             </div>
           )}
         </div>
-        <div className="third-line">
-          <div className="buttons-container">
-            <button className="select-conversation-type">Messagerie</button>
-            <button className="select-conversation-type">Communautés</button>
-          </div>
-        </div>
       </div>
       <div className="conversations-container">
         {searchConversationInput
