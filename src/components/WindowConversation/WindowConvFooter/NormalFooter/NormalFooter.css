@@ -20,7 +20,7 @@
   flex-direction: column;
   gap: 0.25rem;
   width: 50%;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .normal-msg-header-author span {
