@@ -135,16 +135,20 @@ function ConversationParams({
               <div className="conversation-params-action-text">Supprimer la conversation</div>
             </div>
           </li>
-          {conversation.isGroupConversation && conversation.members.includes(user.userName) && (
-            <li className="conversation-params-li" onClick={() => handleActionsClick("leaveConv")}>
-              <div className="conversation-params-action">
-                <div className="conversation-params-action-icon">
-                  <ExitOutline height="2rem" width="2rem" />
+          {conversation.isGroupConversation &&
+            conversation.members.some((member) => member.username === user.userName) && (
+              <li
+                className="conversation-params-li"
+                onClick={() => handleActionsClick("leaveConv")}
+              >
+                <div className="conversation-params-action">
+                  <div className="conversation-params-action-icon">
+                    <ExitOutline height="2rem" width="2rem" />
+                  </div>
+                  <div className="conversation-params-action-text">Quitter la conversation</div>
                 </div>
-                <div className="conversation-params-action-text">Quitter la conversation</div>
-              </div>
-            </li>
-          )}
+              </li>
+            )}
         </ul>
       </div>
       {(showConfirmationModal || showAddMembersModal) && (

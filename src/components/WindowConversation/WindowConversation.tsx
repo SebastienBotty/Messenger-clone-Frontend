@@ -181,23 +181,23 @@ function WindowConversation() {
     const tempArray: LastMsgSeenByMembersType[] = [];
     if (displayedConv) {
       for (const member of displayedConv.members) {
-        if (member !== user?.userName) {
+        if (member.username !== user?.userName) {
           for (const msg of messagesArr) {
-            if (msg.seenBy.includes(member)) {
-              tempArray.push({ username: member, messageId: msg._id });
+            if (msg.seenBy.includes(member.username)) {
+              tempArray.push({ username: member.username, messageId: msg._id });
               break; //Stop after finding the first msg he has seen(the latest one)
             }
           }
           //if no msg has been seen by this member, fetches the last message he has seen
 
-          if (tempArray.every((item) => item.username !== member)) {
+          if (tempArray.every((item) => item.username !== member.username)) {
             //console.log("PLUS DE 15 MESSAGES");
-            const lastMsgIdSeenByUser = await fetchLastMsgIdSeenByUser(member);
+            const lastMsgIdSeenByUser = await fetchLastMsgIdSeenByUser(member.username);
             if (!lastMsgIdSeenByUser) {
               break;
             }
             tempArray.push({
-              username: member,
+              username: member.username,
               messageId: lastMsgIdSeenByUser,
             });
           }
@@ -750,7 +750,11 @@ function WindowConversation() {
           height={footerHeight}
         />
       );
-    else if (user && displayedConv.members && displayedConv.members.includes(user.userName)) {
+    else if (
+      user &&
+      displayedConv.members &&
+      displayedConv.members.some((member) => member.username === user.userName)
+    ) {
       return (
         <NormalFooter
           setShowDragOverOverlay={setShowDragOverOverlay}
@@ -797,9 +801,12 @@ function WindowConversation() {
                           ? displayedConv?.customization.conversationName
                             ? displayedConv?.customization.conversationName
                             : displayedConv?.members
-                                .filter((item) => item !== user?.userName)
+                                .filter((item) => item.username !== user?.userName)
+                                .map((member) => member.username)
                                 .join(", ")
-                          : displayedConv?.members.filter((item) => item !== user?.userName)}
+                          : displayedConv?.members
+                              .filter((item) => item.username !== user?.userName)
+                              .map((member) => member.username)}
                       </div>
                       <div
                         className="online-since"

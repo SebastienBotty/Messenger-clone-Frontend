@@ -43,7 +43,8 @@ export const getUsersSocket = async (
   user: UserDataType | null
 ) => {
   const convMembersStr = conversation?.members
-    ?.filter((member) => member !== user?.userName)
+    ?.filter((member) => member.username !== user?.userName)
+    .map((member) => member.username)
     .join("-");
   try {
     const response = await fetch(REST_API_URI + "/user/getSockets?convMembers=" + convMembersStr, {

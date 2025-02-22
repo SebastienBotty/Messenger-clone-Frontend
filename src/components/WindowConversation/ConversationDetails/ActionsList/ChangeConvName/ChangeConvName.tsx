@@ -3,19 +3,11 @@ import {
   useDisplayedConvContext,
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
-import {
-  useMessagesContext,
-  useUserContext,
-} from "../../../../../constants/context";
+import { useMessagesContext, useUserContext } from "../../../../../constants/context";
 import "./ChangeConvName.css";
 import { ApiToken } from "../../../../../localStorage";
-function ChangeConvName({
-  closeModal,
-  text,
-}: {
-  closeModal: () => void;
-  text: string;
-}) {
+import { patchConvName } from "../../../../../api/conversation";
+function ChangeConvName({ closeModal, text }: { closeModal: () => void; text: string }) {
   const { user, setUser } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { setMostRecentConv } = useMostRecentConvContext();
@@ -27,8 +19,6 @@ function ChangeConvName({
   const inputTextRef = useRef<HTMLInputElement>(null);
   const maxLength = 30;
 
-  const RESTApiUri = process.env.REACT_APP_REST_API_URI;
-
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
     setNbCharS(e.target.value.length);
@@ -36,9 +26,7 @@ function ChangeConvName({
 
   const changeConvName = async (value: string) => {
     if (!displayedConv || !user) {
-      setErrorMsg(
-        "Une erreur est survenue, rafraichissement de la page dans 5 sec"
-      );
+      setErrorMsg("Une erreur est survenue, rafraichissement de la page dans 5 sec");
       setTimeout(() => {
         window.location.reload();
       }, 5000);
@@ -57,38 +45,21 @@ function ChangeConvName({
       setErrorMsg("La conversation porte déja ce nom");
       return;
     }
-    try {
-      const response = await fetch(
-        RESTApiUri + "/conversation/changeConversationName",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + ApiToken(),
-          },
-          body: JSON.stringify({
-            conversationId: displayedConv._id,
-            conversationName: value,
-            userId: user._id,
-            date: new Date(),
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
-      const jsonData = await response.json();
-      console.log(jsonData);
-      setDisplayedConv(jsonData.conversation);
-      setMostRecentConv(jsonData.conversation);
+    const response = await patchConvName(displayedConv._id, value, user._id);
+    if (response) {
+      setDisplayedConv(response.conversation);
+      setMostRecentConv(response.conversation);
       setMessages((prev) => {
-        return [...prev, jsonData.conversation.lastMessage];
+        return [...prev, response.conversation.lastMessage];
       });
       closeModal();
-    } catch (error) {}
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (event.key === "Enter") {
+      changeConvName(value);
+    }
   };
 
   useEffect(() => {
@@ -110,14 +81,10 @@ function ChangeConvName({
   return (
     <>
       <div className="change-conv-name-text">{text}</div>
-      <div
-        className={`change-conv-name ${isFocused || value ? "focused" : ""}`}
-      >
+      <div className={`change-conv-name ${isFocused || value ? "focused" : ""}`}>
         <div className="change-conv-name-inner">
           <div className="input-container">
-            <label
-              className={`input-label ${isFocused || value ? "focused" : ""}`}
-            >
+            <label className={`input-label ${isFocused || value ? "focused" : ""}`}>
               Nom de la conversation
             </label>
             {nbCharS > 0 && (
@@ -133,22 +100,17 @@ function ChangeConvName({
               onChange={onChange}
               onFocus={() => setIsFocused(true)}
               maxLength={maxLength}
+              onKeyDown={handleKeyDown}
             />
           </div>
         </div>
       </div>
       <div className="change-conv-name-buttons">
         <div className="change-conv-name-error">{errorMsg}</div>
-        <button
-          className="cancel-btn change-conv-name-btn"
-          onClick={closeModal}
-        >
+        <button className="cancel-btn change-conv-name-btn" onClick={closeModal}>
           Annuler
         </button>
-        <button
-          className="confirm-btn change-conv-name-btn"
-          onClick={() => changeConvName(value)}
-        >
+        <button className="confirm-btn change-conv-name-btn" onClick={() => changeConvName(value)}>
           Enregistrer
         </button>
       </div>

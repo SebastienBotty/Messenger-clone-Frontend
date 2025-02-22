@@ -23,7 +23,7 @@ export type UserDataType = {
 export type ConversationType = {
   _id: string;
   isGroupConversation: boolean;
-  members: string[];
+  members: ConversationMemberType[];
   admin: string[];
   photo: string;
   lastMessage: MessageType;
@@ -43,7 +43,7 @@ export type ConversationType = {
     userId: string;
     photo: string;
     isOnline: boolean;
-    status: "Online" | "Offline" | "Busy";
+    status: StatusType;
     lastSeen: Date;
   };
 };
@@ -195,3 +195,16 @@ export type DeletedByType = {
   username: string;
   userId: string;
 };
+
+type ConversationMemberType = {
+  userId: string;
+  username: string;
+  nickname: string;
+  photo: string;
+  status: StatusType;
+  isOnline: boolean;
+  lastSeen: Date;
+  _id: string; // idk why it appears when i don't add it
+};
+
+type StatusType = "Online" | "Offline" | "Busy";

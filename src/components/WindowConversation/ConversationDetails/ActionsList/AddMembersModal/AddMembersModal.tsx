@@ -43,7 +43,7 @@ function AddMembersModal({
     _.debounce(async (searchQuery: string) => {
       console.log("))))))))");
       console.log(searchQuery);
-      const exceptUsers = conversation.members;
+      const exceptUsers = conversation.members.map((member) => member.username);
       if (searchQuery.length > 2) {
         try {
           const response = await fetch(

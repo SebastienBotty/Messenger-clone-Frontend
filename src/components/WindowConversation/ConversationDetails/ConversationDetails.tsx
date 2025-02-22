@@ -171,8 +171,13 @@ function ConversationDetails() {
                 {displayedConv?.isGroupConversation
                   ? displayedConv?.customization.conversationName
                     ? displayedConv?.customization.conversationName
-                    : displayedConv?.members.filter((item) => item !== user?.userName).join(", ")
-                  : displayedConv?.members.filter((item) => item !== user?.userName)}
+                    : displayedConv?.members
+                        .filter((item) => item.username !== user?.userName)
+                        .map((member) => member.username)
+                        .join(", ")
+                  : displayedConv?.members
+                      .filter((item) => item.username !== user?.userName)
+                      .map((member) => member.username)}
               </div>
               <span className="user-online">
                 {displayedConv?.isGroupConversation ? "" : "Online"}

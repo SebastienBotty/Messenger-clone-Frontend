@@ -43,13 +43,16 @@ function CreateConvFooter({
   const createConversation = async () => {
     if (!user) return;
     if (addedMembers.length > 1) {
-      console.log(addedMembers);
       const convCreated = await postConversation(user, addedMembers, inputMessage);
       if (convCreated) {
         setDisplayedConv(convCreated);
+        setTimeout(() => {
+          sendMessage(convCreated);
+        }, 1000);
         setAddedMembers([]);
       }
     } else if (addedMembers.length == 1) {
+      console.log("CREATE CONV WITH 1 PERSON");
       //If user wants to create a conversation with only one person, it first checks in his conversations if he doesn't already have a private (not a group where ppl left and they are only 2 left) conversation with the selected person.
       const existingConv = await isPrivateConvExisting(user, addedMembers);
       if (existingConv) {
@@ -75,7 +78,7 @@ function CreateConvFooter({
         }
       }
     } else {
-      //console.log("pas assez de membre");
+      console.log("pas assez de membre");
     }
   };
   const sendMessage = async (conversation: ConversationType) => {

@@ -74,7 +74,8 @@ function ConversationLi(props: {
 
   const getUsersSocket = async (conversation: ConversationType | null) => {
     const convMembersStr = conversation?.members
-      ?.filter((member) => member !== user?.userName)
+      ?.filter((member) => member.username !== user?.userName)
+      .map((member) => member.username)
       .join("-");
     try {
       const response = await fetch(RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr, {
@@ -137,8 +138,13 @@ function ConversationLi(props: {
         {conversation.isGroupConversation
           ? conversation.customization.conversationName
             ? conversation.customization.conversationName
-            : conversation.members.filter((item) => item !== user?.userName).join(", ")
-          : conversation.members.filter((item) => item !== user?.userName)}
+            : conversation.members
+                .filter((item) => item.username !== user?.userName)
+                .map((member) => member.username)
+                .join(", ")
+          : conversation.members
+              .filter((item) => item.username !== user?.userName)
+              .map((member) => member.username)}
       </div>
       <div className="modal-send-button">
         <button

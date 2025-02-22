@@ -80,6 +80,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     return responseArr;
   };
   const fetchConversations = async (idsArray: string[]) => {
+    console.log("Fetching conversations");
     const conversationsIdStr: string = idsArray.join("-");
     try {
       const response = await fetch(
@@ -95,12 +96,14 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         }
       );
       if (!response.ok) {
+        console.log("Error fetching conversations");
         const error = await response.json();
         throw new Error(error.message);
       }
+      console.log("Conversations fetched");
       const jsonData = await response.json();
-      //console.log("CONVERSATIONS");
-      //console.log(jsonData);
+      console.log("CONVERSATIONS");
+      console.log(jsonData);
       const test = await fetchConversationLastMsg(jsonData);
       setDisplayedConv(test[0]);
       setConversations((prev) => [...test, ...prev]);
@@ -278,8 +281,13 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
             {conversation.isGroupConversation
               ? conversation.customization.conversationName
                 ? conversation.customization.conversationName
-                : conversation.members.filter((item) => item !== user?.userName).join(", ")
-              : conversation.members.filter((item) => item !== user?.userName)}
+                : conversation.members
+                    .filter((item) => item.username !== user?.userName)
+                    .map((member) => member.username)
+                    .join(", ")
+              : conversation.members
+                  .filter((item) => item.username !== user?.userName)
+                  .map((member) => member.username)}
           </div>
           <div id="conversation-last-message">
             <div
@@ -351,6 +359,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
 
   const convFilterMember = (conversation: ConversationType) => {
     return conversation.members
+      .map((member) => member.username)
       .join(",")
       .toLocaleLowerCase()
       .includes(searchConversationInput.toLowerCase());

@@ -28,7 +28,7 @@ import { confirmationMessage, muteConv } from "../../../../constants/Confirmatio
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { isConvMuted } from "../../../../functions/conversation";
 import NotificationsDisplay from "../../../Utiles/NotificationsDisplay/NotificationsDisplay";
-import { leaveConv } from "../../../../api/conversation";
+import { leaveConv, postConvPhoto } from "../../../../api/conversation";
 
 function ActionsList({
   openMoreDetailsComp,
@@ -158,6 +158,7 @@ function ActionsList({
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 10 MB
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!displayedConv || !user) return;
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
@@ -177,13 +178,27 @@ function ActionsList({
         const compressedFile = await imageCompression(file, options);
 
         const reader = new FileReader();
-        reader.onloadend = () => {
+        reader.onloadend = async () => {
           if (reader.result) {
             const setBase64Image = reader.result as string;
             //console.log("Image en Base64:", reader.result);
             const size = (setBase64Image.length / 1024).toFixed(2);
             //console.log(size + "Ko");
-            postConvPhoto(setBase64Image);
+            const response = await postConvPhoto(setBase64Image, displayedConv._id, user._id);
+            if (response) {
+              setDisplayedConv(response.conversation);
+              setMostRecentConv(response.conversation);
+              setMessages((prev) => {
+                return [...prev, response.message];
+              });
+              setChangePhotoLoading(false);
+              //console.log(jsonData);
+              if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+              }
+            } else {
+              setChangePhotoLoading(false);
+            }
           }
         };
         reader.readAsDataURL(compressedFile);
@@ -193,48 +208,6 @@ function ActionsList({
       }
     } else {
       console.log("no file");
-    }
-  };
-
-  const postConvPhoto = async (base64String: string) => {
-    try {
-      const response = await fetch(`${RESTAPIUri}/conversation/changeConversationPhoto`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${ApiToken()}`,
-        },
-        body: JSON.stringify({
-          conversationId: displayedConv?._id,
-          photoStr: base64String,
-          userId: user?._id,
-          date: new Date(),
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        setChangePhotoLoading(false);
-        throw new Error(error.message);
-      }
-
-      const jsonData = await response.json();
-      setDisplayedConv(jsonData.conversation);
-      setMostRecentConv(jsonData.conversation);
-      setMessages((prev) => {
-        return [...prev, jsonData.message];
-      });
-      setChangePhotoLoading(false);
-      //console.log(jsonData);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("Erreur inconnue");
-      }
     }
   };
 
@@ -312,7 +285,7 @@ function ActionsList({
           </li>
           <ul className={"actions-content" + (active2 ? " active" : "")}>
             {displayedConv.members.map((member) => (
-              <ConvMembersLi key={member} member={member} />
+              <ConvMembersLi key={member.username} member={member.username} />
             ))}
 
             {displayedConv.admin.includes(user.userName) && (

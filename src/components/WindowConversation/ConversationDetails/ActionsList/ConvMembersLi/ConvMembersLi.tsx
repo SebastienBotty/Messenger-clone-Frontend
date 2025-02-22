@@ -247,7 +247,8 @@ export function ConvMembersLi({ member, key }: { member: string; key: string }):
     if (!conversation || !user) return false;
 
     const convMembersStr = conversation.members
-      ?.filter((member) => member !== user.userName)
+      ?.filter((member) => member.username !== user.userName)
+      .map((member) => member.username)
       .join("-");
     try {
       const response = await fetch(RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr, {
@@ -306,11 +307,13 @@ export function ConvMembersLi({ member, key }: { member: string; key: string }):
 
   if (members) {
     members.sort((a, b) => {
-      if (displayedConv.admin[0] === a && displayedConv.admin[0] !== b) return -1;
-      if (displayedConv.admin[0] === b && displayedConv.admin[0] !== a) return 1;
-      if (displayedConv.admin.includes(a) && !displayedConv.admin.includes(b)) return -1;
-      if (!displayedConv.admin.includes(a) && displayedConv.admin.includes(b)) return 1;
-      return a.localeCompare(b);
+      if (displayedConv.admin[0] === a.username && displayedConv.admin[0] !== b.username) return -1;
+      if (displayedConv.admin[0] === b.username && displayedConv.admin[0] !== a.username) return 1;
+      if (displayedConv.admin.includes(a.username) && !displayedConv.admin.includes(b.username))
+        return -1;
+      if (!displayedConv.admin.includes(a.username) && displayedConv.admin.includes(b.username))
+        return 1;
+      return a.username.localeCompare(b.username);
     });
   }
 

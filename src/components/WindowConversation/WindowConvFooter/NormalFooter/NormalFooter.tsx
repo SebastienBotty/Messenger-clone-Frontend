@@ -102,7 +102,7 @@ function NormalFooter({
         ? [convMembersSocket, messageData, conversation, messages[messages.length - 1]]
         : [convMembersSocket, messageData, conversation];
     //console.log(messages[messages.length - 1]);
-    //console.log(socketData);
+    console.log(socketData);
     socket.emit("message", socketData);
     console.log("EMITTING  MESSAGE ICIIIIIIIIIIIIIIII");
   };
