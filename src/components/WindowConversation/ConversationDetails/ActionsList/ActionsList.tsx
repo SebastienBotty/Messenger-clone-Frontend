@@ -14,8 +14,7 @@ import {
   Disc,
   ExitOutline,
   ImagesOutline,
-  Notifications,
-  NotificationsOff,
+  TextOutline,
   PencilOutline,
   PersonAdd,
 } from "react-ionicons";
@@ -28,7 +27,8 @@ import { confirmationMessage, muteConv } from "../../../../constants/Confirmatio
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { isConvMuted } from "../../../../functions/conversation";
 import NotificationsDisplay from "../../../Utiles/NotificationsDisplay/NotificationsDisplay";
-import { leaveConv, postConvPhoto } from "../../../../api/conversation";
+import { leaveConv, patchConvEmoji, postConvPhoto } from "../../../../api/conversation";
+import ChangeNicknames from "./ChangeNicknames/ChangeNicknames";
 
 function ActionsList({
   openMoreDetailsComp,
@@ -112,45 +112,26 @@ function ActionsList({
           closeModal: () => setShowConfirmationModal(false),
         });
         break;
+      case "changeNicknames":
+        setShowConfirmationModal(true);
+        setConfirmationModalAction({
+          title: "Pseudos",
+          text: <ChangeNicknames conversation={displayedConv} />,
+          action: () => {},
+          closeModal: () => setShowConfirmationModal(false),
+        });
+        break;
     }
   };
 
-  const handleEmojiClick = (emojiData: EmojiClickData) => {
-    changeEmoji(emojiData.emoji);
-  };
-
-  const changeEmoji = async (emoji: string) => {
+  const handleEmojiClick = async (emojiData: EmojiClickData) => {
     if (!displayedConv || !user) return;
-    try {
-      const response = await fetch(`${RESTAPIUri}/conversation/changeEmoji`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${ApiToken()}`,
-        },
-        body: JSON.stringify({
-          conversationId: displayedConv._id,
-          emoji: emoji,
-          userId: user._id,
-          date: new Date(),
-        }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-      const data = await response.json();
-      console.log(data);
-      setDisplayedConv(data.conversation);
-      setMostRecentConv(data.conversation);
-      setMessages((prev) => [...prev, data.message]);
+    const changeEmoji = await patchConvEmoji(emojiData.emoji, displayedConv._id, user._id);
+    if (changeEmoji) {
+      setDisplayedConv(changeEmoji.conversation);
+      setMostRecentConv(changeEmoji.conversation);
+      setMessages((prev) => [...prev, changeEmoji.message]);
       setShowConfirmationModal(false);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log(error.message);
-      } else {
-        console.log("An unknown error occurred");
-      }
     }
   };
 
@@ -268,6 +249,12 @@ function ActionsList({
               <div className="li-icon">{displayedConv.customization.emoji}</div>
 
               <span>Modifier l'emoji</span>
+            </li>
+            <li className="li-actions" onClick={() => handleActionsClick("changeNicknames")}>
+              <div className="li-icon">
+                <TextOutline color={"#00000"} />
+              </div>
+              <span>Modifier les pseudos</span>
             </li>
           </ul>{" "}
         </ul>

@@ -1,0 +1,69 @@
+.change-nicknames ul {
+  row-gap: 0.5rem;
+}
+
+.nickname-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+  height: 5rem;
+  gap: 0.25rem;
+}
+
+.nick-name-container-photo-container {
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nick-name-container-photo-container-profile-pic {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nickname-username-container {
+  width: 75%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  justify-content: center;
+}
+
+.nickname-input {
+  width: 70%;
+  height: 90%;
+  font-size: 1.2rem;
+  border: none;
+  outline: none;
+}
+.nickname-nickname {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.nickname-username {
+  color: #666;
+  font-size: 1.2rem;
+}
+.nickname-container:hover .nickname-username {
+  color: #0866ff;
+}
+
+.nickname-icon-container {
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.nickname-icon-container > * {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -211,3 +211,35 @@ export const postConvPhoto = async (
     return false;
   }
 };
+
+export const patchConvEmoji = async (emoji: string, conversationId: string, userId: string) => {
+  try {
+    const response = await fetch(`${RESTAPIUri}/conversation/changeEmoji`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${ApiToken()}`,
+      },
+      body: JSON.stringify({
+        conversationId: conversationId,
+        emoji: emoji,
+        userId: userId,
+        date: new Date(),
+      }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log(error.message);
+    } else {
+      console.log("An unknown error occurred");
+    }
+    return false;
+  }
+};

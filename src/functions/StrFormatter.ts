@@ -69,3 +69,10 @@ export const getMessageText = (
   }
   return author === username ? `Vous: ${text}` : `${author}: ${text}`;
 };
+
+export const getName = (username: string, nickname: string) => {
+  if (nickname) {
+    return nickname;
+  }
+  return username;
+};

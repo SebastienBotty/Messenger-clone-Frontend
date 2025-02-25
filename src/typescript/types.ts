@@ -196,7 +196,7 @@ export type DeletedByType = {
   userId: string;
 };
 
-type ConversationMemberType = {
+export type ConversationMemberType = {
   userId: string;
   username: string;
   nickname: string;
