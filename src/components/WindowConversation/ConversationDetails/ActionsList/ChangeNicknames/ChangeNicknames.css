@@ -1,5 +1,6 @@
-.change-nicknames ul {
-  row-gap: 0.5rem;
+.change-nicknames {
+  max-height: 20rem;
+  overflow-y: auto;
 }
 
 .nickname-container {

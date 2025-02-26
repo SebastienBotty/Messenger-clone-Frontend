@@ -3,13 +3,56 @@ import "./ChangeNicknames.css";
 import { ConversationMemberType } from "../../../../../typescript/types";
 import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
 import { CheckmarkOutline, PencilOutline } from "react-ionicons";
-
-const ChangeNicknamesLi = ({ member }: { member: ConversationMemberType }) => {
+import { patchConvNickname } from "../../../../../api/conversation";
+import {
+  useDisplayedConvContext,
+  useMostRecentConvContext,
+} from "../../../../../screens/userLoggedIn/userLoggedIn";
+import { useMessagesContext, useUserContext } from "../../../../../constants/context";
+const ChangeNicknamesLi = ({
+  member,
+  closeModal,
+}: {
+  member: ConversationMemberType;
+  closeModal: () => void;
+}) => {
+  const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { user } = useUserContext();
+  const { setMostRecentConv } = useMostRecentConvContext();
+  const { setMessages } = useMessagesContext();
   const [editingUserId, setEditingUserId] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [inputValue, setInputValue] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>(member.nickname);
 
+  const handleKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      changeNickName();
+    }
+  };
+
+  const changeNickName = async () => {
+    if (!displayedConv?._id || !user) return;
+    const res = await patchConvNickname(displayedConv._id, user._id, member.userId, inputValue);
+    if (res) {
+      setEditingUserId("");
+      console.log(res);
+      setDisplayedConv(res.conversation);
+      setMostRecentConv(res.conversation);
+      setMessages((prev) => {
+        return [...prev, res.conversation.lastMessage];
+      });
+      closeModal();
+    }
+  };
+  const editNickname = (userId: string) => {
+    if (editingUserId === userId) return;
+    console.log(userId);
+    setEditingUserId(userId);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  };
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -27,13 +70,7 @@ const ChangeNicknamesLi = ({ member }: { member: ConversationMemberType }) => {
     };
   }, [editingUserId]);
 
-  const editNickname = (userId: string) => {
-    console.log(userId);
-    setEditingUserId(userId);
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
-  };
+  if (!displayedConv) return <></>;
   return (
     <li key={member._id}>
       <div
@@ -55,8 +92,9 @@ const ChangeNicknamesLi = ({ member }: { member: ConversationMemberType }) => {
               className="nickname-input"
               maxLength={20}
               placeholder={member.nickname || member.username}
-              value={member.nickname || inputValue}
+              value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           ) : (
             <>
@@ -69,7 +107,7 @@ const ChangeNicknamesLi = ({ member }: { member: ConversationMemberType }) => {
         </div>
         <div className="nickname-icon-container">
           {editingUserId === member.userId ? (
-            <CheckmarkOutline color={"#00000"} />
+            <CheckmarkOutline color={"#00000"} onClick={changeNickName} />
           ) : (
             <PencilOutline color={"#00000"} />
           )}

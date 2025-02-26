@@ -11,6 +11,8 @@ import {
 } from "../../../../../constants/context";
 import { fetchMessagesBeforeAndAfter } from "../../../../../api/message";
 import { isMsgInMessages } from "../../../../../functions/updateMessage";
+import { useDisplayedConvContext } from "../../../../../screens/userLoggedIn/userLoggedIn";
+import { getNickNameById } from "../../../../../functions/StrFormatter";
 
 function FoundMsgLi({
   msg,
@@ -22,7 +24,7 @@ function FoundMsgLi({
   word: string;
 }) {
   const { user, setUser } = useUserContext();
-
+  const { displayedConv } = useDisplayedConvContext();
   const { messages, setMessages } = useMessagesContext();
   const { setSelectedFoundMsgId } = useSelectedFoundMsgIdContext();
   const { messagesRef } = useMessagesRefContext();
@@ -86,14 +88,16 @@ function FoundMsgLi({
   };
 
   //Fetches messages before and after a selected message
-
+  if (!displayedConv) return null;
   return (
     <li key={key} className="found-msg" onClick={() => handleMsgClick(msg)}>
       <div className="found-msg-user-img">
         <div className="found-msg-user-img-container"></div>
       </div>
       <div className="found-msg-content">
-        <div className="found-msg-username">{msg.author}</div>
+        <div className="found-msg-username">
+          {getNickNameById(displayedConv.members, msg.authorId)}
+        </div>
         <div className="found-msg-details">
           <div className="found-msg-text">
             <div className="trunc-text">

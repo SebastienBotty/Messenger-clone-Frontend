@@ -12,6 +12,7 @@ import {
 import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
 import { isMsgInMessages } from "../../../functions/updateMessage";
 import { fetchMessagesBeforeAndAfter, getMessageById } from "../../../api/message";
+import { getNickNameById } from "../../../functions/StrFormatter";
 
 function QuotedMessage({
   quotedMessage,
@@ -77,6 +78,7 @@ function QuotedMessage({
     setSelectedFoundMsgId(msg._id);
   };
   const msgInfoTxt = () => {
+    if (!displayedConv) return "";
     if (currentMsgAuthorId === user._id) {
       //If current msg is from user
       if (quotedMessage.authorId === user._id) {
@@ -84,7 +86,9 @@ function QuotedMessage({
         return "Vous avez répondu à votre propre message";
       } else {
         //If user reponds someone else's message
-        return "Vous avez répondu à " + quotedMessage.author;
+        return (
+          "Vous avez répondu à " + getNickNameById(displayedConv.members, quotedMessage.authorId)
+        );
       }
     } else {
       //If current msg is from someone else

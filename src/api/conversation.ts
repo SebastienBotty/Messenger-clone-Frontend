@@ -243,3 +243,39 @@ export const patchConvEmoji = async (emoji: string, conversationId: string, user
     return false;
   }
 };
+
+export const patchConvNickname = async (
+  conversationId: string,
+  userId: string,
+  userTargetId: string,
+  nickname: string
+) => {
+  try {
+    const response = await fetch(RESTAPIUri + "/conversation/changeNickname", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${ApiToken()}`,
+      },
+      body: JSON.stringify({
+        conversationId: conversationId,
+        userId: userId,
+        userTargetId: userTargetId,
+        nickname: nickname,
+      }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};

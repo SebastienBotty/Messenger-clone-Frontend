@@ -306,6 +306,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                   textProps={
                     conversation.lastMessage.text[conversation.lastMessage.text.length - 1]
                   }
+                  members={conversation.members}
                 />
               ) : (
                 getMessageText(

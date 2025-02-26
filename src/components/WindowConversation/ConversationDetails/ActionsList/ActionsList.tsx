@@ -116,7 +116,7 @@ function ActionsList({
         setShowConfirmationModal(true);
         setConfirmationModalAction({
           title: "Pseudos",
-          text: <ChangeNicknames conversation={displayedConv} />,
+          text: <ChangeNicknames conversation={displayedConv} closeModal={() => setShowConfirmationModal(false)} />,
           action: () => {},
           closeModal: () => setShowConfirmationModal(false),
         });

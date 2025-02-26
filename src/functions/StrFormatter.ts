@@ -1,12 +1,15 @@
-import { ConversationType } from "../typescript/types";
+import { ConversationMemberType, ConversationType } from "../typescript/types";
 
 export const convMemberMsg = (
+  members: ConversationMemberType[],
   username: string,
   agent: string,
   eventName: string,
-  target?: string
+  target?: string,
+  nickname?: string
 ) => {
-  const agentName = agent === username ? "Vous avez " : `${agent} a `;
+  const agentName =
+    agent === username ? "Vous avez " : `${getNickNameByUsername(members, agent)} a `;
 
   if (target === username && (eventName === "addUser" || eventName === "removeUser")) {
     if (eventName === "addUser") {
@@ -19,6 +22,12 @@ export const convMemberMsg = (
         ? `Vous avez été retiré de la conversation.`
         : `${agent} vous a retiré de la conversation.`;
     }
+  }
+  if (eventName === "changeNickname" && target === username) {
+    if (agent === username) {
+      return `Vous vous êtes renommé en: ${nickname} .`;
+    }
+    return `${getNickNameByUsername(members, agent)} vous a renommé en: ${nickname} .`;
   }
 
   if (target && target.split(",").length > 2) {
@@ -46,6 +55,8 @@ export const convMemberMsg = (
       return `${agentName}envoyé un fichier.`;
     case "sendGif":
       return `${agentName}envoyé un gif.`;
+    case "changeNickname":
+      return `${agentName}renommé ${target}  en: ${nickname} .`;
     default:
       return "";
   }
@@ -70,9 +81,21 @@ export const getMessageText = (
   return author === username ? `Vous: ${text}` : `${author}: ${text}`;
 };
 
-export const getName = (username: string, nickname: string) => {
-  if (nickname) {
-    return nickname;
+export const getNickNameById = (members: ConversationMemberType[], userId: string) => {
+  const member = members.find((member) => member.userId === userId);
+  if (!member) return;
+  if (member?.nickname) {
+    return member.nickname;
+  }
+  return member?.username;
+};
+
+export const getNickNameByUsername = (members: ConversationMemberType[], username: string) => {
+  const member = members.find((member) => member.username === username);
+  if (!member) return;
+  console.log(member);
+  if (member?.nickname) {
+    return member.nickname;
   }
   return username;
 };

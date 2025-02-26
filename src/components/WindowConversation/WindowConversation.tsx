@@ -52,6 +52,7 @@ import EditingMsgFooter from "./WindowConvFooter/EditingMsgFooter/EditingMsgFoot
 import EditedMsgHistory from "../EditedMsgHistory/EditedMsgHistory";
 import ConfirmationModal from "../Utiles/ConfirmationModal/ConfirmationModal";
 import QuotedMessage from "./QuotedMessage/QuotedMessage";
+import { getNickNameById, getNickNameByUsername } from "../../functions/StrFormatter";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -802,7 +803,9 @@ function WindowConversation() {
                             ? displayedConv?.customization.conversationName
                             : displayedConv?.members
                                 .filter((item) => item.username !== user?.userName)
-                                .map((member) => member.username)
+                                .map((member) =>
+                                  getNickNameByUsername(displayedConv.members, member.username)
+                                )
                                 .join(", ")
                           : displayedConv?.members
                               .filter((item) => item.username !== user?.userName)
@@ -978,7 +981,10 @@ function WindowConversation() {
                   if (message.author === "System/" + displayedConv?._id) {
                     return (
                       <div className="message-container" id="message-system">
-                        <ConvSystemMsg textProps={message.text[message.text.length - 1]} />
+                        <ConvSystemMsg
+                          textProps={message.text[message.text.length - 1]}
+                          members={displayedConv?.members}
+                        />
                       </div>
                     );
                   }
@@ -1092,7 +1098,10 @@ function WindowConversation() {
                         {messages[currentMsg]?.author !== messages[currentMsg - 1]?.author &&
                           displayedConv?.isGroupConversation && (
                             <div className="message-author-name">
-                              <div className="message-author">{message.author}</div>
+                              <div className="message-author">
+                                {" "}
+                                {getNickNameById(displayedConv.members, message.authorId)}
+                              </div>
                               {isgMsgEdit && (
                                 <div
                                   className="edited-msg"
@@ -1164,7 +1173,9 @@ function WindowConversation() {
                       {messages[currentMsg]?.author !== messages[currentMsg - 1]?.author &&
                         displayedConv?.isGroupConversation && (
                           <div className="message-author-name">
-                            <div className="message-author">{message.author}</div>
+                            <div className="message-author">
+                              {getNickNameById(displayedConv.members, message.authorId)}
+                            </div>
                           </div>
                         )}
                       {isgMsgEdit && (
