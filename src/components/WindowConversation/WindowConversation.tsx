@@ -312,17 +312,25 @@ function WindowConversation() {
   }, []); */
 
   const displayMembersTyping = () => {
-    if (convMembersTyping.length > 2) {
+    if (!displayedConv) return;
+
+    const typingMembers = displayedConv.members.filter((member) => member.isTyping);
+    if (typingMembers.length === 0) return;
+    if (typingMembers.length > 2) {
       return (
         <>
-          {convMembersTyping[0]}, {convMembersTyping[1]} et
-          {convMembersTyping.length - 2 > 1
-            ? convMembersTyping.length - 2 + " autres... "
-            : " un autre..."}
+          <TypingDots />
+          {typingMembers[0].username}, {typingMembers[1].username} et{" "}
+          {typingMembers.length - 2 > 1 ? typingMembers.length - 2 + " autres... " : " un autre..."}
         </>
       );
     } else {
-      return <>{convMembersTyping.join(", ")}</>;
+      return (
+        <>
+          <TypingDots />
+          {typingMembers.map((member) => member.username).join(", ")}
+        </>
+      );
     }
   };
 
@@ -416,17 +424,46 @@ function WindowConversation() {
           );
         }
       });
-      socket.on("typing", (data) => {
-        if (data[2]._id === displayedConv?._id) {
-          if (data[0] === true) {
-            setConvMembersTyping((prev) => [...prev, data[1]]);
-          } else if (data[0] === false) {
-            setConvMembersTyping((prev) => prev.filter((item) => item !== data[1]));
+      socket.on(
+        "typing",
+        ({
+          isWriting,
+          writingUser,
+          conversation,
+        }: {
+          isWriting: boolean;
+          writingUser: string;
+          conversation: ConversationType;
+        }) => {
+          if (conversation._id === displayedConv?._id) {
+            if (isWriting === true) {
+              setDisplayedConv((prev) => {
+                if (prev) {
+                  return {
+                    ...prev,
+                    members: prev.members.map((member) =>
+                      member.username === writingUser ? { ...member, isTyping: true } : member
+                    ),
+                  };
+                }
+                return prev;
+              });
+            } else {
+              setDisplayedConv((prev) => {
+                if (prev) {
+                  return {
+                    ...prev,
+                    members: prev.members.map((member) =>
+                      member.username === writingUser ? { ...member, isTyping: false } : member
+                    ),
+                  };
+                }
+                return prev;
+              });
+            }
           }
-        } else {
-          setConvMembersTyping((prev) => prev.filter((item) => item !== data[1]));
         }
-      });
+      );
 
       socket.on("convUpdate", (conversation: ConversationType) => {
         console.log("members change écouté");
@@ -513,6 +550,22 @@ function WindowConversation() {
               }
               return prev;
             });
+            if (isOnline === false && memberTarget.isTyping) {
+              //When someone is offline, we remove him from the typing list
+              console.log("IS USER OFFLINE");
+              console.log(memberTarget);
+              setDisplayedConv((prev) => {
+                if (prev) {
+                  return {
+                    ...prev,
+                    members: prev.members.map((member) =>
+                      member.userId === userId ? { ...member, isTyping: false } : member
+                    ),
+                  };
+                }
+                return prev;
+              });
+            }
           }
         }
       );
@@ -1075,10 +1128,8 @@ function WindowConversation() {
                   );
                 })}
               <div className="conversation-body-bottom" style={{ display: "flex" }}>
-                {convMembersTyping.length > 0 && (
-                  <div className="typing-users">
-                    <TypingDots /> {displayMembersTyping()}
-                  </div>
+                {displayedConv?.members.some((member) => member.isTyping) && (
+                  <div className="typing-users">{displayMembersTyping()}</div>
                 )}{" "}
               </div>
             </div>

@@ -476,28 +476,58 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         });
       });
     });
-    socket.on("isUserOnline", (data) => {
-      console.log("isUserOnline listened");
-      console.log(data.userId);
-      setConversations((prev) => {
-        return prev.map((conv) => {
-          const member = conv.members.find((member) => member.userId === data.userId);
+    socket.on(
+      "isUserOnline",
+      ({ userId, isOnline, lastSeen }: { userId: string; isOnline: boolean; lastSeen: Date }) => {
+        console.log("isUserOnline listened");
+        console.log(userId);
+        setConversations((prev) => {
+          return prev.map((conv) => {
+            const member = conv.members.find((member) => member.userId === userId);
 
-          if (member) {
-            member.isOnline = data.isOnline;
-            member.lastSeen = data.lastSeen;
-          }
-          return conv;
+            if (member) {
+              member.isOnline = isOnline;
+              member.lastSeen = lastSeen;
+              member.isTyping = false;
+            }
+            return conv;
+          });
         });
-      });
-    });
+      }
+    );
 
+    socket.on(
+      "typing",
+      ({
+        isWriting,
+        writingUser,
+        conversation,
+      }: {
+        isWriting: boolean;
+        writingUser: string;
+        conversation: ConversationType;
+      }) => {
+        setConversations((prev) => {
+          return prev.map((conv) => {
+            if (conv._id === conversation._id)
+              return {
+                ...conv,
+                members: conv.members.map((member) =>
+                  member.username === writingUser ? { ...member, isTyping: isWriting } : member
+                ),
+              };
+            return conv;
+          });
+        });
+      }
+    );
     return () => {
       socket.off("message");
       socket.off("convUpdate");
       socket.off("adminChange");
       socket.off("changeStatus");
       socket.off("isUserOnline");
+      socket.off("typing");
     };
   }, [displayedConv?._id, user?.status]);
 

@@ -196,6 +196,7 @@ export type ConversationMemberType = {
   status: StatusType;
   isOnline: boolean;
   lastSeen: Date;
+  isTyping: boolean;
   _id: string; // idk why it appears when i don't add it
 };
 
