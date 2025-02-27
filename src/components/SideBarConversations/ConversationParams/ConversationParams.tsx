@@ -45,7 +45,10 @@ function ConversationParams({
         setConfirmationModalProps({
           title: confirmationMessage.leaveConv.title,
           text: confirmationMessage.leaveConv.text,
-          action: () => leaveConv(conversation._id, user.userName, user._id),
+          action: async () => {
+            await leaveConv(conversation._id, user.userName, user._id);
+            setShowConfirmationModal(false);
+          },
           closeModal: () => setShowConfirmationModal(false),
         });
         setShowConfirmationModal(true);
