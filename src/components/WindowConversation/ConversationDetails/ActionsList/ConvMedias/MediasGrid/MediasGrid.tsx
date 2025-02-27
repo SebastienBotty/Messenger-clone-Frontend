@@ -6,10 +6,7 @@ import { ApiToken } from "../../../../../../localStorage";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 import "./MediasGrid.css";
-import {
-  useConversationMediasContext,
-  useUserContext,
-} from "../../../../../../constants/context";
+import { useConversationMediasContext, useUserContext } from "../../../../../../constants/context";
 
 function MediasGrid() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
@@ -106,26 +103,27 @@ function MediasGrid() {
   return (
     <div className="medias-grid">
       <div className="infinite-scroll-container" id="infinite-scroll-container">
-        <InfiniteScroll
-          className="media-container"
-          dataLength={mediasCtxt.length}
-          next={fetchMedias}
-          hasMore={hasMore}
-          loader={<h4>Loading...</h4>}
-          scrollableTarget="infinite-scroll-container"
-        >
-          {mediasCtxt.map((item, index) => (
-            <div key={index} className="media-item">
-              <img src={item.Url} onClick={() => handleImgClick(item)} />
-            </div>
-          ))}
-        </InfiniteScroll>
+        {mediasCtxt.length > 0 ? (
+          <InfiniteScroll
+            className="media-container"
+            dataLength={mediasCtxt.length}
+            next={fetchMedias}
+            hasMore={hasMore}
+            loader={<h4>Loading...</h4>}
+            scrollableTarget="infinite-scroll-container"
+          >
+            {mediasCtxt.map((item, index) => (
+              <div key={index} className="media-item">
+                <img src={item.Url} onClick={() => handleImgClick(item)} />
+              </div>
+            ))}
+          </InfiniteScroll>
+        ) : (
+          <div className="no-media">Aucun média</div>
+        )}
       </div>
       {showImgVisualizer && (
-        <ImageVizualizer
-          closeVisualizer={() => setShowImgVisualizer(false)}
-          imgData={imgData}
-        />
+        <ImageVizualizer closeVisualizer={() => setShowImgVisualizer(false)} imgData={imgData} />
       )}
     </div>
   );

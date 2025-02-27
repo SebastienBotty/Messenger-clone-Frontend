@@ -4,10 +4,7 @@ import "./FilesList.css";
 import { ApiToken } from "../../../../../../localStorage";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { formatFileSize } from "../../../../../../functions/file";
-import {
-  useConversationFilesContext,
-  useUserContext,
-} from "../../../../../../constants/context";
+import { useConversationFilesContext, useUserContext } from "../../../../../../constants/context";
 
 function FilesList() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
@@ -92,45 +89,35 @@ function FilesList() {
 
   return (
     <div className="files-list">
-      <div
-        className="infinite-scroll-files-container"
-        id="infinite-scroll-files-container"
-      >
-        <InfiniteScroll
-          className="files-list-infinite-scroll"
-          dataLength={filesCtxt.length}
-          next={fetchFiles}
-          hasMore={hasMore}
-          loader={<h4>Loading...</h4>}
-          scrollableTarget="infinite-scroll-files-container"
-        >
-          {filesCtxt.map((item, index) => (
-            <a
-              href={item.Url}
-              download={getFilenameFromUrl(item.Key)}
-              className="files-item"
-            >
-              <div className="files-item-img-container">
-                {" "}
-                <div>
+      <div className="infinite-scroll-files-container" id="infinite-scroll-files-container">
+        {filesCtxt.length > 0 ? (
+          <InfiniteScroll
+            className="files-list-infinite-scroll"
+            dataLength={filesCtxt.length}
+            next={fetchFiles}
+            hasMore={hasMore}
+            loader={<h4>Loading...</h4>}
+            scrollableTarget="infinite-scroll-files-container"
+          >
+            {filesCtxt.map((item, index) => (
+              <a href={item.Url} download={getFilenameFromUrl(item.Key)} className="files-item">
+                <div className="files-item-img-container">
                   {" "}
-                  <img
-                    src="/file-icon.png"
-                    alt={getFilenameFromUrl(item.Key)}
-                  />
+                  <div>
+                    {" "}
+                    <img src="/file-icon.png" alt={getFilenameFromUrl(item.Key)} />
+                  </div>
                 </div>
-              </div>
-              <div className="files-item-info">
-                <span className="files-item-name">
-                  {getFilenameFromUrl(item.Key)}
-                </span>
-                <span className="files-item-size">
-                  {formatFileSize(item.Size)}
-                </span>
-              </div>
-            </a>
-          ))}
-        </InfiniteScroll>
+                <div className="files-item-info">
+                  <span className="files-item-name">{getFilenameFromUrl(item.Key)}</span>
+                  <span className="files-item-size">{formatFileSize(item.Size)}</span>
+                </div>
+              </a>
+            ))}
+          </InfiniteScroll>
+        ) : (
+          <div className="no-media">Aucun fichier</div>
+        )}
       </div>
     </div>
   );

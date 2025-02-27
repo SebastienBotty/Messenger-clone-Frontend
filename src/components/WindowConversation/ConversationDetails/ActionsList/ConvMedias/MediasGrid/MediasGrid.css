@@ -35,3 +35,10 @@
   height: 100%;
   object-fit: cover;
 }
+.no-media {
+  width: 100%;
+  text-align: center;
+  font-size: small;
+  margin-top: 25%;
+  color: #333;
+}
