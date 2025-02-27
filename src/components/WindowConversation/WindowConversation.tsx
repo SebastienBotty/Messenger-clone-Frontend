@@ -8,6 +8,7 @@ import {
   MediasType,
   ConfirmationModalPropsType,
   QuotedMessageType,
+  StatusType,
 } from "../../typescript/types";
 import { Call, Videocam, InformationCircle, Close, ArrowDown } from "react-ionicons";
 import { compareNowToDate } from "../../functions/time";
@@ -53,15 +54,15 @@ import EditedMsgHistory from "../EditedMsgHistory/EditedMsgHistory";
 import ConfirmationModal from "../Utiles/ConfirmationModal/ConfirmationModal";
 import QuotedMessage from "./QuotedMessage/QuotedMessage";
 import { getNickNameById, getNickNameByUsername } from "../../functions/StrFormatter";
+import CreateConvHeader from "./WindowConvheader/CreateConvHeader/CreateConvHeader";
+import NormalConvHeader from "./WindowConvheader/NormalConvHeader/NormalConvHeader";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
 
   // Create conversation
   const [addedMembers, setAddedMembers] = useState<string[]>([]);
-  const [searchUserInput, setSearchUserInput] = useState<string>("");
-  const [usersPrediction, setUsersPrediction] = useState<UserDataType[]>([]);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // Displayed conversation
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
@@ -281,59 +282,6 @@ function WindowConversation() {
     }
   };
 
-  const addMember = (username: string) => {
-    setAddedMembers((prev) => [...prev, username]);
-    if (searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  };
-  const debouncedFetchUsers = useCallback(
-    _.debounce(async (searchQuery: string) => {
-      //console.log("))))))))");
-      //console.log(searchQuery);
-      if (searchQuery.length > 2) {
-        try {
-          const response = await fetch(RESTAPIUri + "/user/username?search=" + searchQuery, {
-            headers: { authorization: `Bearer ${ApiToken()}` },
-          });
-          if (!response.ok) {
-            throw new Error("Erreur lors de la recherche d'utilisateur");
-          }
-          const jsonData = await response.json();
-          //console.log(jsonData);
-          setUsersPrediction(jsonData);
-          return jsonData;
-        } catch (error) {
-          if (error instanceof Error) {
-            console.error(error.message);
-          } else {
-            console.error("An unknown error occurred");
-          }
-        }
-      } else {
-        return false;
-      }
-    }, 300),
-    []
-  );
-
-  const handleSearch = (user: UserDataType) => {
-    if (addedMembers.includes(user.userName)) {
-      //console.log("User déja ajouté");
-      setSearchUserInput("");
-    } else {
-      addMember(user.userName);
-      setUsersPrediction([]);
-    }
-
-    setSearchUserInput("");
-  };
-
-  const searchUser = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchUserInput(e.target.value);
-    debouncedFetchUsers(e.target.value);
-  };
-
   const emitSeenMsgToSocket = async (
     messageData: MessageType,
     conversation: ConversationType | null
@@ -522,43 +470,52 @@ function WindowConversation() {
         }
       });
 
-      socket.on("changeStatus", (data) => {
-        if (displayedConv?.partnerInfos?.userId === data.userId) {
-          console.log("CHANGE STATUS DISPLAYED CONV");
-          setDisplayedConv((prev) => {
-            if (prev?.partnerInfos) {
-              return {
-                ...prev,
-                partnerInfos: {
-                  ...prev?.partnerInfos,
-                  status: data.status,
-                  lastSeenAt: data.lastSeenAt,
-                },
-              };
-            }
-            return prev;
-          });
+      socket.on(
+        "changeStatus",
+        ({ userId, status, lastSeen }: { userId: string; status: StatusType; lastSeen: Date }) => {
+          const memberTarget = displayedConv?.members.find((member) => member.userId === userId);
+          if (memberTarget) {
+            console.log("CHANGE STATUS DISPLAYED CONV");
+            setDisplayedConv((prev) => {
+              if (prev) {
+                return {
+                  ...prev,
+                  members: prev.members.map((member) =>
+                    member.userId === userId
+                      ? { ...member, status, lastSeen: new Date(lastSeen) }
+                      : member
+                  ),
+                };
+              }
+              return prev;
+            });
+          }
         }
-      });
-      socket.on("isUserOnline", (data) => {
-        console.log("IS USER ONLINE");
-        if (displayedConv?.partnerInfos?.userId === data.userId) {
-          setDisplayedConv((prev) => {
-            if (prev?.partnerInfos) {
-              console.log("IS USER ONLINE DISPLAYED CONV");
-              return {
-                ...prev,
-                partnerInfos: {
-                  ...prev?.partnerInfos,
-                  isOnline: data.isOnline,
-                  lastSeen: data.lastSeen,
-                },
-              };
-            }
-            return prev;
-          });
+      );
+      socket.on(
+        "isUserOnline",
+        ({ userId, isOnline, lastSeen }: { userId: string; isOnline: boolean; lastSeen: Date }) => {
+          console.log("IS USER ONLINE");
+          const memberTarget = displayedConv?.members.find((member) => member.userId === userId);
+          if (memberTarget) {
+            console.log("IS USER ONLINE DISPLAYED CONV");
+            setDisplayedConv((prev) => {
+              if (prev) {
+                console.log("IS USER ONLINE DISPLAYED CONV");
+                return {
+                  ...prev,
+                  members: prev.members.map((member) =>
+                    member.userId === userId
+                      ? { ...member, isOnline, lastSeen: new Date(lastSeen) }
+                      : member
+                  ),
+                };
+              }
+              return prev;
+            });
+          }
         }
-      });
+      );
       socket.on("deletedMessage", (data) => {
         const msg: MessageType = data[0];
         const conversationId: string = data[1];
@@ -593,11 +550,6 @@ function WindowConversation() {
       });
 
       //Close conversatoin details every time a new conversation is selected
-    } else if (searchInputRef.current) {
-      setMessages([]);
-      searchInputRef.current.focus();
-      setAddedMembers([]);
-      setShowConvDetails(false);
     }
 
     return () => {
@@ -613,9 +565,6 @@ function WindowConversation() {
       socket.off("editedMessage");
     };
   }, [displayedConv?._id]);
-  useEffect(() => {
-    console.log(displayedConv?.partnerInfos);
-  }, [displayedConv?.partnerInfos]);
 
   useEffect(() => {
     if (isAtBottom && messagesEndRef.current) {
@@ -792,130 +741,15 @@ function WindowConversation() {
             <div className="conversation-header">
               <div className="conversation-member-info">
                 {displayedConv ? (
-                  <>
-                    <div className="img-container">
-                      <ProfilePic props={displayedConv} />
-                    </div>
-                    <div className="conversation-member-info-text-container">
-                      <div className="conversation-member-name">
-                        {displayedConv?.isGroupConversation
-                          ? displayedConv?.customization.conversationName
-                            ? displayedConv?.customization.conversationName
-                            : displayedConv?.members
-                                .filter((item) => item.username !== user?.userName)
-                                .map((member) =>
-                                  getNickNameByUsername(displayedConv.members, member.username)
-                                )
-                                .join(", ")
-                          : displayedConv?.members
-                              .filter((item) => item.username !== user?.userName)
-                              .map((member) => member.username)}
-                      </div>
-                      <div
-                        className="online-since"
-                        onClick={() => {
-                          console.log(displayedConv);
-                        }}
-                      >
-                        {!displayedConv?.isGroupConversation && displayedConv?.partnerInfos
-                          ? !displayedConv.partnerInfos?.isOnline ||
-                            displayedConv?.partnerInfos?.status === "Offline"
-                            ? "Hors ligne depuis " +
-                              timeSince(new Date(displayedConv.partnerInfos.lastSeen))
-                            : statusTranslate(displayedConv.partnerInfos.status)
-                          : ""}
-                      </div>
-                    </div>
-                  </>
+                  <NormalConvHeader setShowConvDetails={setShowConvDetails} />
                 ) : (
-                  <div className="create-conversation-add-members">
-                    <label htmlFor="add-members-input">A : </label>
-                    <div className="added-members-container">
-                      {addedMembers.map((addedMember) => {
-                        return (
-                          <div className="member" key={addedMember}>
-                            <span>{addedMember} </span>
-                            <div
-                              id="create-conversation-delete-member"
-                              onClick={() =>
-                                setAddedMembers((prev) =>
-                                  prev.filter((item) => item !== addedMember)
-                                )
-                              }
-                            >
-                              <Close
-                                color={"#0084ff"}
-                                title={"Supprimer"}
-                                height="1.25rem"
-                                width="1.25rem"
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="search-user">
-                      <input
-                        ref={searchInputRef}
-                        type="text"
-                        id="add-members-input"
-                        name="add-members-input"
-                        onChange={(e) => searchUser(e)}
-                        value={searchUserInput}
-                      />
-                      <div
-                        className="dropdown-search-list"
-                        id={searchUserInput.length > 2 ? "visible" : ""}
-                      >
-                        {usersPrediction.length > 0 ? (
-                          usersPrediction.map((userPrediction) => {
-                            if (
-                              !addedMembers.includes(userPrediction.userName) &&
-                              userPrediction.userName !== user?.userName
-                            ) {
-                              return (
-                                <li
-                                  key={userPrediction._id}
-                                  onClick={() => handleSearch(userPrediction)}
-                                >
-                                  <div className="user-profile-pic">
-                                    <ProfilePic props={userPrediction.photo} />
-                                  </div>
-                                  <span> {userPrediction.userName}</span>
-                                </li>
-                              );
-                            }
-                          })
-                        ) : (
-                          <li>
-                            <div className="no-user-found">
-                              <span>Aucun utilisateur trouvé</span>
-                            </div>
-                          </li>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <CreateConvHeader
+                    addedMembers={addedMembers}
+                    setAddedMembers={setAddedMembers}
+                    setShowConvDetails={setShowConvDetails}
+                  />
                 )}
               </div>
-              {displayedConv && (
-                <div className="conversation-buttons">
-                  <Call color={"#00000"} title="Passer un appel vocal" height="3vh" width="3vh" />
-                  <Videocam
-                    color={"#00000"}
-                    title="Lancer un appel vidéo"
-                    height="3vh"
-                    width="3vh"
-                  />
-                  <InformationCircle
-                    color={"#00000"}
-                    title="Informations sur la conversation"
-                    height="3vh"
-                    width="3vh"
-                    onClick={() => setShowConvDetails(!showConvDetails)}
-                  />
-                </div>
-              )}
             </div>
             <div
               className="conversation-body"

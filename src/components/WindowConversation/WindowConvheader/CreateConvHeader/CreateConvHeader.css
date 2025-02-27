@@ -1,0 +1,109 @@
+.search-user {
+  position: relative;
+  width: 20vw;
+  height: 100%;
+}
+.search-user > input {
+  width: 100%;
+  height: 100%;
+  font-size: large;
+}
+.dropdown-search-list {
+  position: absolute;
+  top: 100;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.1), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  border: none;
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #ffffff;
+  min-height: 3rem;
+  max-height: 40vh;
+  display: none;
+  overflow-y: auto;
+  margin-left: 1rem;
+}
+#visible {
+  display: block;
+}
+.dropdown-search-list li {
+  display: flex;
+  list-style-type: none;
+  min-height: 3rem;
+  cursor: pointer;
+  border-radius: 0.25rem;
+}
+.dropdown-search-list li > * {
+  height: auto;
+}
+.dropdown-search-list li .user-profile-pic {
+  width: 20%;
+  aspect-ratio: 1/1;
+}
+.dropdown-search-list li > span {
+  display: flex;
+  align-items: center;
+}
+.dropdown-search-list li:hover {
+  background-color: #f2f2f2;
+}
+.dropdown-search-list li img {
+  border-radius: 50%; /* Rend l'image ronde */
+  width: 2.5rem; /* Définit la largeur de l'image */
+  height: 2.5rem;
+}
+
+.no-user-found {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.create-conversation-add-members {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#add-members-input {
+  height: 90%;
+  border: none;
+  outline: none;
+  margin-left: 1rem;
+}
+.added-members-container {
+  display: flex;
+  gap: 0.75rem;
+  height: 100%;
+  align-items: center;
+  margin-left: 1rem;
+}
+.member {
+  background-color: #ebf5ff;
+  color: #0084ff;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  padding: 0.125rem 0.25rem 0.125rem 0.5rem;
+  font-weight: 500;
+  font-size: large;
+}
+#create-conversation-delete-member {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#create-conversation-delete-member > * {
+  border-radius: 50%;
+  padding: 0.25rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#create-conversation-delete-member > *:hover {
+  background-color: #dfe9f2;
+}

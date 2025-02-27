@@ -65,3 +65,24 @@ export const getUsersSocket = async (
     }
   }
 };
+
+export const fetchSearchUser = async (searchQuery: string) => {
+  try {
+    const response = await fetch(REST_API_URI + "/user/username?search=" + searchQuery, {
+      headers: { authorization: `Bearer ${ApiToken()}` },
+    });
+    if (!response.ok) {
+      throw new Error("Erreur lors de la recherche d'utilisateur");
+    }
+    const jsonData = await response.json();
+    //console.log(jsonData);
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};

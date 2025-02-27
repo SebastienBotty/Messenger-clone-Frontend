@@ -1,0 +1,42 @@
+.conversation-member-info .img-container img {
+  border-radius: 50%; /* Rend l'image ronde */
+  height: 100%;
+  width: 100%;
+}
+
+.img-container:has(svg),
+.img-container:has(img) {
+  background-color: #f0f2f5;
+  z-index: 1;
+}
+
+.conversation-member-name {
+  font-size: large;
+  font-weight: 500;
+}
+.online-since {
+  font-size: small;
+  font-weight: 200;
+}
+
+.conversation-buttons {
+  flex: 1;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  gap: 0.5rem;
+  padding-right: 1rem;
+}
+
+.conversation-buttons > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.conversation-buttons > *:hover {
+  background-color: #f2f2f2;
+}

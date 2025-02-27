@@ -5,11 +5,7 @@ import { PeopleOutline, PersonOutline } from "react-ionicons";
 import { useUserContext } from "../../../constants/context";
 import UserStatus from "../../UserStatus/UserStatus";
 
-function ProfilePic({
-  props,
-}: {
-  props: ConversationType | string | undefined;
-}) {
+function ProfilePic({ props }: { props: ConversationType | string | undefined }) {
   const { user } = useUserContext();
   if (props === undefined || !user) {
     return <>RIEN</>;
@@ -57,20 +53,20 @@ function ProfilePic({
 
       //Private conversation
     } else {
-      const status = props.partnerInfos?.isOnline
-        ? props.partnerInfos.status
-        : "Offline";
+      const member = props.members.find((member) => member.userId === user._id);
+      if (!member) return <></>;
+      const status = member.isOnline ? member.status : "Offline";
 
-      if (props.partnerInfos?.photo?.length) {
+      if (member.photo) {
         return (
           <div className="profile-pic">
-            <img src={props.partnerInfos?.photo} />
+            <img src={member.photo} />
             <div className="profile-pic-user-status">
               <UserStatus status={status} />
             </div>
           </div>
         );
-      } else if (props.partnerInfos?.photo === "") {
+      } else {
         return (
           <div className="profile-pic">
             <PersonOutline height={"75%"} width={"75%"} />
@@ -80,8 +76,6 @@ function ProfilePic({
           </div>
         );
       }
-      console.log("rrrr");
-      return <></>;
     }
   }
 }

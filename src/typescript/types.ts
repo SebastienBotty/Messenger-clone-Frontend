@@ -38,14 +38,6 @@ export type ConversationType = {
     theme: string;
     emoji: string;
   };
-  partnerInfos?: {
-    username: string;
-    userId: string;
-    photo: string;
-    isOnline: boolean;
-    status: StatusType;
-    lastSeen: Date;
-  };
 };
 
 export type displayedConvContextType = {
@@ -207,4 +199,4 @@ export type ConversationMemberType = {
   _id: string; // idk why it appears when i don't add it
 };
 
-type StatusType = "Online" | "Offline" | "Busy";
+export type StatusType = "Online" | "Offline" | "Busy";

@@ -448,11 +448,12 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     });
 
     socket.on("changeStatus", (data) => {
+      console.log("changesStatus", data);
       setConversations((prev) => {
         return prev.map((conv) => {
-          if (conv.partnerInfos && conv.partnerInfos?.userId === data.userId) {
-            conv.partnerInfos.status = data.status;
-            conv.partnerInfos.lastSeen = data.lastSeen;
+          const member = conv.members.find((member) => member.userId === data.userId);
+          if (member) {
+            member.status = data.status;
           }
           return conv;
         });
@@ -463,12 +464,11 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       console.log(data.userId);
       setConversations((prev) => {
         return prev.map((conv) => {
-          if (!conv.isGroupConversation) {
-            console.log(conv.partnerInfos?.username, conv.partnerInfos?.userId, data.userId);
-          }
-          if (conv.partnerInfos && conv.partnerInfos?.userId === data.userId) {
-            conv.partnerInfos.isOnline = data.isOnline;
-            conv.partnerInfos.lastSeen = data.lastSeen;
+          const member = conv.members.find((member) => member.userId === data.userId);
+
+          if (member) {
+            member.isOnline = data.isOnline;
+            member.lastSeen = data.lastSeen;
             console.log("ICICICIC IDEEIN");
             console.log(data.isOnline);
           }
