@@ -96,7 +96,9 @@ function FoundMsgLi({
       </div>
       <div className="found-msg-content">
         <div className="found-msg-username">
-          {getNickNameById(displayedConv.members, msg.authorId)}
+          {displayedConv.members.some((member) => member.username === msg.authorId)
+            ? getNickNameById(displayedConv.members, msg.authorId)
+            : msg.author}
         </div>
         <div className="found-msg-details">
           <div className="found-msg-text">

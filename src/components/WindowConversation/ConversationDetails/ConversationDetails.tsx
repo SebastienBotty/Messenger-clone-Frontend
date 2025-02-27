@@ -42,6 +42,12 @@ function ConversationDetails() {
       closeModal: () => setShowNotificationsModal(false),
     });
 
+  const isPrivateConv = !displayedConv?.isGroupConversation;
+  let partner;
+  if (isPrivateConv) {
+    partner = displayedConv?.members.find((member) => member.userId !== user?._id);
+  }
+
   const openNotificationsModal = () => {
     if (!displayedConv) return;
     setShowNotificationsModal(true);
@@ -165,7 +171,20 @@ function ConversationDetails() {
                   console.log(displayedConv);
                 }}
               >
-                <ProfilePic props={displayedConv} />
+                {isPrivateConv ? (
+                  <ProfilePic
+                    picSrc={partner?.photo}
+                    status={partner?.status}
+                    isOnline={partner?.isOnline}
+                    isGroupConversationPic={false}
+                  />
+                ) : (
+                  <ProfilePic
+                    picSrc={displayedConv?.customization.photo}
+                    status={undefined}
+                    isGroupConversationPic={true}
+                  />
+                )}{" "}
               </div>
               <div className="conversation-title">
                 {displayedConv?.isGroupConversation

@@ -116,7 +116,12 @@ function ActionsList({
         setShowConfirmationModal(true);
         setConfirmationModalAction({
           title: "Pseudos",
-          text: <ChangeNicknames conversation={displayedConv} closeModal={() => setShowConfirmationModal(false)} />,
+          text: (
+            <ChangeNicknames
+              conversation={displayedConv}
+              closeModal={() => setShowConfirmationModal(false)}
+            />
+          ),
           action: () => {},
           closeModal: () => setShowConfirmationModal(false),
         });
@@ -272,7 +277,7 @@ function ActionsList({
           </li>
           <ul className={"actions-content" + (active2 ? " active" : "")}>
             {displayedConv.members.map((member) => (
-              <ConvMembersLi key={member.username} member={member.username} />
+              <ConvMembersLi key={member.userId} member={member} />
             ))}
 
             {displayedConv.admin.includes(user.userName) && (

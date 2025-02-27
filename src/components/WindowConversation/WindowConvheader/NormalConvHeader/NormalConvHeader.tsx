@@ -16,6 +16,12 @@ function NormalConvHeader({
   const { displayedConv } = useDisplayedConvContext();
   const { user } = useUserContext();
 
+  const isPrivateConv = !displayedConv?.isGroupConversation;
+  let partner;
+  if (isPrivateConv) {
+    partner = displayedConv?.members.find((member) => member.userId !== user?._id);
+  }
+
   const renderOnlineSince = () => {
     if (!displayedConv || !user) return null;
     if (displayedConv.isGroupConversation) return null;
@@ -28,7 +34,20 @@ function NormalConvHeader({
   return (
     <>
       <div className="img-container">
-        <ProfilePic props={displayedConv} />
+        {isPrivateConv ? (
+          <ProfilePic
+            picSrc={partner?.photo}
+            status={partner?.status}
+            isOnline={partner?.isOnline}
+            isGroupConversationPic={false}
+          />
+        ) : (
+          <ProfilePic
+            picSrc={displayedConv?.customization.photo}
+            status={undefined}
+            isGroupConversationPic={true}
+          />
+        )}{" "}
       </div>
       <div className="conversation-member-info-text-container">
         <div className="conversation-member-name">

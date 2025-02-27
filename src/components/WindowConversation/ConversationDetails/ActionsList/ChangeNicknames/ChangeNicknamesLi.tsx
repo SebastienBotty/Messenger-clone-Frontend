@@ -80,7 +80,12 @@ const ChangeNicknamesLi = ({
       >
         <div className="nick-name-container-photo-container">
           <div className="nick-name-container-photo-container-profile-pic">
-            <ProfilePic props={member.photo || ""} />
+            <ProfilePic
+              picSrc={member.photo}
+              status={member.status}
+              isOnline={member.isOnline}
+              isGroupConversationPic={false}
+            />
           </div>
         </div>
 

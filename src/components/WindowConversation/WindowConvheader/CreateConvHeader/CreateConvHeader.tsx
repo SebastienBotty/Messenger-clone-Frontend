@@ -107,7 +107,12 @@ function CreateConvHeader({
                 return (
                   <li key={userPrediction._id} onClick={() => handleSearch(userPrediction)}>
                     <div className="user-profile-pic">
-                      <ProfilePic props={userPrediction.photo} />
+                      <ProfilePic
+                        picSrc={userPrediction.photo}
+                        status={userPrediction.status}
+                        isOnline={userPrediction.isOnline}
+                        isGroupConversationPic={false}
+                      />
                     </div>
                     <span> {userPrediction.userName}</span>
                   </li>

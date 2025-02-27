@@ -93,7 +93,6 @@ export const getNickNameById = (members: ConversationMemberType[], userId: strin
 export const getNickNameByUsername = (members: ConversationMemberType[], username: string) => {
   const member = members.find((member) => member.username === username);
   if (!member) return;
-  console.log(member);
   if (member?.nickname) {
     return member.nickname;
   }

@@ -130,7 +130,12 @@ function NavBar(props: NavBarProps) {
       <div className="navBar-right">
         <div className="navBar-right-btn">
           <div className="profile-pic-container">
-            <ProfilePic props={user.photo} />{" "}
+            <ProfilePic
+              picSrc={user.photo}
+              status={user.status}
+              isOnline={user.isOnline}
+              isGroupConversationPic={false}
+            />
             <div className="profile-dropdown-menu">
               <div className="user-profile-container">
                 <div className="profile" onClick={() => console.log(user)}>
@@ -140,7 +145,12 @@ function NavBar(props: NavBarProps) {
                       onClick={() => focusProfilePicinput()}
                     >
                       {" "}
-                      <ProfilePic props={user.photo} />
+                      <ProfilePic
+                        picSrc={user.photo}
+                        status={user.status}
+                        isOnline={user.isOnline}
+                        isGroupConversationPic={false}
+                      />
                     </div>
                   </div>
                   <div className="user-profile-info">
@@ -160,7 +170,12 @@ function NavBar(props: NavBarProps) {
                   <div className="options-icon">
                     <div id="profile-pic-status-container">
                       {" "}
-                      <ProfilePic props={user.photo} />
+                      <ProfilePic
+                        picSrc={user.photo}
+                        status={user.status}
+                        isOnline={user.isOnline}
+                        isGroupConversationPic={false}
+                      />
                     </div>
                   </div>
                   <div className="options-text ">Changer de statut</div>

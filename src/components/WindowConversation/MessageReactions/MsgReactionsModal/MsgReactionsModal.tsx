@@ -85,6 +85,7 @@ function MsgReactionsModal({
       closeModal();
     }
   };
+  if (!user) return null;
   return (
     <div className="msg-reactions-modal">
       <div className="conv-media">
@@ -117,7 +118,12 @@ function MsgReactionsModal({
                       onClick={isMe ? removeReaction : () => {}}
                     >
                       <div className="msg-reactions-user-pic">
-                        <ProfilePic props={usr.userId} />
+                        <ProfilePic
+                          picSrc={user.photo}
+                          status={user.status}
+                          isOnline={user.isOnline}
+                          isGroupConversationPic={false}
+                        />
                       </div>
                       <div className="msg-reactions-username">
                         {" "}
@@ -138,7 +144,12 @@ function MsgReactionsModal({
                     onClick={isMe ? removeReaction : () => {}}
                   >
                     <div className="msg-reactions-user-pic">
-                      <ProfilePic props={usr.userId} />
+                      <ProfilePic
+                        picSrc={user.photo}
+                        status={user.status}
+                        isOnline={user.isOnline}
+                        isGroupConversationPic={false}
+                      />
                     </div>
                     <div className="msg-reactions-username">
                       <div className="msg-reactions-username-text">{usr.username}</div>

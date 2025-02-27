@@ -215,7 +215,12 @@ function AddMembersModal({
                           onClick={() => handleUserClick(user)}
                         />
                       </div>
-                      <ProfilePic props={user.photo} />
+                      <ProfilePic
+                        picSrc={user.photo}
+                        status={user.status}
+                        isOnline={user.isOnline}
+                        isGroupConversationPic={false}
+                      />
                     </div>
                     <div className="added-member-username">{user.userName}</div>
                   </div>
@@ -227,7 +232,12 @@ function AddMembersModal({
                     <div className="found-msg-user-img">
                       <div className="found-msg-user-img-container">
                         {" "}
-                        <ProfilePic props={user.photo} />
+                        <ProfilePic
+                          picSrc={user.photo}
+                          status={user.status}
+                          isOnline={user.isOnline}
+                          isGroupConversationPic={false}
+                        />
                       </div>
                     </div>
                     <div className="found-username-txt"> {user.userName}</div>

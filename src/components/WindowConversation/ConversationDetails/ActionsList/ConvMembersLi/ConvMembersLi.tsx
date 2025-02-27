@@ -18,12 +18,22 @@ import {
 import ConfirmationModal from "../../../../Utiles/ConfirmationModal/ConfirmationModal";
 import { confirmationMessage } from "../../../../../constants/ConfirmationMessage";
 import { ApiToken } from "../../../../../localStorage";
-import { ConfirmationModalPropsType, ConversationType } from "../../../../../typescript/types";
+import {
+  ConfirmationModalPropsType,
+  ConversationMemberType,
+  ConversationType,
+} from "../../../../../typescript/types";
 import { socket } from "../../../../../Sockets/socket";
 import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
 import { leaveConv } from "../../../../../api/conversation";
 
-export function ConvMembersLi({ member, key }: { member: string; key: string }): JSX.Element {
+export function ConvMembersLi({
+  member,
+  key,
+}: {
+  member: ConversationMemberType;
+  key: string;
+}): JSX.Element {
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
   const { messages, setMessages } = useMessagesContext();
@@ -322,14 +332,19 @@ export function ConvMembersLi({ member, key }: { member: string; key: string }):
       <li className="li-members">
         <div className="li-members-img">
           <div className="li-members-img-container">
-            <ProfilePic props={member} />
+            <ProfilePic
+              picSrc={member.photo}
+              status={member.status}
+              isOnline={member.isOnline}
+              isGroupConversationPic={false}
+            />
           </div>
         </div>
         <div className="li-members-text">
-          <span className="members-name">{member}</span>
+          <span className="members-name">{member.username}</span>
           <span className="members-role">
-            {displayedConv.admin.includes(member)
-              ? displayedConv.admin[0] === member
+            {displayedConv.admin.includes(member.username)
+              ? displayedConv.admin[0] === member.username
                 ? "Super Admin"
                 : "Admin"
               : "Membre"}
@@ -341,7 +356,7 @@ export function ConvMembersLi({ member, key }: { member: string; key: string }):
             <EllipsisHorizontal color={"#00000"} />
           </div>
           {showModal &&
-            (user?.userName === member ? (
+            (user?.userName === member.username ? (
               <div className="li-members-options-modal">
                 <ul className="ul-members-options">
                   <li
@@ -376,10 +391,10 @@ export function ConvMembersLi({ member, key }: { member: string; key: string }):
                     <>
                       {" "}
                       <li className="separation-bar"></li>
-                      {displayedConv.admin.includes(member) ? (
+                      {displayedConv.admin.includes(member.username) ? (
                         <li
                           className="li-members-options"
-                          onClick={() => handleActions("removeAdmin", member)}
+                          onClick={() => handleActions("removeAdmin", member.username)}
                         >
                           <div className="members-options-icon">
                             <ShieldOutline color={"#00000"} height={"1.75rem"} width={"1.75rem"} />
@@ -389,7 +404,7 @@ export function ConvMembersLi({ member, key }: { member: string; key: string }):
                       ) : (
                         <li
                           className="li-members-options"
-                          onClick={() => handleActions("setAdmin", member)}
+                          onClick={() => handleActions("setAdmin", member.username)}
                         >
                           <div className="members-options-icon">
                             <ShieldCheckmarkOutline
@@ -404,11 +419,11 @@ export function ConvMembersLi({ member, key }: { member: string; key: string }):
                     </>
                   )}
                   {displayedConv.admin.includes(user.userName) &&
-                    !displayedConv.admin.includes(member) && (
+                    !displayedConv.admin.includes(member.username) && (
                       <li
                         className="li-members-options"
                         onClick={() => {
-                          handleActions("removeMember", member);
+                          handleActions("removeMember", member.username);
                         }}
                       >
                         <div className="members-options-icon">

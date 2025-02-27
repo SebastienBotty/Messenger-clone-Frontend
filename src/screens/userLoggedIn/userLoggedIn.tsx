@@ -44,6 +44,10 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
 
   const setUserOnline = async (socketId: string | undefined) => {
     socket.emit("userConnected", { socketId, userId: user?._id });
+    setUser((prev) => {
+      if (prev) return { ...prev, isOnline: true, lastSteen: new Date() };
+      else return prev;
+    });
   };
 
   useEffect(() => {

@@ -23,6 +23,12 @@ function ConversationLi(props: {
   const [btnMessage, setBtnMessage] = useState<string>("Envoyer");
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
 
+  const isPrivateConv = !conversation.isGroupConversation;
+  let partner;
+  if (isPrivateConv) {
+    partner = conversation.members.find((member) => member.userId !== user?._id);
+  }
+
   const transferImage = async (): Promise<MessageType | false> => {
     console.log("TEST MSG");
     if (user) {
@@ -132,7 +138,20 @@ function ConversationLi(props: {
       }}
     >
       <div className="modal-conversation-photo">
-        <ProfilePic props={conversation} />
+        {isPrivateConv ? (
+          <ProfilePic
+            picSrc={partner?.photo}
+            status={partner?.status}
+            isOnline={partner?.isOnline}
+            isGroupConversationPic={false}
+          />
+        ) : (
+          <ProfilePic
+            picSrc={conversation.customization.photo}
+            status={undefined}
+            isGroupConversationPic={true}
+          />
+        )}{" "}
       </div>
       <div className="modal-conversation-name">
         {conversation.isGroupConversation

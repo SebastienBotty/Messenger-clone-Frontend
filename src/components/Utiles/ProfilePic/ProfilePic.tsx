@@ -5,78 +5,63 @@ import { PeopleOutline, PersonOutline } from "react-ionicons";
 import { useUserContext } from "../../../constants/context";
 import UserStatus from "../../UserStatus/UserStatus";
 
-function ProfilePic({ props }: { props: ConversationType | string | undefined }) {
-  const { user } = useUserContext();
-  if (props === undefined || !user) {
-    return <>RIEN</>;
+function ProfilePic({
+  picSrc,
+  status,
+  isGroupConversationPic,
+  isOnline = false,
+  showStatus = true,
+}: {
+  picSrc: string | undefined;
+  status: string | undefined;
+  isGroupConversationPic: boolean;
+  isOnline?: boolean;
+  showStatus?: boolean;
+}) {
+  if (picSrc === undefined) {
+    return <></>;
   }
 
-  //User only to display current user profile pic
-  if (typeof props === "string") {
-    if (props.length > 0) {
+  if (isGroupConversationPic) {
+    if (picSrc.length > 0) {
       return (
         <div className="profile-pic">
-          <img src={props} />
-          <div className="profile-pic-user-status">
-            <UserStatus status={user.status} />
-          </div>
+          <img src={picSrc} />
         </div>
       );
     } else {
+      return (
+        <div className="profile-pic">
+          <PeopleOutline height={"75%"} width={"75%"} />
+        </div>
+      );
+    }
+  } else {
+    if (picSrc.length > 0 && status) {
+      return (
+        <div className="profile-pic">
+          <img src={picSrc} />
+          {showStatus && isOnline && (
+            <div className="profile-pic-user-status">
+              <UserStatus status={status} />
+            </div>
+          )}
+        </div>
+      );
+    } else if (status) {
       return (
         <div className="profile-pic">
           <PersonOutline height={"75%"} width={"75%"} />{" "}
-          <div className="profile-pic-user-status">
-            <UserStatus status={user.status} />
-          </div>
+          {showStatus && isOnline && (
+            <div className="profile-pic-user-status">
+              <UserStatus status={status} />
+            </div>
+          )}
         </div>
       );
     }
-
-    //used to display conversations pic
-  } else {
-    //Group conversation
-    if (props.isGroupConversation) {
-      if (props.customization.photo?.length > 0) {
-        return (
-          <div className="profile-pic">
-            <img src={props.customization.photo} />
-          </div>
-        );
-      } else {
-        return (
-          <div className="profile-pic">
-            <PeopleOutline height={"75%"} width={"75%"} />
-          </div>
-        );
-      }
-
-      //Private conversation
-    } else {
-      const member = props.members.find((member) => member.userId === user._id);
-      if (!member) return <></>;
-      const status = member.isOnline ? member.status : "Offline";
-
-      if (member.photo) {
-        return (
-          <div className="profile-pic">
-            <img src={member.photo} />
-            <div className="profile-pic-user-status">
-              <UserStatus status={status} />
-            </div>
-          </div>
-        );
-      } else {
-        return (
-          <div className="profile-pic">
-            <PersonOutline height={"75%"} width={"75%"} />
-            <div className="profile-pic-user-status">
-              <UserStatus status={status} />
-            </div>
-          </div>
-        );
-      }
-    }
+    //User only to display current user profile pic
+    return <></>;
   }
 }
 

@@ -21,7 +21,7 @@ import { getMessageText } from "../../functions/StrFormatter";
 import { updateConvLastMsgEdited } from "../../functions/updateMessage";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
-  const { user } = useUserContext();
+  const { user, setUser } = useUserContext();
   const { conversations, setConversations } = useConversationsContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
@@ -261,7 +261,11 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const conversationsMap = (conversation: ConversationType, index: number) => {
     if (!user) return null;
     //console.log(conversation.lastMessage);
-
+    const isPrivateConv = !conversation.isGroupConversation;
+    let partner;
+    if (isPrivateConv) {
+      partner = conversation.members.find((member) => member.userId !== user._id);
+    }
     return (
       <div
         key={conversation._id + "-" + index}
@@ -274,7 +278,20 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         id={conversation._id === displayedConv?._id ? "selected-conversation" : ""}
       >
         <div className="conversation-img-container">
-          <ProfilePic props={conversation} />
+          {isPrivateConv ? (
+            <ProfilePic
+              picSrc={partner?.photo}
+              status={partner?.status}
+              isOnline={partner?.isOnline}
+              isGroupConversationPic={false}
+            />
+          ) : (
+            <ProfilePic
+              picSrc={conversation.customization.photo}
+              status={undefined}
+              isGroupConversationPic={true}
+            />
+          )}
         </div>
         <div className="conversation-text-container">
           <div className="conversation-name">
@@ -469,8 +486,6 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           if (member) {
             member.isOnline = data.isOnline;
             member.lastSeen = data.lastSeen;
-            console.log("ICICICIC IDEEIN");
-            console.log(data.isOnline);
           }
           return conv;
         });
