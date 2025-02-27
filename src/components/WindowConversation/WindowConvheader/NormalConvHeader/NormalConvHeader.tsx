@@ -60,7 +60,7 @@ function NormalConvHeader({
                   .join(", ")
             : displayedConv?.members
                 .filter((item) => item.username !== user?.userName)
-                .map((member) => member.username)}
+                .map((member) => getNickNameByUsername(displayedConv.members, member.username))}
         </div>
         <div
           className="online-since"

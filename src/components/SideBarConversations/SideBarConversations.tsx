@@ -17,7 +17,7 @@ import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { isConvMuted } from "../../functions/conversation";
 import ConversationParams from "./ConversationParams/ConversationParams";
-import { getMessageText } from "../../functions/StrFormatter";
+import { getMessageText, getNickNameByUsername } from "../../functions/StrFormatter";
 import { updateConvLastMsgEdited } from "../../functions/updateMessage";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
@@ -300,11 +300,11 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                 ? conversation.customization.conversationName
                 : conversation.members
                     .filter((item) => item.username !== user?.userName)
-                    .map((member) => member.username)
+                    .map((member) => getNickNameByUsername(conversation.members, member.username))
                     .join(", ")
               : conversation.members
                   .filter((item) => item.username !== user?.userName)
-                  .map((member) => member.username)}
+                  .map((member) => getNickNameByUsername(conversation.members, member.username))}
           </div>
           <div id="conversation-last-message">
             <div

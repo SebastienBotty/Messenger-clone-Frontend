@@ -205,67 +205,63 @@ function ActionsList({
 
   return (
     <div className="actions-list">
-      {displayedConv.admin.includes(user.userName) || !displayedConv.isGroupConversation ? (
-        <ul className="ul-actions-category">
-          <li className="category-title" onClick={() => setActive1(!active1)}>
-            <div className="title-text">Personnaliser la discussion</div>
-            <div className={active1 ? "title-arrow-icon active" : "title-arrow-icon"}>
-              <ChevronDownOutline color={"#00000"} />
-            </div>
-          </li>
-          <ul className={"actions-content" + (active1 ? " active" : "")}>
-            {displayedConv.isGroupConversation && (
-              <>
-                <li className="li-actions" onClick={() => handleActionsClick("changeConvName")}>
-                  <div className="li-icon">
-                    <PencilOutline color={"#00000"} />
-                  </div>
-                  <span>Modifier le nom de la discussion</span>
+      <ul className="ul-actions-category">
+        <li className="category-title" onClick={() => setActive1(!active1)}>
+          <div className="title-text">Personnaliser la discussion</div>
+          <div className={active1 ? "title-arrow-icon active" : "title-arrow-icon"}>
+            <ChevronDownOutline color={"#00000"} />
+          </div>
+        </li>
+        <ul className={"actions-content" + (active1 ? " active" : "")}>
+          {displayedConv.isGroupConversation && (
+            <>
+              <li className="li-actions" onClick={() => handleActionsClick("changeConvName")}>
+                <div className="li-icon">
+                  <PencilOutline color={"#00000"} />
+                </div>
+                <span>Modifier le nom de la discussion</span>
+              </li>
+              {changePhotoLoading ? (
+                <li className="li-actions">
+                  <LoadingSpinner />
                 </li>
-                {changePhotoLoading ? (
-                  <li className="li-actions">
-                    <LoadingSpinner />
-                  </li>
-                ) : (
-                  <li className="li-actions" onClick={() => fileInputRef.current?.click()}>
-                    <div className="li-icon">
-                      <ImagesOutline color={"#00000"} />
-                    </div>
-                    <span>Changer la photo</span>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      className="conversation-photo-file-input"
-                      onChange={handleImageChange}
-                      accept=".jpg, .jpeg, .png"
-                      multiple={false}
-                    />
-                  </li>
-                )}
-              </>
-            )}
-            <li className="li-actions">
-              <div className="li-icon">
-                <Disc color={displayedConv.customization.theme} />
-              </div>
-              <span>Modifier le thème</span>
-            </li>
-            <li className="li-actions" onClick={() => handleActionsClick("changeEmoji")}>
-              <div className="li-icon">{displayedConv.customization.emoji}</div>
+              ) : (
+                <li className="li-actions" onClick={() => fileInputRef.current?.click()}>
+                  <div className="li-icon">
+                    <ImagesOutline color={"#00000"} />
+                  </div>
+                  <span>Changer la photo</span>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="conversation-photo-file-input"
+                    onChange={handleImageChange}
+                    accept=".jpg, .jpeg, .png"
+                    multiple={false}
+                  />
+                </li>
+              )}
+            </>
+          )}
+          <li className="li-actions">
+            <div className="li-icon">
+              <Disc color={displayedConv.customization.theme} />
+            </div>
+            <span>Modifier le thème</span>
+          </li>
+          <li className="li-actions" onClick={() => handleActionsClick("changeEmoji")}>
+            <div className="li-icon">{displayedConv.customization.emoji}</div>
 
-              <span>Modifier l'emoji</span>
-            </li>
-            <li className="li-actions" onClick={() => handleActionsClick("changeNicknames")}>
-              <div className="li-icon">
-                <TextOutline color={"#00000"} />
-              </div>
-              <span>Modifier les pseudos</span>
-            </li>
-          </ul>{" "}
-        </ul>
-      ) : (
-        <></>
-      )}
+            <span>Modifier l'emoji</span>
+          </li>
+          <li className="li-actions" onClick={() => handleActionsClick("changeNicknames")}>
+            <div className="li-icon">
+              <TextOutline color={"#00000"} />
+            </div>
+            <span>Modifier les pseudos</span>
+          </li>
+        </ul>{" "}
+      </ul>
       {displayedConv.isGroupConversation && (
         <ul className="ul-actions-category">
           <li className="category-title" onClick={() => setActive2(!active2)}>
@@ -364,14 +360,12 @@ function ActionsList({
           )}
         </ul>
       </ul>
-
       {showAddMembersModal && (
         <AddMembersModal
           conversation={displayedConv}
           closeModal={() => setShowAddMembersModal(false)}
         />
       )}
-
       {showConfirmationModal && <ConfirmationModal {...confirmationModalAction} />}
     </div>
   );

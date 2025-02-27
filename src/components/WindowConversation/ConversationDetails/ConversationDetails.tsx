@@ -15,6 +15,7 @@ import { muteConv } from "../../../constants/ConfirmationMessage";
 import { ApiToken } from "../../../localStorage";
 import { isConvMuted } from "../../../functions/conversation";
 import { ConfirmationModalPropsType } from "../../../typescript/types";
+import { getNickNameByUsername } from "../../../functions/StrFormatter";
 
 function ConversationDetails() {
   const { user, setUser } = useUserContext();
@@ -192,11 +193,15 @@ function ConversationDetails() {
                     ? displayedConv?.customization.conversationName
                     : displayedConv?.members
                         .filter((item) => item.username !== user?.userName)
-                        .map((member) => member.username)
+                        .map((member) =>
+                          getNickNameByUsername(displayedConv.members, member.username)
+                        )
                         .join(", ")
                   : displayedConv?.members
                       .filter((item) => item.username !== user?.userName)
-                      .map((member) => member.username)}
+                      .map((member) =>
+                        getNickNameByUsername(displayedConv.members, member.username)
+                      )}
               </div>
               <span className="user-online">
                 {displayedConv?.isGroupConversation ? "" : "Online"}

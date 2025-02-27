@@ -6,6 +6,7 @@ import { socket } from "../../Sockets/socket";
 import { useMostRecentConvContext } from "../../screens/userLoggedIn/userLoggedIn";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { transferMsg } from "../../api/message";
+import { getNickNameByUsername } from "../../functions/StrFormatter";
 
 function ConversationLi(props: {
   conversation: ConversationType;
@@ -159,11 +160,11 @@ function ConversationLi(props: {
             ? conversation.customization.conversationName
             : conversation.members
                 .filter((item) => item.username !== user?.userName)
-                .map((member) => member.username)
+                .map((member) => getNickNameByUsername(conversation.members, member.username))
                 .join(", ")
           : conversation.members
               .filter((item) => item.username !== user?.userName)
-              .map((member) => member.username)}
+              .map((member) => getNickNameByUsername(conversation.members, member.username))}{" "}
       </div>
       <div className="modal-send-button">
         <button
