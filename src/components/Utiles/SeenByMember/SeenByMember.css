@@ -1,0 +1,31 @@
+.seen-by-member {
+  aspect-ratio: 1/1;
+  position: relative;
+}
+
+.seen-by-member:hover .seen-by-member-tooltip {
+  display: block;
+}
+
+.seen-by-member-tooltip {
+  display: none;
+  position: absolute;
+  text-align: center;
+  top: -125%;
+  font-size: 0.75rem;
+  padding: 0.5rem 0.375rem;
+  color: white;
+  background-color: #333333;
+  border-radius: 0.675rem;
+  z-index: 1;
+  width: auto;
+  white-space: nowrap;
+}
+
+.left-tooltip {
+  left: 0;
+}
+
+.right-tooltip {
+  right: 0;
+}

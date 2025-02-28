@@ -66,17 +66,17 @@ function NormalFooter({
     const maxHeight = 10; // 10vh
     const maxHeightInPixels = (maxHeight * window.innerHeight) / 100; // Convertir 10vh en pixels
     if (!textarea) return;
-    console.log(textarea.scrollHeight, textareaHeight);
-    if (textarea.scrollHeight <= maxHeightInPixels) {
+    /*     console.log(textarea.scrollHeight, textareaHeight);
+     */ if (textarea.scrollHeight <= maxHeightInPixels) {
       textarea.style.overflowY = "hidden";
 
       const newHeight = textarea.scrollHeight; // Obtenir la hauteur du contenu
-      console.log(textarea.scrollHeight, "xxxxxxxxxxxxxx");
-
+      /*       console.log(textarea.scrollHeight, "xxxxxxxxxxxxxx");
+       */
       // Convertir la hauteur en pourcentage (par rapport à la hauteur du parent)
       const parentHeight = textarea.parentElement?.clientHeight || 0;
-      console.log("ICICICIC");
-      console.log(textarea.parentElement?.clientHeight);
+      /*  console.log("ICICICIC");
+      console.log(textarea.parentElement?.clientHeight); */
       const newHeightPercentage = (newHeight / parentHeight) * 100;
       textarea.style.height = newHeight + "px";
 
@@ -127,7 +127,7 @@ function NormalFooter({
       text: fileNames
         ? ["PATHIMAGE/" + displayedConv?._id + ":" + fileNames.map((name) => name).join(",")]
         : [trimmedString],
-      seenBy: [user.userName],
+      seenBy: [{ username: user.userName, userId: user._id, seenDate: new Date() }],
       date: new Date(),
       conversationId: displayedConv?._id,
       responseToMsgId: quotedMessage ? quotedMessage._id : null,
@@ -257,7 +257,7 @@ function NormalFooter({
       author: user.userName,
       authorId: user._id,
       text: ["GIF/" + displayedConv._id + ":" + gif.preview.url],
-      seenBy: [user.userName],
+      seenBy: [{ username: user.userName, userId: user._id, seenDate: new Date() }],
       date: new Date(),
       conversationId: displayedConv._id,
       responseToMsgId: null,
@@ -359,7 +359,7 @@ function NormalFooter({
       author: user.userName,
       authorId: user._id,
       text: [displayedConv.customization.emoji],
-      seenBy: [user?.userName],
+      seenBy: [{ username: user.userName, userId: user._id, seenDate: new Date() }],
       date: new Date(),
       conversationId: displayedConv?._id,
       responseToMsgId: null,

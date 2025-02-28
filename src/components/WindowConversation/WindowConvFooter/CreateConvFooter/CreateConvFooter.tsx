@@ -91,7 +91,7 @@ function CreateConvFooter({
       authorId: user._id,
 
       text: [trimmedString],
-      seenBy: [user.userName],
+      seenBy: [{ username: user.userName, userId: user._id, seenDate: new Date() }],
       date: new Date(),
       conversationId: conversation._id,
       responseToMsgId: null,

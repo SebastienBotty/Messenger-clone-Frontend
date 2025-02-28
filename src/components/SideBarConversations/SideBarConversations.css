@@ -157,11 +157,12 @@
 }
 
 .conversation-text-container {
-  width: 80%;
+  width: 70%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background-color: red;
 }
 
 .conversation-name {
@@ -205,6 +206,12 @@
   width: 0.75rem;
   height: 0.75rem;
   border-radius: 50%;
+}
+
+.conversation-msg-seen-by {
+  background-color: yellow;
+  width: 10%;
+  height: 100%;
 }
 
 #selected-conversation {

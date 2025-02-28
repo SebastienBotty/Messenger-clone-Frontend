@@ -40,6 +40,74 @@ export type ConversationType = {
   };
 };
 
+export type MessageType = {
+  author: string;
+  authorId: string;
+  text: string[];
+  seenBy: SeenByType[];
+  date: Date;
+  conversationId: string | undefined;
+  _id?: string;
+  deletedBy?: DeletedByType[];
+  deletedForEveryone?: boolean;
+  deletedForEveryoneDate?: Date | null;
+  reactions?: Array<{
+    username: string;
+    userId: string;
+    reaction: string;
+  }>;
+  responseToMsgId: QuotedMessageType | null;
+};
+export type PostMessageType = {
+  author: string;
+  authorId: string;
+  text: string[];
+  seenBy: SeenByType[];
+  date: Date;
+  conversationId: string | undefined;
+  deletedBy?: Array<{
+    username: string;
+    userId: string;
+  }>;
+  deletedForEveryone?: boolean;
+  deletedForEveryoneDate?: Date | null;
+  reactions?: Array<{
+    username: string;
+    userId: string;
+    reaction: string;
+  }>;
+  responseToMsgId: string | null;
+};
+export type SeenByType = {
+  username: string;
+  userId: string;
+  seenDate: Date;
+};
+
+export type QuotedMessageType = {
+  _id: string;
+  author: string;
+  authorId: string;
+  text: string[];
+  date: Date;
+  conversationId: string;
+  deletedBy: DeletedByType[];
+};
+
+export type LastMsgSeenByMembersType = {
+  username: string;
+  userId: string;
+  messageId: string | undefined;
+  seenByDate: Date;
+};
+
+export type Date15minDifference = {
+  isMoreThan15Minutes: boolean;
+  hours: string;
+  minutes: string;
+  date: Date;
+};
+
 export type displayedConvContextType = {
   displayedConv: ConversationType | null;
   setDisplayedConv: React.Dispatch<React.SetStateAction<ConversationType | null>>;
@@ -69,67 +137,6 @@ export type ImgS3DataType = {
 export type RecentConversationsContextType = {
   recentConversations: ConversationType[] | null;
   setRecentConversations: React.Dispatch<React.SetStateAction<ConversationType[] | null>>;
-};
-
-export type MessageType = {
-  author: string;
-  authorId: string;
-  text: string[];
-  seenBy: (string | undefined)[];
-  date: Date;
-  conversationId: string | undefined;
-  _id?: string;
-  deletedBy?: DeletedByType[];
-  deletedForEveryone?: boolean;
-  deletedForEveryoneDate?: Date | null;
-  reactions?: Array<{
-    username: string;
-    userId: string;
-    reaction: string;
-  }>;
-  responseToMsgId: QuotedMessageType | null;
-};
-export type PostMessageType = {
-  author: string;
-  authorId: string;
-  text: string[];
-  seenBy: (string | undefined)[];
-  date: Date;
-  conversationId: string | undefined;
-  deletedBy?: Array<{
-    username: string;
-    userId: string;
-  }>;
-  deletedForEveryone?: boolean;
-  deletedForEveryoneDate?: Date | null;
-  reactions?: Array<{
-    username: string;
-    userId: string;
-    reaction: string;
-  }>;
-  responseToMsgId: string | null;
-};
-
-export type QuotedMessageType = {
-  _id: string;
-  author: string;
-  authorId: string;
-  text: string[];
-  date: Date;
-  conversationId: string;
-  deletedBy: DeletedByType[];
-};
-
-export type LastMsgSeenByMembersType = {
-  username: string;
-  messageId: string | undefined;
-};
-
-export type Date15minDifference = {
-  isMoreThan15Minutes: boolean;
-  hours: string;
-  minutes: string;
-  date: Date;
 };
 
 export type NavBarProps = {

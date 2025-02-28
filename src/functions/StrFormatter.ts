@@ -83,11 +83,11 @@ export const getMessageText = (
 
 export const getNickNameById = (members: ConversationMemberType[], userId: string) => {
   const member = members.find((member) => member.userId === userId);
-  if (!member) return;
-  if (member?.nickname) {
+  if (!member) return "undefined";
+  if (member.nickname) {
     return member.nickname;
   }
-  return member?.username;
+  return member.username;
 };
 
 export const getNickNameByUsername = (members: ConversationMemberType[], username: string) => {

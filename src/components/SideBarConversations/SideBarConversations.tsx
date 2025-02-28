@@ -19,6 +19,7 @@ import { isConvMuted } from "../../functions/conversation";
 import ConversationParams from "./ConversationParams/ConversationParams";
 import { getMessageText, getNickNameByUsername } from "../../functions/StrFormatter";
 import { updateConvLastMsgEdited } from "../../functions/updateMessage";
+import SeenByMember from "../Utiles/SeenByMember/SeenByMember";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const { user, setUser } = useUserContext();
@@ -158,7 +159,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     if (conversation.lastMessage._id && user?._id && user?.userName) {
       setDisplayedConv(conversation);
 
-      if (!conversation.lastMessage.seenBy.includes(user?.userName)) {
+      if (!conversation.lastMessage.seenBy.some((seenBy) => seenBy.username === user?.userName)) {
         updateSeenConversation(conversation.lastMessage._id, conversation);
       }
     }
@@ -310,7 +311,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
             <div
               className="truncated-text"
               id={
-                conversation.lastMessage.seenBy.includes(user?.userName)
+                conversation.lastMessage.seenBy.some((seenBy) => seenBy.username === user?.userName)
                   ? "seen"
                   : "unseen-conversation"
               }
@@ -340,9 +341,9 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
               {isConvMuted(user?.mutedConversations, conversation._id) && (
                 <NotificationsOff height="1rem" width="1rem" color="#B0B3B8" />
               )}
-              {!conversation.lastMessage.seenBy.includes(user?.userName) && (
-                <div className="unseen-conversation-notification"></div>
-              )}
+              {!conversation.lastMessage.seenBy.some(
+                (seenBy) => seenBy.username === user?.userName
+              ) && <div className="unseen-conversation-notification"></div>}
             </div>
           </div>
           <div
@@ -367,6 +368,26 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                     closeComponent={() => setClickedConvParamsBtn("")}
                   />
                 </div>{" "}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="conversation-msg-seen-by">
+          <div className="seen-by">
+            {conversation.lastMessage.authorId === user?._id && (
+              <div className="seen-by-me">
+                {conversation.lastMessage.seenBy
+                  .filter((seenBy) => seenBy.userId !== user?._id)
+                  .map((lastMsgSeen) => {
+                    return (
+                      <SeenByMember
+                        conversation={conversation}
+                        userId={lastMsgSeen.userId}
+                        seenByDate={lastMsgSeen.seenDate}
+                        width={"1.5rem"}
+                      />
+                    );
+                  })}
               </div>
             )}
           </div>

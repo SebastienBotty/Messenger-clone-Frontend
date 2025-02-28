@@ -56,6 +56,7 @@ import QuotedMessage from "./QuotedMessage/QuotedMessage";
 import { getNickNameById, getNickNameByUsername } from "../../functions/StrFormatter";
 import CreateConvHeader from "./WindowConvheader/CreateConvHeader/CreateConvHeader";
 import NormalConvHeader from "./WindowConvheader/NormalConvHeader/NormalConvHeader";
+import SeenByMember from "../Utiles/SeenByMember/SeenByMember";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -68,7 +69,6 @@ function WindowConversation() {
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { setConversations } = useConversationsContext();
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
-  const [convMembersTyping, setConvMembersTyping] = useState<string[]>([]);
   const [lastMsgSeenByConvMembers, setLastMsgSeenByConvMembers] = useState<
     LastMsgSeenByMembersType[]
   >([]);
@@ -179,32 +179,58 @@ function WindowConversation() {
    * @param {MessageType[]} messagesArr - An array of MessageType objects representing
    * the messages in the conversation.
    * @return {boolean} This function always returns false.
-   */ const lastMsgSeenByMembers = async (messagesArr: MessageType[]) => {
+   */
+  const lastMsgSeenByMembers = async (messagesArr: MessageType[]) => {
+    console.log("lastMsgSeenByMembers");
     const tempArray: LastMsgSeenByMembersType[] = [];
     if (displayedConv) {
+      console.log("displayedConv");
+      console.log(displayedConv.members);
       for (const member of displayedConv.members) {
+        console.log("member" + member.username);
         if (member.username !== user?.userName) {
           for (const msg of messagesArr) {
-            if (msg.seenBy.includes(member.username)) {
-              tempArray.push({ username: member.username, messageId: msg._id });
+            if (msg.seenBy.some((seenBy) => seenBy.username === member.username)) {
+              console.log("PUSHED FOR" + member.username + " " + msg._id);
+              const seenByDate = msg.seenBy.find(
+                (seenBy) => seenBy.username === member.username
+              )?.seenDate;
+
+              tempArray.push({
+                username: member.username,
+                messageId: msg._id,
+                userId: member.userId,
+                seenByDate: seenByDate ? seenByDate : new Date(),
+              });
               break; //Stop after finding the first msg he has seen(the latest one)
             }
           }
           //if no msg has been seen by this member, fetches the last message he has seen
 
           if (tempArray.every((item) => item.username !== member.username)) {
-            //console.log("PLUS DE 15 MESSAGES");
+            console.log("PLUS DE 15 MESSAGES POUR " + member.username);
             const lastMsgIdSeenByUser = await fetchLastMsgIdSeenByUser(member.username);
             if (!lastMsgIdSeenByUser) {
-              break;
+              console.log("VU AUCUN MSG POUR " + member.username);
+              tempArray.push({
+                username: member.username,
+                messageId: undefined,
+                userId: member.userId,
+                seenByDate: new Date(),
+              });
+              continue;
             }
             tempArray.push({
               username: member.username,
               messageId: lastMsgIdSeenByUser,
+              userId: member.userId,
+              seenByDate: new Date(),
             });
+            console.log("PUSHED LAST MSG  FETCH POUR " + member.username);
           }
         }
       }
+      console.log("tempArray set", tempArray);
       setLastMsgSeenByConvMembers(tempArray);
       return false;
     }
@@ -286,11 +312,18 @@ function WindowConversation() {
     messageData: MessageType,
     conversation: ConversationType | null
   ) => {
+    if (!user || messageData.seenBy.some((seenBy) => seenBy.username === user.userName)) {
+      console.log("message already seen");
+      console.log(messageData.text[messageData.text.length - 1]);
+      console.log(messageData.author);
+      return;
+    }
     const convMembersSocket = await getUsersSocket(conversation, user);
     const seenMsgData = messageData;
-    messageData.seenBy = [user?.userName];
-    const socketData = [convMembersSocket, seenMsgData, conversation];
+    messageData.seenBy.push({ username: user.userName, userId: user._id, seenDate: new Date() });
+    const socketData = [convMembersSocket, seenMsgData, conversation, user._id];
     socket.emit("seenMessage", socketData);
+    console.log("SEEN MESSAGE EMIT");
   };
 
   /* useEffect(() => {
@@ -320,7 +353,23 @@ function WindowConversation() {
       return (
         <>
           <TypingDots />
-          {typingMembers[0].username}, {typingMembers[1].username} et{" "}
+          <SeenByMember
+            conversation={displayedConv}
+            userId={typingMembers[0].userId}
+            seenByDate={typingMembers[0].lastSeen} //This date has no use to be there, just have to put one but it won't be used
+            width="1.5rem"
+            showSeenByTooltip={false}
+            showUsernameTooltip={true}
+          />
+          <SeenByMember
+            conversation={displayedConv}
+            userId={typingMembers[1].userId}
+            seenByDate={typingMembers[1].lastSeen}
+            width="1.5rem"
+            showSeenByTooltip={false}
+            showUsernameTooltip={true}
+          />
+          et{" "}
           {typingMembers.length - 2 > 1 ? typingMembers.length - 2 + " autres... " : " un autre..."}
         </>
       );
@@ -328,7 +377,16 @@ function WindowConversation() {
       return (
         <>
           <TypingDots />
-          {typingMembers.map((member) => member.username).join(", ")}
+          {typingMembers.map((member) => (
+            <SeenByMember
+              conversation={displayedConv}
+              userId={member.userId}
+              seenByDate={member.lastSeen}
+              width={"1.5rem"}
+              showSeenByTooltip={false}
+              showUsernameTooltip={true}
+            />
+          ))}
         </>
       );
     }
@@ -412,18 +470,41 @@ function WindowConversation() {
         }
       });
 
-      socket.on("seenMessage", (data) => {
-        const message = data[0];
-        const conv = data[1];
+      socket.on(
+        "seenMessage",
+        ({
+          message,
+          conversation,
+          userId,
+        }: {
+          message: MessageType;
+          conversation: ConversationType;
+          userId: string;
+        }) => {
+          console.log("SEEN MESSAGE RECU");
+          console.log(userId);
 
-        if (conv?._id === displayedConv?._id) {
-          setLastMsgSeenByConvMembers((prev) =>
-            prev.map((item) =>
-              item.username === message.seenBy[0] ? { ...item, messageId: message._id } : item
-            )
-          );
+          if (conversation._id === displayedConv?._id) {
+            setLastMsgSeenByConvMembers((prev) =>
+              prev.map((item) => {
+                if (item.userId === userId) {
+                  console.log("ici");
+                  console.log(item);
+                  return {
+                    ...item,
+                    messageId: message._id,
+                  };
+                } else {
+                  return item;
+                }
+              })
+            );
+            /*  setMessages((prev) => prev.map((msg)=>{
+            msg._id === message._id?
+          })); */
+          }
         }
-      });
+      );
       socket.on(
         "typing",
         ({
@@ -473,7 +554,7 @@ function WindowConversation() {
           emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
           setLastMsgSeenByConvMembers((prev) =>
             prev.map((item) =>
-              item.username === conversation.lastMessage.seenBy[0]
+              item.username === conversation.lastMessage?.seenBy[0].username
                 ? { ...item, messageId: conversation.lastMessage._id }
                 : item
             )
@@ -840,7 +921,6 @@ function WindowConversation() {
                   )}
                 </>
               )}
-
               {messages
                 .sort((a, b) => {
                   return new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -867,23 +947,44 @@ function WindowConversation() {
                   const isgMsgEdit = message.text.length > 1;
                   if (message.author === "System/" + displayedConv?._id) {
                     return (
-                      <div className="message-container" id="message-system">
-                        <ConvSystemMsg
-                          textProps={message.text[message.text.length - 1]}
-                          members={displayedConv?.members}
-                        />
-                      </div>
+                      <>
+                        <div
+                          className="message-container"
+                          id="message-system"
+                          onClick={() => console.log(message)}
+                        >
+                          <ConvSystemMsg
+                            textProps={message.text[message.text.length - 1]}
+                            members={displayedConv?.members}
+                          />
+                        </div>
+                        <div className="seen-by">
+                          {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                            if (displayedConv && message._id === lastMsgSeen.messageId) {
+                              return (
+                                <SeenByMember
+                                  conversation={displayedConv}
+                                  userId={lastMsgSeen.userId}
+                                  seenByDate={lastMsgSeen.seenByDate}
+                                  width={"1.5rem"}
+                                  showSeenByTooltip={true}
+                                />
+                              );
+                            }
+                          })}
+                        </div>
+                      </>
                     );
                   }
                   if (message?.author === user?.userName) {
                     return (
                       <div
                         key={message.author + "-" + index}
-                        /*  onClick={() => {
-                        if (!message._id) return;
-                        console.log(message);
-                        console.log(messagesRef.current[message._id]);
-                      }} */
+                        onClick={() => {
+                          if (!message._id) return;
+                          console.log(message);
+                          console.log(lastMsgSeenByConvMembers);
+                        }}
                         ref={firstMessage ? firstMessageRef : messagesRef.current[message._id]}
                       >
                         {checkMsgTime.isMoreThan15Minutes && (
@@ -956,8 +1057,16 @@ function WindowConversation() {
                         </div>
                         <div className="seen-by">
                           {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                            if (message._id === lastMsgSeen.messageId) {
-                              return <div>{lastMsgSeen.username}</div>;
+                            if (displayedConv && message._id === lastMsgSeen.messageId) {
+                              return (
+                                <SeenByMember
+                                  conversation={displayedConv}
+                                  userId={lastMsgSeen.userId}
+                                  seenByDate={lastMsgSeen.seenByDate}
+                                  width={"1.5rem"}
+                                  showSeenByTooltip={true}
+                                />
+                              );
                             }
                           })}
                         </div>
@@ -1119,8 +1228,16 @@ function WindowConversation() {
                       </div>
                       <div className="seen-by">
                         {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                          if (message._id === lastMsgSeen.messageId) {
-                            return <div>{lastMsgSeen.username}</div>;
+                          if (displayedConv && message._id === lastMsgSeen.messageId) {
+                            return (
+                              <SeenByMember
+                                conversation={displayedConv}
+                                userId={lastMsgSeen.userId}
+                                seenByDate={lastMsgSeen.seenByDate}
+                                width={"1.5rem"}
+                                showSeenByTooltip={true}
+                              />
+                            );
                           }
                         })}
                       </div>
