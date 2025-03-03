@@ -503,6 +503,11 @@ function WindowConversation() {
             msg._id === message._id?
           })); */
           }
+          setConversations((prev) =>
+            prev.map((conv) =>
+              conv._id === conversation._id ? { ...conv, lastMessage: message } : conv
+            )
+          );
         }
       );
       socket.on(

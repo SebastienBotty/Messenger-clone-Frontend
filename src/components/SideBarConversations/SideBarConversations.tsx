@@ -375,9 +375,13 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         <div className="conversation-msg-seen-by">
           <div className="seen-by">
             {conversation.lastMessage.authorId === user?._id && (
-              <div className="seen-by-me">
+              <div className="seen-by-users">
                 {conversation.lastMessage.seenBy
                   .filter((seenBy) => seenBy.userId !== user?._id)
+                  .sort((a, b) => {
+                    return new Date(b.seenDate).getTime() - new Date(a.seenDate).getTime();
+                  })
+                  .slice(0, 2)
                   .map((lastMsgSeen) => {
                     return (
                       <SeenByMember
@@ -385,6 +389,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                         userId={lastMsgSeen.userId}
                         seenByDate={lastMsgSeen.seenDate}
                         width={"1.5rem"}
+                        showUsernameTooltip={true}
                       />
                     );
                   })}

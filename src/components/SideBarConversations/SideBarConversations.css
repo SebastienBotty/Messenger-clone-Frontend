@@ -162,7 +162,6 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: red;
 }
 
 .conversation-name {
@@ -209,9 +208,14 @@
 }
 
 .conversation-msg-seen-by {
-  background-color: yellow;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 10%;
   height: 100%;
+}
+.seen-by-users {
+  display: flex;
 }
 
 #selected-conversation {
@@ -221,6 +225,7 @@
   display: block !important;
 }
 .conversation-params {
+  z-index: 1;
   display: none;
   position: absolute;
   top: 50%;
