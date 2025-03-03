@@ -502,6 +502,20 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         });
       });
     });
+
+    socket.on("profilPicUpdate", ({ userId, picSrc }: { userId: string; picSrc: string }) => {
+      console.log("profilPicUpdate", userId, picSrc);
+      setConversations((prev) => {
+        return prev.map((conv) => {
+          const member = conv.members.find((member) => member.userId === userId);
+          if (member) {
+            member.photo = picSrc;
+          }
+          return conv;
+        });
+      });
+    });
+
     socket.on(
       "isUserOnline",
       ({ userId, isOnline, lastSeen }: { userId: string; isOnline: boolean; lastSeen: Date }) => {
