@@ -326,7 +326,8 @@ export const searchMsgInConversation = async (
     );
 
     if (!response.ok) {
-      throw new Error("Erreur lor du fetch");
+      const errorMsg = await response.json();
+      throw new Error("Erreur lor du searchMsgInConversation:" + errorMsg.message);
     }
 
     const jsonData = await response.json();

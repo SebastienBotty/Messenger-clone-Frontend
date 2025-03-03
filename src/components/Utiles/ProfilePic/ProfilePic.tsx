@@ -1,8 +1,6 @@
 import React, { useContext } from "react";
 import "./ProfilePic.css";
-import { ConversationType } from "../../../typescript/types";
 import { PeopleOutline, PersonOutline } from "react-ionicons";
-import { useUserContext } from "../../../constants/context";
 import UserStatus from "../../UserStatus/UserStatus";
 
 function ProfilePic({

@@ -13,15 +13,18 @@ import { fetchMessagesBeforeAndAfter } from "../../../../../api/message";
 import { isMsgInMessages } from "../../../../../functions/updateMessage";
 import { useDisplayedConvContext } from "../../../../../screens/userLoggedIn/userLoggedIn";
 import { getNickNameById } from "../../../../../functions/StrFormatter";
+import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
 
 function FoundMsgLi({
   msg,
   key,
   word,
+  memberPhoto,
 }: {
   msg: MessageType;
   key: string | undefined;
   word: string;
+  memberPhoto: string;
 }) {
   const { user, setUser } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
@@ -92,7 +95,14 @@ function FoundMsgLi({
   return (
     <li key={key} className="found-msg" onClick={() => handleMsgClick(msg)}>
       <div className="found-msg-user-img">
-        <div className="found-msg-user-img-container"></div>
+        <div className="found-msg-user-img-container">
+          <ProfilePic
+            picSrc={memberPhoto}
+            status={msg.authorId} // We don't care about the data we put there
+            isGroupConversationPic={false}
+            showStatus={false}
+          />
+        </div>
       </div>
       <div className="found-msg-content">
         <div className="found-msg-username">

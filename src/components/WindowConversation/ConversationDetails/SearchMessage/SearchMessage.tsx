@@ -4,7 +4,6 @@ import { Search, ArrowBackOutline } from "react-ionicons";
 import { MessageType } from "../../../../typescript/types";
 import { useDisplayedConvContext } from "../../../../screens/userLoggedIn/userLoggedIn";
 
-import { ApiToken } from "../../../../localStorage";
 import FoundMsgLi from "./FoundMsgLi/FoundMsgLi";
 import {
   useMessagesContext,
@@ -16,7 +15,9 @@ import { searchMsgInConversation } from "../../../../api/message";
 function SearchMessage() {
   const [searchMsgInput, setSearchMsgInput] = useState("");
   const [infoMsg, setInfoMsg] = useState<string>("Appuyez sur Entrée pour rechercher");
-  const [messagesList, setMessagesList] = useState<MessageType[]>([]);
+  const [messagesList, setMessagesList] = useState<{ message: MessageType; memberPhoto: string }[]>(
+    []
+  );
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { user, setUser } = useUserContext();
@@ -28,13 +29,13 @@ function SearchMessage() {
     if (!user || !displayedConv) return [];
     console.log("recherche");
 
-    const searchMsgInMessages = messages.find((msg) =>
+    /*  const searchMsgInMessages = messages.find((msg) =>                   // Removed it because if user searches a word that has been said in a recent msg, it wont search toe the other msg ocntaining it
       msg.text[msg.text.length - 1].includes(searchMsgInput)
     );
     if (searchMsgInMessages) {
       console.log("msg trouvé dans les messages");
       return [searchMsgInMessages];
-    }
+    } */
     const fetchMsgInConv = await searchMsgInConversation(
       user._id,
       displayedConv._id,
@@ -110,11 +111,18 @@ function SearchMessage() {
       {infoMsg && <p className="info-msg">{infoMsg}</p>}
       {messagesList && (
         <div className="search-message-list">
-          {messagesList.map((message) => (
-            <div className="messageList-container">
-              <FoundMsgLi msg={message} key={message._id} word={searchMsgInput} />
-            </div>
-          ))}
+          {messagesList
+            .sort((a, b) => new Date(b.message.date).getTime() - new Date(a.message.date).getTime())
+            .map((message) => (
+              <div className="messageList-container">
+                <FoundMsgLi
+                  msg={message.message}
+                  key={message.message._id}
+                  word={searchMsgInput}
+                  memberPhoto={message.memberPhoto}
+                />
+              </div>
+            ))}
         </div>
       )}
     </div>

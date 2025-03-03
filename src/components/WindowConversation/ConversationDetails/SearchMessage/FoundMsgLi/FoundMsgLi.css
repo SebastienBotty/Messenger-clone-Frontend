@@ -3,7 +3,7 @@ li.found-msg {
   display: flex;
   padding: 1rem 0.25rem;
   border-radius: 10px;
-  height: 2.5rem;
+  height: 3rem;
   width: 100%;
   align-items: center;
   gap: 0.75rem;
@@ -20,7 +20,6 @@ li.found-msg:hover {
 .found-msg-user-img-container {
   height: 3rem;
   width: 3rem;
-  background-color: aqua;
   border-radius: 50%;
 }
 .found-msg-content {
