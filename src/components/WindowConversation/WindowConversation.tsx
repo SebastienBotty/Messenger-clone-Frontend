@@ -208,10 +208,10 @@ function WindowConversation() {
           //if no msg has been seen by this member, fetches the last message he has seen
 
           if (tempArray.every((item) => item.username !== member.username)) {
-            console.log("PLUS DE 15 MESSAGES POUR " + member.username);
+            //console.log("PLUS DE 15 MESSAGES POUR " + member.username);
             const lastMsgIdSeenByUser = await fetchLastMsgIdSeenByUser(member.username);
             if (!lastMsgIdSeenByUser) {
-              console.log("VU AUCUN MSG POUR " + member.username);
+              //console.log("VU AUCUN MSG POUR " + member.username);
               tempArray.push({
                 username: member.username,
                 messageId: undefined,
@@ -226,11 +226,11 @@ function WindowConversation() {
               userId: member.userId,
               seenByDate: new Date(),
             });
-            console.log("PUSHED LAST MSG  FETCH POUR " + member.username);
+            //console.log("PUSHED LAST MSG  FETCH POUR " + member.username);
           }
         }
       }
-      console.log("tempArray set", tempArray);
+      //console.log("tempArray set", tempArray);
       setLastMsgSeenByConvMembers(tempArray);
       return false;
     }
@@ -312,8 +312,11 @@ function WindowConversation() {
     messageData: MessageType,
     conversation: ConversationType | null
   ) => {
-    if (!user || messageData.seenBy.some((seenBy) => seenBy.username === user.userName)) {
+    if (!user) return;
+    const isMsgSeen = messageData.seenBy.some((seenBy) => seenBy.username === user.userName);
+    if (isMsgSeen) {
       console.log("message already seen");
+      console.log(messageData.seenBy);
       console.log(messageData.text[messageData.text.length - 1]);
       console.log(messageData.author);
       return;
@@ -397,6 +400,8 @@ function WindowConversation() {
     if (!fetchedMessages || fetchedMessages.length === 0) return;
 
     lastMsgSeenByMembers(fetchedMessages);
+    console.log("XXXXXXXXXXXXXXXXXXXXX");
+    console.log(fetchedMessages[0]);
     emitSeenMsgToSocket(fetchedMessages[0], displayedConv);
   };
 
@@ -963,21 +968,25 @@ function WindowConversation() {
                             members={displayedConv?.members}
                           />
                         </div>
-                        <div className="seen-by">
-                          {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                            if (displayedConv && message._id === lastMsgSeen.messageId) {
-                              return (
-                                <SeenByMember
-                                  conversation={displayedConv}
-                                  userId={lastMsgSeen.userId}
-                                  seenByDate={lastMsgSeen.seenByDate}
-                                  width={"1.5rem"}
-                                  showSeenByTooltip={true}
-                                />
-                              );
-                            }
-                          })}
-                        </div>
+                        {lastMsgSeenByConvMembers.some(
+                          (member) => member.messageId === message._id
+                        ) && (
+                          <div className="seen-by ">
+                            {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                              if (displayedConv && message._id === lastMsgSeen.messageId) {
+                                return (
+                                  <SeenByMember
+                                    conversation={displayedConv}
+                                    userId={lastMsgSeen.userId}
+                                    seenByDate={lastMsgSeen.seenByDate}
+                                    width={"1.5rem"}
+                                    showSeenByTooltip={true}
+                                  />
+                                );
+                              }
+                            })}
+                          </div>
+                        )}
                       </>
                     );
                   }
@@ -1060,21 +1069,25 @@ function WindowConversation() {
                             <MessageReactions message={message} />
                           </div>
                         </div>
-                        <div className="seen-by">
-                          {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                            if (displayedConv && message._id === lastMsgSeen.messageId) {
-                              return (
-                                <SeenByMember
-                                  conversation={displayedConv}
-                                  userId={lastMsgSeen.userId}
-                                  seenByDate={lastMsgSeen.seenByDate}
-                                  width={"1.5rem"}
-                                  showSeenByTooltip={true}
-                                />
-                              );
-                            }
-                          })}
-                        </div>
+                        {lastMsgSeenByConvMembers.some(
+                          (member) => member.messageId === message._id
+                        ) && (
+                          <div className="seen-by">
+                            {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                              if (displayedConv && message._id === lastMsgSeen.messageId) {
+                                return (
+                                  <SeenByMember
+                                    conversation={displayedConv}
+                                    userId={lastMsgSeen.userId}
+                                    seenByDate={lastMsgSeen.seenByDate}
+                                    width={"1.5rem"}
+                                    showSeenByTooltip={true}
+                                  />
+                                );
+                              }
+                            })}
+                          </div>
+                        )}
                       </div>
                     );
                   }
@@ -1152,13 +1165,17 @@ function WindowConversation() {
                           </div>
                           <MessagesOptions message={message} setQuotedMessage={setQuotedMessage} />
                         </div>
-                        <div className="seen-by">
-                          {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                            if (message._id === lastMsgSeen.messageId) {
-                              return <div>{lastMsgSeen.username}</div>;
-                            }
-                          })}
-                        </div>
+                        {lastMsgSeenByConvMembers.some(
+                          (member) => member.messageId === message._id
+                        ) && (
+                          <div className="seen-by">
+                            {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                              if (message._id === lastMsgSeen.messageId) {
+                                return <div>{lastMsgSeen.username}</div>;
+                              }
+                            })}
+                          </div>
+                        )}
                       </div>
                     );
                   }
@@ -1231,21 +1248,25 @@ function WindowConversation() {
                         </div>
                         <MessagesOptions message={message} setQuotedMessage={setQuotedMessage} />
                       </div>
-                      <div className="seen-by">
-                        {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                          if (displayedConv && message._id === lastMsgSeen.messageId) {
-                            return (
-                              <SeenByMember
-                                conversation={displayedConv}
-                                userId={lastMsgSeen.userId}
-                                seenByDate={lastMsgSeen.seenByDate}
-                                width={"1.5rem"}
-                                showSeenByTooltip={true}
-                              />
-                            );
-                          }
-                        })}
-                      </div>
+                      {lastMsgSeenByConvMembers.some(
+                        (member) => member.messageId === message._id
+                      ) && (
+                        <div className="seen-by">
+                          {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                            if (displayedConv && message._id === lastMsgSeen.messageId) {
+                              return (
+                                <SeenByMember
+                                  conversation={displayedConv}
+                                  userId={lastMsgSeen.userId}
+                                  seenByDate={lastMsgSeen.seenByDate}
+                                  width={"1.5rem"}
+                                  showSeenByTooltip={true}
+                                />
+                              );
+                            }
+                          })}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
