@@ -3,7 +3,11 @@ import {
   useDisplayedConvContext,
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
-import { useMessagesContext, useUserContext } from "../../../../../constants/context";
+import {
+  useConversationsContext,
+  useMessagesContext,
+  useUserContext,
+} from "../../../../../constants/context";
 import "./ConvMembersLi.css";
 import {
   ChatbubbleOutline,
@@ -25,7 +29,11 @@ import {
 } from "../../../../../typescript/types";
 import { socket } from "../../../../../Sockets/socket";
 import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
-import { leaveConv } from "../../../../../api/conversation";
+import { leaveConv, patchRemoveMember } from "../../../../../api/conversation";
+import {
+  updateConvRemovedMembers,
+  updateMostRecentConvRemovedMembers,
+} from "../../../../../functions/updateConversation";
 
 export function ConvMembersLi({
   member,
@@ -35,7 +43,8 @@ export function ConvMembersLi({
   key: string;
 }): JSX.Element {
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
-  const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
+  const { setMostRecentConv } = useMostRecentConvContext();
+  const { conversations } = useConversationsContext();
   const { messages, setMessages } = useMessagesContext();
   const btnRef = useRef<HTMLDivElement>(null);
   const [showModal, setShowModal] = useState(false);
@@ -57,45 +66,23 @@ export function ConvMembersLi({
     removerUsername: string,
     removerUserId: string,
     removedUsername: string
-  ): Promise<false | string[]> => {
-    try {
-      const response = await fetch(RESTAPIUri + "/conversation/removeUser", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + ApiToken(),
-        },
-        body: JSON.stringify({
-          conversationId: conversationId,
-          removerUsername: removerUsername,
-          removerUserId: removerUserId,
-          removedUsername: removedUsername,
-          date: new Date(),
-        }),
-      });
-      if (!response.ok) {
-        const errorMsg = await response.json();
-        throw new Error(errorMsg.message);
-      }
-      const jsonData = await response.json();
-      const updatedConv = jsonData.conversation;
-      updatedConv.lastMessage = jsonData.message;
+  ) => {
+    if (!displayedConv) return;
+    const res = await patchRemoveMember(
+      conversationId,
+      removerUsername,
+      removerUserId,
+      removedUsername
+    );
+    if (res) {
       setShowConfirmationModal(false);
-      setDisplayedConv(updatedConv);
-      setMostRecentConv(updatedConv);
+      setDisplayedConv((prev) => updateConvRemovedMembers(prev, removedUsername, displayedConv));
+      setMostRecentConv((prev) =>
+        updateMostRecentConvRemovedMembers(conversations, prev, removedUsername, displayedConv)
+      );
       setMessages((prev) => {
-        return [...prev, jsonData.message];
+        return [...prev, res.conversation.lastMessage];
       });
-      //emitToSockets("convUpdate", updatedConv); //--------------
-
-      return jsonData;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-      return false;
     }
   };
 

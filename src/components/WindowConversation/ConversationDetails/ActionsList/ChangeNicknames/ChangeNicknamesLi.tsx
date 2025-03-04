@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import "./ChangeNicknames.css";
-import { ConversationMemberType } from "../../../../../typescript/types";
+import { ConversationMemberType, ConversationType } from "../../../../../typescript/types";
 import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
 import { CheckmarkOutline, PencilOutline } from "react-ionicons";
 import { patchConvNickname } from "../../../../../api/conversation";
@@ -8,7 +8,15 @@ import {
   useDisplayedConvContext,
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
-import { useMessagesContext, useUserContext } from "../../../../../constants/context";
+import {
+  useConversationsContext,
+  useMessagesContext,
+  useUserContext,
+} from "../../../../../constants/context";
+import {
+  updateConversationMembers,
+  updateMostRecentConv,
+} from "../../../../../functions/updateConversation";
 const ChangeNicknamesLi = ({
   member,
   closeModal,
@@ -17,6 +25,7 @@ const ChangeNicknamesLi = ({
   closeModal: () => void;
 }) => {
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { conversations } = useConversationsContext();
   const { user } = useUserContext();
   const { setMostRecentConv } = useMostRecentConvContext();
   const { setMessages } = useMessagesContext();
@@ -37,14 +46,26 @@ const ChangeNicknamesLi = ({
     if (res) {
       setEditingUserId("");
       console.log(res);
-      setDisplayedConv(res.conversation);
-      setMostRecentConv(res.conversation);
+      setDisplayedConv((prev) =>
+        updateConversationMembers(prev, member.userId, inputValue, res.conversation)
+      );
+      setMostRecentConv((prev) => {
+        return updateMostRecentConv(
+          prev,
+          conversations,
+          res.conversation,
+          "changeNickname",
+          member.userId,
+          inputValue
+        );
+      });
       setMessages((prev) => {
         return [...prev, res.conversation.lastMessage];
       });
       closeModal();
     }
   };
+
   const editNickname = (userId: string) => {
     if (editingUserId === userId) return;
     console.log(userId);

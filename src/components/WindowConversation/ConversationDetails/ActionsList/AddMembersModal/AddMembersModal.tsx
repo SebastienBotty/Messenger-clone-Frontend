@@ -9,8 +9,17 @@ import { ConversationType, UserDataType } from "../../../../../typescript/types"
 import { AddCircleOutline, CheckmarkCircleOutline, Close, SearchOutline } from "react-ionicons";
 import { ApiToken } from "../../../../../localStorage";
 import _ from "lodash";
-import { useMessagesContext, useUserContext } from "../../../../../constants/context";
+import {
+  useConversationsContext,
+  useMessagesContext,
+  useUserContext,
+} from "../../../../../constants/context";
 import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
+import { patchAddMembers } from "../../../../../api/conversation";
+import {
+  updateConvAddedMembers,
+  updateMostRecentConvAddedMembers,
+} from "../../../../../functions/updateConversation";
 
 function AddMembersModal({
   conversation,
@@ -21,6 +30,7 @@ function AddMembersModal({
 }) {
   const { user } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { conversations } = useConversationsContext();
   const ref = useRef<HTMLDivElement>(null);
   const { setMessages } = useMessagesContext();
   const { setMostRecentConv } = useMostRecentConvContext();
@@ -95,7 +105,7 @@ function AddMembersModal({
     return addedMembers.some((obj) => obj._id === userId);
   };
 
-  const handleAddMembers = async (
+  const hand2leAddMembers = async (
     arrMembers: UserDataType[],
     conversationId: string | undefined,
     userUsername: string | undefined,
@@ -144,6 +154,25 @@ function AddMembersModal({
     }
   };
 
+  const handleAddMembers = async (
+    arrMembers: UserDataType[],
+    conversationId: string | undefined,
+    userUsername: string | undefined,
+    userId: string | undefined
+  ) => {
+    console.log(arrMembers, conversationId, userUsername, userId);
+    if (!conversationId || !userUsername || !userId || arrMembers.length < 1) return;
+
+    const res = await patchAddMembers(arrMembers, conversationId, userUsername, userId);
+    if (res) {
+      setDisplayedConv((prev) => updateConvAddedMembers(prev, res.addedUsersArr, res.conversation));
+    }
+    setMostRecentConv((prev) =>
+      updateMostRecentConvAddedMembers(conversations, prev, res.addedUsersArr, res.conversation)
+    );
+    closeModal();
+    setMessages((prev) => [...prev, res.conversation.lastMessage]);
+  };
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();

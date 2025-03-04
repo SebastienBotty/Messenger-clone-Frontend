@@ -1,5 +1,5 @@
 import { ApiToken } from "../localStorage";
-import { UserDataType } from "../typescript/types";
+import { ConversationType, UserDataType } from "../typescript/types";
 import { postMessage } from "./message";
 
 const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
@@ -270,6 +270,83 @@ export const patchConvNickname = async (
     }
     const data = await response.json();
     return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
+
+export const patchAddMembers = async (
+  arrMembers: UserDataType[],
+  conversationId: string | undefined,
+  userUsername: string | undefined,
+  userId: string | undefined
+) => {
+  console.log(arrMembers, conversationId, userUsername, userId);
+  if (!conversationId || !userUsername || !userId || arrMembers.length < 1) return;
+  try {
+    const response = await fetch(RESTAPIUri + "/conversation/addMembers", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: "Bearer " + ApiToken(),
+      },
+      body: JSON.stringify({
+        addedUsers: arrMembers,
+        conversationId: conversationId,
+        adderUsername: userUsername,
+        adderUserId: userId,
+        date: new Date(),
+      }),
+    });
+
+    if (!response.ok) {
+      const jsonData = await response.json();
+      throw new Error(jsonData.message);
+    }
+    const jsonData = await response.json();
+
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+  }
+};
+
+export const patchRemoveMember = async (
+  conversationId: string,
+  removerUsername: string,
+  removerUserId: string,
+  removedUsername: string
+): Promise<false | { conversation: ConversationType; removedUsername: string }> => {
+  try {
+    const response = await fetch(RESTAPIUri + "/conversation/removeUser", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + ApiToken(),
+      },
+      body: JSON.stringify({
+        conversationId: conversationId,
+        removerUsername: removerUsername,
+        removerUserId: removerUserId,
+        removedUsername: removedUsername,
+        date: new Date(),
+      }),
+    });
+    if (!response.ok) {
+      const errorMsg = await response.json();
+      throw new Error(errorMsg.message);
+    }
+    const jsonData = await response.json();
+    return jsonData;
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);

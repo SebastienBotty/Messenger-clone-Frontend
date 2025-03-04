@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Close, CreateOutline, EllipsisHorizontal, NotificationsOff, Search } from "react-ionicons";
-import { ConversationType, MessageType, SideBarPropsType } from "../../typescript/types";
+import {
+  ConversationMemberType,
+  ConversationType,
+  MessageType,
+  SideBarPropsType,
+} from "../../typescript/types";
 import "./SideBarConversations.css";
 
 import { ApiToken } from "../../localStorage";
@@ -10,7 +15,11 @@ import {
   useTriggerContext,
   useRecentConversationContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
-import { useConversationsContext, useUserContext } from "../../constants/context";
+import {
+  useConversationsContext,
+  useMessagesContext,
+  useUserContext,
+} from "../../constants/context";
 import { timeSince } from "../../functions/time";
 import { socket } from "../../Sockets/socket";
 import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
@@ -18,8 +27,15 @@ import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { isConvMuted } from "../../functions/conversation";
 import ConversationParams from "./ConversationParams/ConversationParams";
 import { getMessageText, getNickNameByUsername } from "../../functions/StrFormatter";
-import { updateConvLastMsgEdited } from "../../functions/updateMessage";
 import SeenByMember from "../Utiles/SeenByMember/SeenByMember";
+import {
+  updateConv,
+  updateConvAddedMembers,
+  updateConvRemovedMembers,
+  updateMostRecentConv,
+  updateMostRecentConvRemovedMembers,
+  updateMostRecentConvAddedMembers,
+} from "../../functions/updateConversation";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const { user, setUser } = useUserContext();
@@ -27,6 +43,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { mostRecentConv, setMostRecentConv } = useMostRecentConvContext();
   const { recentConversations, setRecentConversations } = useRecentConversationContext();
+  const { messages, setMessages } = useMessagesContext();
   const { trigger, setTrigger } = useTriggerContext();
   const RESTAPIUri: string | undefined = process.env.REACT_APP_REST_API_URI;
   const [searchConversationInput, setSearchConversationInput] = useState<string>("");
@@ -107,6 +124,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       console.log(jsonData);
       const test = await fetchConversationLastMsg(jsonData);
       setDisplayedConv(test[0]);
+      setMostRecentConv(test[0]);
       setConversations((prev) => [...test, ...prev]);
       set5LatestConversation(test);
     } catch (error: unknown) {
@@ -341,9 +359,9 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
               {isConvMuted(user?.mutedConversations, conversation._id) && (
                 <NotificationsOff height="1rem" width="1rem" color="#B0B3B8" />
               )}
-              {!conversation.lastMessage.seenBy.some(
-                (seenBy) => seenBy.username === user?.userName
-              ) && <div className="unseen-conversation-notification"></div>}
+              {!conversation.lastMessage.seenBy.some((seenBy) => seenBy.userId === user?._id) && (
+                <div className="unseen-conversation-notification"></div>
+              )}
             </div>
           </div>
           <div
@@ -457,17 +475,100 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       }
     });
 
-    socket.on("convUpdate", (conversation: ConversationType) => {
-      if (!conversation || !conversation.lastMessage._id) return;
-      if (conversation._id === displayedConv?._id) {
-        console.log("MEMBERS CHANGE");
-        updateSeenConversation(conversation.lastMessage._id, conversation);
-        setDisplayedConv(conversation);
-        setMostRecentConv(conversation);
-      } else {
-        setMostRecentConv(conversation);
+    socket.on(
+      "convUpdate",
+      ({
+        conversation,
+        actionName,
+        actionTargetId,
+        actionValue,
+      }: {
+        conversation: ConversationType;
+        actionName: string;
+        actionTargetId: string;
+        actionValue: string;
+      }) => {
+        if (!conversation || !conversation.lastMessage._id) return;
+        if (conversation._id === displayedConv?._id) {
+          console.log("MEMBERS CHANGE");
+          updateSeenConversation(conversation.lastMessage._id, conversation);
+          setDisplayedConv((prev) =>
+            updateConv(prev, actionName, actionTargetId, actionValue, conversation)
+          );
+          setMostRecentConv((prev) => {
+            return updateMostRecentConv(
+              prev,
+              conversations,
+              conversation,
+              actionName,
+              actionTargetId,
+              actionValue
+            );
+          });
+        } else {
+          setMostRecentConv((prev) => {
+            return updateMostRecentConv(
+              prev,
+              conversations,
+              conversation,
+              actionName,
+              actionTargetId,
+              actionValue
+            );
+          });
+        }
       }
-    });
+    );
+
+    socket.on(
+      "addMembers",
+      ({
+        conversation,
+        addedUsersArr,
+      }: {
+        conversation: ConversationType;
+        addedUsersArr: ConversationMemberType[];
+      }) => {
+        console.log("ADD MEMBERS received");
+        if (!conversation || !conversation.lastMessage._id) return;
+        if (conversation._id === displayedConv?._id) {
+          updateSeenConversation(conversation.lastMessage._id, conversation);
+          setDisplayedConv((prev) => updateConvAddedMembers(prev, addedUsersArr, conversation));
+          setMessages((prev) => [...prev, conversation.lastMessage]);
+        }
+        setMostRecentConv((prev) => {
+          return updateMostRecentConvAddedMembers(conversations, prev, addedUsersArr, conversation);
+        });
+      }
+    );
+
+    socket.on(
+      "removeMember",
+      ({
+        conversation,
+        removedUsername,
+      }: {
+        conversation: ConversationType;
+        removedUsername: string;
+      }) => {
+        console.log("REMOVED MEMBER LISTENED");
+        if (!conversation || !conversation.lastMessage._id) return;
+        if (conversation._id === displayedConv?._id) {
+          console.log("IS DISPLAYEDCONV");
+          updateSeenConversation(conversation.lastMessage._id, conversation);
+          setDisplayedConv((prev) => updateConvRemovedMembers(prev, removedUsername, conversation));
+          setMessages((prev) => [...prev, conversation.lastMessage]);
+        }
+        setMostRecentConv((prev) => {
+          return updateMostRecentConvRemovedMembers(
+            conversations,
+            prev,
+            removedUsername,
+            conversation
+          );
+        });
+      }
+    );
 
     socket.on("adminChange", (data) => {
       // console.log("ADMIN CHANGE RECU");
@@ -568,6 +669,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       socket.off("changeStatus");
       socket.off("isUserOnline");
       socket.off("typing");
+      socket.off("removeMember");
+      socket.off("addMembers");
     };
   }, [displayedConv?._id, user?.status]);
 

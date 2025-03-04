@@ -556,21 +556,34 @@ function WindowConversation() {
         }
       );
 
-      socket.on("convUpdate", (conversation: ConversationType) => {
-        console.log("members change écouté");
-        if (conversation._id === displayedConv?._id) {
-          console.log("c les meme");
-          setMessages((prev) => [...prev, conversation.lastMessage]);
-          emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
-          setLastMsgSeenByConvMembers((prev) =>
-            prev.map((item) =>
-              item.username === conversation.lastMessage?.seenBy[0].username
-                ? { ...item, messageId: conversation.lastMessage._id }
-                : item
-            )
-          );
+      socket.on(
+        "convUpdate",
+        ({
+          conversation,
+          actionName,
+          actionTargetId,
+          actionValue,
+        }: {
+          conversation: ConversationType;
+          actionName: string;
+          actionTargetId: string;
+          actionValue: string;
+        }) => {
+          console.log("members change écouté");
+          if (conversation._id === displayedConv?._id) {
+            console.log("c les meme");
+            setMessages((prev) => [...prev, conversation.lastMessage]);
+            emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
+            setLastMsgSeenByConvMembers((prev) =>
+              prev.map((item) =>
+                item.username === conversation.lastMessage?.seenBy[0].username
+                  ? { ...item, messageId: conversation.lastMessage._id }
+                  : item
+              )
+            );
+          }
         }
-      });
+      );
       socket.on("newFile", (data) => {
         const fileData: MediasType = data[0];
         const conversationId: string = data[1];
