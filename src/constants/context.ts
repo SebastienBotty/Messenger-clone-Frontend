@@ -7,6 +7,7 @@ import {
   UserDataContextType,
   ConversationContextType,
   MessagesRefContextType,
+  AddedMembersContextType,
 } from "../typescript/types";
 
 //User Context
@@ -87,6 +88,16 @@ export const useMessagesRefContext = () => {
   const context = useContext(MessagesRefContext);
   if (!context) {
     throw new Error("useMessagesRefContext doit être utilisé dans un MessagesRefProvider");
+  }
+  return context;
+};
+
+export const AddedMembersContext = createContext<AddedMembersContextType | undefined>(undefined);
+
+export const useAddedMembersContext = () => {
+  const context = useContext(AddedMembersContext);
+  if (!context) {
+    throw new Error("useAddedMembersContext must be used within a AddedMembersProvider");
   }
   return context;
 };

@@ -2,21 +2,22 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./CreateConvHeader.css";
 import { Close } from "react-ionicons";
 import { UserDataType } from "../../../../typescript/types";
-import { useMessagesContext, useUserContext } from "../../../../constants/context";
+import {
+  useAddedMembersContext,
+  useMessagesContext,
+  useUserContext,
+} from "../../../../constants/context";
 import ProfilePic from "../../../Utiles/ProfilePic/ProfilePic";
 import _ from "lodash";
 import { fetchSearchUser } from "../../../../api/user";
 function CreateConvHeader({
-  addedMembers,
-  setAddedMembers,
   setShowConvDetails,
 }: {
-  addedMembers: string[];
-  setAddedMembers: React.Dispatch<React.SetStateAction<string[]>>;
   setShowConvDetails: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { user } = useUserContext();
   const { setMessages } = useMessagesContext();
+  const { addedMembers, setAddedMembers } = useAddedMembersContext();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchUserInput, setSearchUserInput] = useState<string>("");
   const [usersPrediction, setUsersPrediction] = useState<UserDataType[]>([]);

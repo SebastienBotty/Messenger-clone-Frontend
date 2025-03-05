@@ -6,20 +6,19 @@ import {
   useMostRecentConvContext,
   useTriggerContext,
 } from "../../../../screens/userLoggedIn/userLoggedIn";
-import { useMessagesContext, useUserContext } from "../../../../constants/context";
+import {
+  useAddedMembersContext,
+  useMessagesContext,
+  useUserContext,
+} from "../../../../constants/context";
 import { isPrivateConvExisting, postConversation } from "../../../../api/conversation";
 import { postMessage } from "../../../../api/message";
 import { ConversationType, MessageType } from "../../../../typescript/types";
 import { socket } from "../../../../Sockets/socket";
 import { getUsersSocket } from "../../../../api/user";
 
-function CreateConvFooter({
-  addedMembers,
-  setAddedMembers,
-}: {
-  addedMembers: string[];
-  setAddedMembers: React.Dispatch<React.SetStateAction<string[]>>;
-}) {
+function CreateConvFooter({}: {}) {
+  const { addedMembers, setAddedMembers } = useAddedMembersContext();
   const { user } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { messages, setMessages } = useMessagesContext();

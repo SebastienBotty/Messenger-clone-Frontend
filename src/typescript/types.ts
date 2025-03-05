@@ -110,6 +110,46 @@ export type Date15minDifference = {
   date: Date;
 };
 
+export type MediasType = {
+  Key: string;
+  LastModified: Date;
+  Size: number;
+  Url: string;
+};
+
+export type ConfirmationModalPropsType = {
+  title: string;
+  text: string | JSX.Element;
+  action: () => void;
+  closeModal: () => void;
+  width?: string;
+};
+
+export type DeletedByType = {
+  username: string;
+  userId: string;
+};
+
+export type ConversationMemberType = {
+  userId: string;
+  username: string;
+  nickname: string;
+  photo: string;
+  status: StatusType;
+  isOnline: boolean;
+  lastSeen: Date;
+  isTyping: boolean;
+  _id: string; // idk why it appears when i don't add it
+};
+
+export type StatusType = "Online" | "Offline" | "Busy";
+
+export type ImgS3DataType = {
+  src: string;
+  name: string;
+  convId?: string;
+};
+
 export type displayedConvContextType = {
   displayedConv: ConversationType | null;
   setDisplayedConv: React.Dispatch<React.SetStateAction<ConversationType | null>>;
@@ -128,12 +168,6 @@ export type TriggerContextType = {
 export type MessagesContextType = {
   messages: MessageType[];
   setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
-};
-
-export type ImgS3DataType = {
-  src: string;
-  name: string;
-  convId?: string;
 };
 
 export type RecentConversationsContextType = {
@@ -177,36 +211,7 @@ export type MessagesRefContextType = {
   messagesRef: MutableRefObject<{ [key: string]: React.RefObject<HTMLDivElement> }>;
 };
 
-export type MediasType = {
-  Key: string;
-  LastModified: Date;
-  Size: number;
-  Url: string;
+export type AddedMembersContextType = {
+  addedMembers: string[];
+  setAddedMembers: React.Dispatch<React.SetStateAction<string[]>>;
 };
-
-export type ConfirmationModalPropsType = {
-  title: string;
-  text: string | JSX.Element;
-  action: () => void;
-  closeModal: () => void;
-  width?: string;
-};
-
-export type DeletedByType = {
-  username: string;
-  userId: string;
-};
-
-export type ConversationMemberType = {
-  userId: string;
-  username: string;
-  nickname: string;
-  photo: string;
-  status: StatusType;
-  isOnline: boolean;
-  lastSeen: Date;
-  isTyping: boolean;
-  _id: string; // idk why it appears when i don't add it
-};
-
-export type StatusType = "Online" | "Offline" | "Busy";

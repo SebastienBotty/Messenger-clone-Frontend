@@ -22,6 +22,7 @@ import {
   useMessagesContext,
   useConversationsContext,
   MessagesRefContext,
+  AddedMembersContext,
 } from "../../constants/context";
 import TypingDots from "../Utiles/TypingDots/TypingdDots";
 import _ from "lodash";
@@ -89,8 +90,6 @@ function WindowConversation() {
   const [mediasCtxt, setMediasCtxt] = useState<MediasType[]>([]);
   const [filesCtxt, setFilesCtxt] = useState<MediasType[]>([]);
 
-  const image =
-    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=";
   const fetchMsgIndex = useRef(0);
   const limitFetchMsg: number = 20;
   const { messages, setMessages } = useMessagesContext();
@@ -427,19 +426,19 @@ function WindowConversation() {
       return;
     }
     const maxFooterHeight = 30; //Percentage
-    console.log("xx");
-    console.log(newTextareaHeight);
+    /* console.log("xx");
+    console.log(newTextareaHeight); */
     const newFooterHeight = Math.min(newTextareaHeight, maxFooterHeight);
     const newBodyHeight = 100 - newFooterHeight;
-    console.log("làlàlà");
-    console.log(newBodyHeight);
+    /* console.log("làlàlà");
+    console.log(newBodyHeight); */
     setBodyHeight(`${newBodyHeight}%`);
     setFooterHeight(`${newFooterHeight}%`);
   };
   useEffect(() => {
     if (editingMsg) {
-      setFooterHeight("12.5%");
       setBodyHeight("80%");
+      setFooterHeight("12.5%");
     } else {
       setFooterHeight("7.5%");
       setBodyHeight("85%");
@@ -454,6 +453,7 @@ function WindowConversation() {
       setMessages([]);
       setEditingMsg(null);
       setSelectedFoundMsgId("");
+      setQuotedMessage(null);
 
       console.log("MESSSSSSSAGE RESET");
       console.log(displayedConv._id);
@@ -846,8 +846,7 @@ function WindowConversation() {
   };
 
   const renderWindowConvFooter = () => {
-    if (displayedConv === null)
-      return <CreateConvFooter addedMembers={addedMembers} setAddedMembers={setAddedMembers} />;
+    if (displayedConv === null) return <CreateConvFooter />;
     else if (editingMsg !== null)
       return (
         <EditingMsgFooter
@@ -886,259 +885,339 @@ function WindowConversation() {
     }
   }, [quotedMessage]);
   return (
-    <SelectedFoundMsgIdContext.Provider value={{ selectedFoundMsgId, setSelectedFoundMsgId }}>
-      <MessagesRefContext.Provider value={{ messagesRef }}>
-        <div className="WindowConversation" onDragOver={handleDragOver} onDrop={handleDrop}>
-          <div className={`conversation-container ${showConvDetails ? "retracted" : ""}`}>
-            {showDragOverOverlay && (
-              <div className="drag-overlay">
-                <span>Déposer un fichier</span>{" "}
-              </div>
-            )}
-            <div className="conversation-header">
-              <div className="conversation-member-info">
-                {displayedConv ? (
-                  <NormalConvHeader setShowConvDetails={setShowConvDetails} />
-                ) : (
-                  <CreateConvHeader
-                    addedMembers={addedMembers}
-                    setAddedMembers={setAddedMembers}
-                    setShowConvDetails={setShowConvDetails}
-                  />
-                )}
-              </div>
-            </div>
-            <div
-              className="conversation-body"
-              ref={scrollViewRef}
-              onScroll={handleScroll}
-              style={{ height: bodyHeight }}
-            >
-              {editingMsg && (
-                <div className="editingMsgOverlay" onClick={() => setEditingMsg(null)}>
-                  {" "}
+    <AddedMembersContext.Provider value={{ addedMembers, setAddedMembers }}>
+      <SelectedFoundMsgIdContext.Provider value={{ selectedFoundMsgId, setSelectedFoundMsgId }}>
+        <MessagesRefContext.Provider value={{ messagesRef }}>
+          <div className="WindowConversation" onDragOver={handleDragOver} onDrop={handleDrop}>
+            <div className={`conversation-container ${showConvDetails ? "retracted" : ""}`}>
+              {showDragOverOverlay && (
+                <div className="drag-overlay">
+                  <span>Déposer un fichier</span>{" "}
                 </div>
               )}
-              {displayedConv && (
-                <>
-                  <div className="load-more-messages">
-                    <span onClick={() => fetchMessages()}>Charger plus de message</span>
-                  </div>
-                  {!isAtBottom && hasScroll && (
-                    <div className="button-go-to-last-message">
-                      <button
-                        onClick={() =>
-                          scrollViewRef.current?.scrollTo({
-                            top: scrollViewRef.current.scrollHeight,
-                          })
-                        }
-                      >
-                        <ArrowDown
-                          color={"#00000"}
-                          title="Défiler tout en bas"
-                          height="3vh"
-                          width="3vh"
-                        />
-                      </button>
-                    </div>
+              <div className="conversation-header">
+                <div className="conversation-member-info">
+                  {displayedConv ? (
+                    <NormalConvHeader setShowConvDetails={setShowConvDetails} />
+                  ) : (
+                    <CreateConvHeader setShowConvDetails={setShowConvDetails} />
                   )}
-                </>
-              )}
-              {messages
-                .sort((a, b) => {
-                  return new Date(a.date).getTime() - new Date(b.date).getTime();
-                })
-                .map((message, index) => {
-                  if (!message._id) return null;
-                  const isMsgDeletedByUser =
-                    message?.deletedBy &&
-                    message.deletedBy.some((deletedBy) => deletedBy.userId === user?._id);
-                  if (isMsgDeletedByUser) return null;
-
-                  let checkMsgTime: Date15minDifference = {
-                    isMoreThan15Minutes: false,
-                    hours: "0",
-                    minutes: "0",
-                    date: new Date(),
-                  };
-                  if (index > 0) {
-                    checkMsgTime = checkPreviousMsgTime(index);
-                  }
-                  const firstMessage = index === 0;
-                  const lastMessage = index === messages.length - 1;
-                  const currentMsg = index;
-                  const isgMsgEdit = message.text.length > 1;
-                  if (message.author === "System/" + displayedConv?._id) {
-                    return (
-                      <>
-                        <div
-                          className="message-container"
-                          id="message-system"
-                          onClick={() => console.log(message)}
+                </div>
+              </div>
+              <div
+                className="conversation-body"
+                ref={scrollViewRef}
+                onScroll={handleScroll}
+                style={{ height: bodyHeight }}
+              >
+                {editingMsg && (
+                  <div className="editingMsgOverlay" onClick={() => setEditingMsg(null)}>
+                    {" "}
+                  </div>
+                )}
+                {displayedConv && (
+                  <>
+                    <div className="load-more-messages">
+                      <span onClick={() => fetchMessages()}>Charger plus de message</span>
+                    </div>
+                    {!isAtBottom && hasScroll && (
+                      <div className="button-go-to-last-message">
+                        <button
+                          onClick={() =>
+                            scrollViewRef.current?.scrollTo({
+                              top: scrollViewRef.current.scrollHeight,
+                            })
+                          }
                         >
-                          <ConvSystemMsg
-                            textProps={message.text[message.text.length - 1]}
-                            members={displayedConv?.members}
+                          <ArrowDown
+                            color={"#00000"}
+                            title="Défiler tout en bas"
+                            height="3vh"
+                            width="3vh"
                           />
-                        </div>
-                        {lastMsgSeenByConvMembers.some(
-                          (member) => member.messageId === message._id
-                        ) && (
-                          <div className="seen-by ">
-                            {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                              if (displayedConv && message._id === lastMsgSeen.messageId) {
-                                return (
-                                  <SeenByMember
-                                    conversation={displayedConv}
-                                    userId={lastMsgSeen.userId}
-                                    seenByDate={lastMsgSeen.seenByDate}
-                                    width={"1.5rem"}
-                                    showSeenByTooltip={true}
-                                  />
-                                );
-                              }
-                            })}
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+                {messages
+                  .sort((a, b) => {
+                    return new Date(a.date).getTime() - new Date(b.date).getTime();
+                  })
+                  .map((message, index) => {
+                    if (!message._id) return null;
+                    const isMsgDeletedByUser =
+                      message?.deletedBy &&
+                      message.deletedBy.some((deletedBy) => deletedBy.userId === user?._id);
+                    if (isMsgDeletedByUser) return null;
+
+                    let checkMsgTime: Date15minDifference = {
+                      isMoreThan15Minutes: false,
+                      hours: "0",
+                      minutes: "0",
+                      date: new Date(),
+                    };
+                    if (index > 0) {
+                      checkMsgTime = checkPreviousMsgTime(index);
+                    }
+                    const firstMessage = index === 0;
+                    const lastMessage = index === messages.length - 1;
+                    const currentMsg = index;
+                    const isgMsgEdit = message.text.length > 1;
+                    if (message.author === "System/" + displayedConv?._id) {
+                      return (
+                        <>
+                          <div
+                            className="message-container"
+                            id="message-system"
+                            onClick={() => console.log(message)}
+                          >
+                            <ConvSystemMsg
+                              textProps={message.text[message.text.length - 1]}
+                              members={displayedConv?.members}
+                            />
                           </div>
-                        )}
-                      </>
-                    );
-                  }
-                  if (message?.author === user?.userName) {
+                          {lastMsgSeenByConvMembers.some(
+                            (member) => member.messageId === message._id
+                          ) && (
+                            <div className="seen-by ">
+                              {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                                if (displayedConv && message._id === lastMsgSeen.messageId) {
+                                  return (
+                                    <SeenByMember
+                                      conversation={displayedConv}
+                                      userId={lastMsgSeen.userId}
+                                      seenByDate={lastMsgSeen.seenByDate}
+                                      width={"1.5rem"}
+                                      showSeenByTooltip={true}
+                                    />
+                                  );
+                                }
+                              })}
+                            </div>
+                          )}
+                        </>
+                      );
+                    }
+                    if (message?.author === user?.userName) {
+                      return (
+                        <div
+                          key={message.author + "-" + index}
+                          onClick={() => {
+                            if (!message._id) return;
+                            console.log(message);
+                            console.log(lastMsgSeenByConvMembers);
+                          }}
+                          ref={firstMessage ? firstMessageRef : messagesRef.current[message._id]}
+                        >
+                          {checkMsgTime.isMoreThan15Minutes && (
+                            <div className="message-container" id="Time-center-display">
+                              {compareNowToDate(checkMsgTime.date) ||
+                                checkMsgTime.hours + " : " + checkMsgTime.minutes}
+                            </div>
+                          )}
+                          {isgMsgEdit && (
+                            <div className="message-author-name message-author-name-me">
+                              <div
+                                className="edited-msg "
+                                onClick={() => handleModifiedMsgClick(message)}
+                              >
+                                Modifié
+                              </div>{" "}
+                            </div>
+                          )}
+                          {message.responseToMsgId &&
+                            !message.responseToMsgId.deletedBy?.some(
+                              (deletedBy) => deletedBy.userId === user?._id
+                            ) && (
+                              <QuotedMessage
+                                quotedMessage={message.responseToMsgId}
+                                currentMsgAuthorId={message.authorId}
+                                currentMsgAuthor={message.author}
+                              />
+                            )}
+                          <div
+                            className="message-container"
+                            id="message-me"
+                            style={
+                              editingMsg?._id === message._id
+                                ? { zIndex: 1, backgroundColor: "red" }
+                                : {}
+                            }
+                            onClick={() => console.log(quotedMessage)}
+                          >
+                            <MessagesOptions
+                              message={message}
+                              setEditingMsg={setEditingMsg}
+                              setQuotedMessage={setQuotedMessage}
+                            />
+                            <div
+                              className={`message ${
+                                selectedFoundMsgId === message._id ? "selectedFoundMsg" : ""
+                              }`}
+                              ref={lastMessage ? messagesEndRef : null}
+                              onMouseEnter={() => handleMouseEnter(message._id)}
+                              onMouseLeave={handleMouseLeave}
+                            >
+                              {hoveredId === message._id && (
+                                <div className="msg-date">
+                                  <div className="sent-date">
+                                    {message.deletedForEveryoneDate && "Envoyé: "}
+                                    {formatDateMsg(new Date(message.date))}
+                                  </div>
+                                  {message.deletedForEveryoneDate && (
+                                    <div className="delete-date">
+                                      Retiré:{" "}
+                                      {formatDateMsg(new Date(message.deletedForEveryoneDate))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              <AsyncMsg message={message} />
+                              <MessageReactions message={message} />
+                            </div>
+                          </div>
+                          {lastMsgSeenByConvMembers.some(
+                            (member) => member.messageId === message._id
+                          ) && (
+                            <div className="seen-by">
+                              {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                                if (displayedConv && message._id === lastMsgSeen.messageId) {
+                                  return (
+                                    <SeenByMember
+                                      conversation={displayedConv}
+                                      userId={lastMsgSeen.userId}
+                                      seenByDate={lastMsgSeen.seenByDate}
+                                      width={"1.5rem"}
+                                      showSeenByTooltip={true}
+                                    />
+                                  );
+                                }
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+                    if (messages[currentMsg + 1]?.author === message?.author) {
+                      return (
+                        <div
+                          key={message.author + "-" + index}
+                          onClick={() => {
+                            const test = new Date(message.date);
+                            console.log(test.getTime());
+                          }}
+                          ref={firstMessage ? firstMessageRef : messagesRef.current[message._id]}
+                        >
+                          {checkMsgTime.isMoreThan15Minutes && (
+                            <div className="message-container" id="Time-center-display">
+                              {" "}
+                              {compareNowToDate(checkMsgTime.date) ||
+                                checkMsgTime.hours + " : " + checkMsgTime.minutes}
+                            </div>
+                          )}
+
+                          {messages[currentMsg]?.author !== messages[currentMsg - 1]?.author &&
+                            displayedConv?.isGroupConversation && (
+                              <div className="message-author-name">
+                                <div className="message-author">
+                                  {" "}
+                                  {getNickNameById(displayedConv.members, message.authorId)}
+                                </div>
+                                {isgMsgEdit && (
+                                  <div
+                                    className="edited-msg"
+                                    onClick={() => handleModifiedMsgClick(message)}
+                                  >
+                                    Modifié
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          {message.responseToMsgId &&
+                            !message.responseToMsgId.deletedBy?.some(
+                              (deletedBy) => deletedBy.userId === user?._id
+                            ) && (
+                              <QuotedMessage
+                                quotedMessage={message.responseToMsgId}
+                                currentMsgAuthorId={message.authorId}
+                                currentMsgAuthor={message.author}
+                              />
+                            )}
+                          <div className="message-container" id="message-others">
+                            <div className="img-container"> </div>
+                            <div
+                              className={`message ${
+                                selectedFoundMsgId === message._id ? "selectedFoundMsg" : ""
+                              }`}
+                              ref={lastMessage ? messagesEndRef : null}
+                              onMouseEnter={() => handleMouseEnter(message._id)}
+                              onMouseLeave={handleMouseLeave}
+                            >
+                              {hoveredId === message._id && (
+                                <div className="msg-date">
+                                  <div className="sent-date">
+                                    {message.deletedForEveryoneDate && "Envoyé: "}
+                                    {formatDateMsg(new Date(message.date))}
+                                  </div>
+                                  {message.deletedForEveryoneDate && (
+                                    <div className="delete-date">
+                                      Retiré:{" "}
+                                      {formatDateMsg(new Date(message.deletedForEveryoneDate))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              <AsyncMsg message={message} />
+                              <MessageReactions message={message} />
+                            </div>
+                            <MessagesOptions
+                              message={message}
+                              setQuotedMessage={setQuotedMessage}
+                            />
+                          </div>
+                          {lastMsgSeenByConvMembers.some(
+                            (member) => member.messageId === message._id
+                          ) && (
+                            <div className="seen-by">
+                              {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
+                                if (message._id === lastMsgSeen.messageId) {
+                                  return <div>{lastMsgSeen.username}</div>;
+                                }
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
                     return (
                       <div
                         key={message.author + "-" + index}
                         onClick={() => {
                           if (!message._id) return;
-                          console.log(message);
-                          console.log(lastMsgSeenByConvMembers);
+                          console.log(messagesRef.current[message._id]);
                         }}
                         ref={firstMessage ? firstMessageRef : messagesRef.current[message._id]}
                       >
-                        {checkMsgTime.isMoreThan15Minutes && (
-                          <div className="message-container" id="Time-center-display">
-                            {compareNowToDate(checkMsgTime.date) ||
-                              checkMsgTime.hours + " : " + checkMsgTime.minutes}
-                          </div>
-                        )}
-                        {isgMsgEdit && (
-                          <div className="message-author-name message-author-name-me">
-                            <div
-                              className="edited-msg "
-                              onClick={() => handleModifiedMsgClick(message)}
-                            >
-                              Modifié
-                            </div>{" "}
-                          </div>
-                        )}
-                        {message.responseToMsgId &&
-                          !message.responseToMsgId.deletedBy?.some(
-                            (deletedBy) => deletedBy.userId === user?._id
-                          ) && (
-                            <QuotedMessage
-                              quotedMessage={message.responseToMsgId}
-                              currentMsgAuthorId={message.authorId}
-                              currentMsgAuthor={message.author}
-                            />
-                          )}
-                        <div
-                          className="message-container"
-                          id="message-me"
-                          style={
-                            editingMsg?._id === message._id
-                              ? { zIndex: 1, backgroundColor: "red" }
-                              : {}
-                          }
-                          onClick={() => console.log(quotedMessage)}
-                        >
-                          <MessagesOptions
-                            message={message}
-                            setEditingMsg={setEditingMsg}
-                            setQuotedMessage={setQuotedMessage}
-                          />
-                          <div
-                            className={`message ${
-                              selectedFoundMsgId === message._id ? "selectedFoundMsg" : ""
-                            }`}
-                            ref={lastMessage ? messagesEndRef : null}
-                            onMouseEnter={() => handleMouseEnter(message._id)}
-                            onMouseLeave={handleMouseLeave}
-                          >
-                            {hoveredId === message._id && (
-                              <div className="msg-date">
-                                <div className="sent-date">
-                                  {message.deletedForEveryoneDate && "Envoyé: "}
-                                  {formatDateMsg(new Date(message.date))}
-                                </div>
-                                {message.deletedForEveryoneDate && (
-                                  <div className="delete-date">
-                                    Retiré:{" "}
-                                    {formatDateMsg(new Date(message.deletedForEveryoneDate))}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            <AsyncMsg message={message} />
-                            <MessageReactions message={message} />
-                          </div>
-                        </div>
-                        {lastMsgSeenByConvMembers.some(
-                          (member) => member.messageId === message._id
-                        ) && (
-                          <div className="seen-by">
-                            {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                              if (displayedConv && message._id === lastMsgSeen.messageId) {
-                                return (
-                                  <SeenByMember
-                                    conversation={displayedConv}
-                                    userId={lastMsgSeen.userId}
-                                    seenByDate={lastMsgSeen.seenByDate}
-                                    width={"1.5rem"}
-                                    showSeenByTooltip={true}
-                                  />
-                                );
-                              }
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-                  if (messages[currentMsg + 1]?.author === message?.author) {
-                    return (
-                      <div
-                        key={message.author + "-" + index}
-                        onClick={() => {
-                          const test = new Date(message.date);
-                          console.log(test.getTime());
-                        }}
-                        ref={firstMessage ? firstMessageRef : messagesRef.current[message._id]}
-                      >
-                        {checkMsgTime.isMoreThan15Minutes && (
-                          <div className="message-container" id="Time-center-display">
-                            {" "}
-                            {compareNowToDate(checkMsgTime.date) ||
-                              checkMsgTime.hours + " : " + checkMsgTime.minutes}
-                          </div>
-                        )}
-
                         {messages[currentMsg]?.author !== messages[currentMsg - 1]?.author &&
                           displayedConv?.isGroupConversation && (
                             <div className="message-author-name">
                               <div className="message-author">
-                                {" "}
                                 {getNickNameById(displayedConv.members, message.authorId)}
                               </div>
-                              {isgMsgEdit && (
-                                <div
-                                  className="edited-msg"
-                                  onClick={() => handleModifiedMsgClick(message)}
-                                >
-                                  Modifié
-                                </div>
-                              )}
                             </div>
                           )}
+                        {isgMsgEdit && (
+                          <div className="message-author-name">
+                            <div
+                              className="edited-msg"
+                              onClick={() => handleModifiedMsgClick(message)}
+                            >
+                              Modifié
+                            </div>
+                          </div>
+                        )}
                         {message.responseToMsgId &&
                           !message.responseToMsgId.deletedBy?.some(
                             (deletedBy) => deletedBy.userId === user?._id
@@ -1150,12 +1229,29 @@ function WindowConversation() {
                             />
                           )}
                         <div className="message-container" id="message-others">
-                          <div className="img-container"> </div>
+                          {" "}
+                          <div className="img-container">
+                            <ProfilePic
+                              picSrc={
+                                displayedConv?.members.find(
+                                  (member) => member.userId === message.authorId
+                                )?.photo
+                              }
+                              status={
+                                displayedConv?.members.find(
+                                  (member) => member.userId === message.authorId
+                                )?.status
+                              }
+                              isGroupConversationPic={false}
+                              showStatus={false}
+                            />
+                          </div>
                           <div
                             className={`message ${
                               selectedFoundMsgId === message._id ? "selectedFoundMsg" : ""
                             }`}
                             ref={lastMessage ? messagesEndRef : null}
+                            onClick={() => console.log(message)}
                             onMouseEnter={() => handleMouseEnter(message._id)}
                             onMouseLeave={handleMouseLeave}
                           >
@@ -1183,132 +1279,50 @@ function WindowConversation() {
                         ) && (
                           <div className="seen-by">
                             {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                              if (message._id === lastMsgSeen.messageId) {
-                                return <div>{lastMsgSeen.username}</div>;
+                              if (displayedConv && message._id === lastMsgSeen.messageId) {
+                                return (
+                                  <SeenByMember
+                                    conversation={displayedConv}
+                                    userId={lastMsgSeen.userId}
+                                    seenByDate={lastMsgSeen.seenByDate}
+                                    width={"1.5rem"}
+                                    showSeenByTooltip={true}
+                                  />
+                                );
                               }
                             })}
                           </div>
                         )}
                       </div>
                     );
-                  }
-                  return (
-                    <div
-                      key={message.author + "-" + index}
-                      onClick={() => {
-                        if (!message._id) return;
-                        console.log(messagesRef.current[message._id]);
-                      }}
-                      ref={firstMessage ? firstMessageRef : messagesRef.current[message._id]}
-                    >
-                      {messages[currentMsg]?.author !== messages[currentMsg - 1]?.author &&
-                        displayedConv?.isGroupConversation && (
-                          <div className="message-author-name">
-                            <div className="message-author">
-                              {getNickNameById(displayedConv.members, message.authorId)}
-                            </div>
-                          </div>
-                        )}
-                      {isgMsgEdit && (
-                        <div className="message-author-name">
-                          <div
-                            className="edited-msg"
-                            onClick={() => handleModifiedMsgClick(message)}
-                          >
-                            Modifié
-                          </div>
-                        </div>
-                      )}
-                      {message.responseToMsgId &&
-                        !message.responseToMsgId.deletedBy?.some(
-                          (deletedBy) => deletedBy.userId === user?._id
-                        ) && (
-                          <QuotedMessage
-                            quotedMessage={message.responseToMsgId}
-                            currentMsgAuthorId={message.authorId}
-                            currentMsgAuthor={message.author}
-                          />
-                        )}
-                      <div className="message-container" id="message-others">
-                        {" "}
-                        <div className="img-container">
-                          <img src={image} />
-                        </div>
-                        <div
-                          className={`message ${
-                            selectedFoundMsgId === message._id ? "selectedFoundMsg" : ""
-                          }`}
-                          ref={lastMessage ? messagesEndRef : null}
-                          onClick={() => console.log(message)}
-                          onMouseEnter={() => handleMouseEnter(message._id)}
-                          onMouseLeave={handleMouseLeave}
-                        >
-                          {hoveredId === message._id && (
-                            <div className="msg-date">
-                              <div className="sent-date">
-                                {message.deletedForEveryoneDate && "Envoyé: "}
-                                {formatDateMsg(new Date(message.date))}
-                              </div>
-                              {message.deletedForEveryoneDate && (
-                                <div className="delete-date">
-                                  Retiré: {formatDateMsg(new Date(message.deletedForEveryoneDate))}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          <AsyncMsg message={message} />
-                          <MessageReactions message={message} />
-                        </div>
-                        <MessagesOptions message={message} setQuotedMessage={setQuotedMessage} />
-                      </div>
-                      {lastMsgSeenByConvMembers.some(
-                        (member) => member.messageId === message._id
-                      ) && (
-                        <div className="seen-by">
-                          {lastMsgSeenByConvMembers.map((lastMsgSeen) => {
-                            if (displayedConv && message._id === lastMsgSeen.messageId) {
-                              return (
-                                <SeenByMember
-                                  conversation={displayedConv}
-                                  userId={lastMsgSeen.userId}
-                                  seenByDate={lastMsgSeen.seenByDate}
-                                  width={"1.5rem"}
-                                  showSeenByTooltip={true}
-                                />
-                              );
-                            }
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              <div className="conversation-body-bottom" style={{ display: "flex" }}>
-                {displayedConv?.members.some((member) => member.isTyping) && (
-                  <div className="typing-users">{displayMembersTyping()}</div>
-                )}{" "}
+                  })}
+                <div className="conversation-body-bottom" style={{ display: "flex" }}>
+                  {displayedConv?.members.some((member) => member.isTyping) && (
+                    <div className="typing-users">{displayMembersTyping()}</div>
+                  )}{" "}
+                </div>
+              </div>
+              <div
+                className="conversation-footer"
+                style={{ height: footerHeight, maxHeight: "15vh" }}
+              >
+                {renderWindowConvFooter()}
               </div>
             </div>
-            <div
-              className="conversation-footer"
-              style={{ height: footerHeight, maxHeight: "15vh" }}
-            >
-              {renderWindowConvFooter()}
+            <div className={`conversation-details ${showConvDetails ? "expanded" : ""}`}>
+              {showConvDetails && (
+                <ConversationMediasContext.Provider value={{ mediasCtxt, setMediasCtxt }}>
+                  <ConversationFilesContext.Provider value={{ filesCtxt, setFilesCtxt }}>
+                    <ConversationDetails />
+                  </ConversationFilesContext.Provider>
+                </ConversationMediasContext.Provider>
+              )}
             </div>
+            {showConfirmationModal && <ConfirmationModal {...confirmationModalProps} />}
           </div>
-          <div className={`conversation-details ${showConvDetails ? "expanded" : ""}`}>
-            {showConvDetails && (
-              <ConversationMediasContext.Provider value={{ mediasCtxt, setMediasCtxt }}>
-                <ConversationFilesContext.Provider value={{ filesCtxt, setFilesCtxt }}>
-                  <ConversationDetails />
-                </ConversationFilesContext.Provider>
-              </ConversationMediasContext.Provider>
-            )}
-          </div>
-          {showConfirmationModal && <ConfirmationModal {...confirmationModalProps} />}
-        </div>
-      </MessagesRefContext.Provider>
-    </SelectedFoundMsgIdContext.Provider>
+        </MessagesRefContext.Provider>
+      </SelectedFoundMsgIdContext.Provider>
+    </AddedMembersContext.Provider>
   );
 }
 

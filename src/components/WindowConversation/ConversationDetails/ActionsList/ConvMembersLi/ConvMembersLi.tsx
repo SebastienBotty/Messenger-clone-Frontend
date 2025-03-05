@@ -4,6 +4,7 @@ import {
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
 import {
+  useAddedMembersContext,
   useConversationsContext,
   useMessagesContext,
   useUserContext,
@@ -29,7 +30,12 @@ import {
 } from "../../../../../typescript/types";
 import { socket } from "../../../../../Sockets/socket";
 import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
-import { leaveConv, patchRemoveMember, patchUserAdmin } from "../../../../../api/conversation";
+import {
+  isPrivateConvExisting,
+  leaveConv,
+  patchRemoveMember,
+  patchUserAdmin,
+} from "../../../../../api/conversation";
 import {
   updateConvAdmin,
   updateConvRemovedMembers,
@@ -47,6 +53,7 @@ export function ConvMembersLi({
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { setMostRecentConv } = useMostRecentConvContext();
   const { conversations } = useConversationsContext();
+  const { addedMembers, setAddedMembers } = useAddedMembersContext();
   const { messages, setMessages } = useMessagesContext();
   const btnRef = useRef<HTMLDivElement>(null);
   const [showModal, setShowModal] = useState(false);
@@ -150,42 +157,17 @@ export function ConvMembersLi({
     return true;
   };
 
-  const getUsersSocket = async (
-    conversation: ConversationType | null
-  ): Promise<{ userName: string; socketId: string }[] | false> => {
-    if (!conversation || !user) return false;
-
-    const convMembersStr = conversation.members
-      ?.filter((member) => member.username !== user.userName)
-      .map((member) => member.username)
-      .join("-");
-    try {
-      const response = await fetch(RESTAPIUri + "/user/getSockets?convMembers=" + convMembersStr, {
-        headers: {
-          Authorization: "Bearer " + ApiToken(),
-        },
-      });
-      const jsonData = await response.json();
-      //console.log("ICI SOCKET");
-      //console.log(jsonData);
-
-      return jsonData;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-      return false;
+  const sendMessageToUser = async (member: ConversationMemberType) => {
+    if (!user) return;
+    const existingConv = await isPrivateConvExisting(user, [member.username]);
+    if (existingConv) {
+      setDisplayedConv(existingConv);
+    } else {
+      setDisplayedConv(null);
+      setTimeout(() => {
+        setAddedMembers([member.username]);
+      }, 100);
     }
-  };
-
-  const emitToSockets = async (eventName: string, data: any): Promise<void> => {
-    if (!displayedConv || !user) return;
-
-    const convMembersSocket = await getUsersSocket(displayedConv);
-    if (!convMembersSocket) return;
-    socket.emit(eventName, [convMembersSocket, data]);
   };
 
   useEffect(() => {
@@ -274,13 +256,13 @@ export function ConvMembersLi({
             ) : (
               <div className="li-members-options-modal">
                 <ul className="ul-members-options">
-                  <li className="li-members-options">
+                  <li className="li-members-options" onClick={() => sendMessageToUser(member)}>
                     <div className="members-options-icon">
                       <ChatbubbleOutline color={"#00000"} height={"1.75rem"} width={"1.75rem"} />
                     </div>
                     Envoyer un message
                   </li>
-                  <li className="li-members-options">
+                  <li className="li-members-options" onClick={() => alert("Not implemented")}>
                     <div className="members-options-icon">
                       <CloseCircleOutline color={"#00000"} height={"1.75rem"} width={"1.75rem"} />
                     </div>

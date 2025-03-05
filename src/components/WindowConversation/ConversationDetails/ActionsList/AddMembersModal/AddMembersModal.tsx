@@ -105,55 +105,6 @@ function AddMembersModal({
     return addedMembers.some((obj) => obj._id === userId);
   };
 
-  const hand2leAddMembers = async (
-    arrMembers: UserDataType[],
-    conversationId: string | undefined,
-    userUsername: string | undefined,
-    userId: string | undefined
-  ) => {
-    console.log(arrMembers, conversationId, userUsername, userId);
-    if (!conversationId || !userUsername || !userId || arrMembers.length < 1) return;
-    try {
-      const response = await fetch(RESTAPIUri + "/conversation/addMembers", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: "Bearer " + ApiToken(),
-        },
-        body: JSON.stringify({
-          addedUsers: arrMembers,
-          conversationId: conversationId,
-          adderUsername: userUsername,
-          adderUserId: userId,
-          date: new Date(),
-        }),
-      });
-
-      if (!response.ok) {
-        const jsonData = await response.json();
-        throw new Error(jsonData.message);
-      }
-      const jsonData = await response.json();
-
-      console.log(jsonData);
-      const updatedConv = jsonData.conversation;
-      updatedConv.lastMessage = jsonData.message;
-      setAddedMembers([]);
-      if (conversation._id === displayedConv?._id) {
-        setDisplayedConv(updatedConv);
-      }
-      setMostRecentConv(updatedConv);
-      closeModal();
-      setMessages((prev) => [...prev, jsonData.message]);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  };
-
   const handleAddMembers = async (
     arrMembers: UserDataType[],
     conversationId: string | undefined,
