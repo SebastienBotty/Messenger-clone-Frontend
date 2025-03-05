@@ -244,7 +244,7 @@ export function ConvMembersLi({
           <span className="members-role">
             {displayedConv.admin.includes(member.username)
               ? displayedConv.admin[0] === member.username
-                ? "Super Admin"
+                ? "Propriétaire"
                 : "Admin"
               : "Membre"}
           </span>

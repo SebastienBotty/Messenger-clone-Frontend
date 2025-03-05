@@ -80,7 +80,7 @@ export const updateMostRecentConvAddedMembers = (
   const conv = conversations.find((conv) => conv._id === conversation._id);
   if (conv) {
     const convCopy = { ...conv };
-    const updatedConv = updateConvAddedMembers(prev, members, convCopy);
+    const updatedConv = updateConvAddedMembers(convCopy, members, convCopy);
     return { ...updatedConv, lastMessage: conversation.lastMessage };
   }
   return prev;
@@ -116,7 +116,7 @@ export const updateMostRecentConvRemovedMembers = (
   const conv = conversations.find((conv) => conv._id === conversation._id);
   if (conv) {
     const convCopy = { ...conv };
-    const updatedConv = updateConvRemovedMembers(prev, removedUsername, convCopy);
+    const updatedConv = updateConvRemovedMembers(convCopy, removedUsername, convCopy);
     return { ...updatedConv, lastMessage: conversation.lastMessage };
   }
   return prev;
@@ -152,11 +152,12 @@ export const updateMostRecentConvCustomization = (
   if (conv) {
     const convCopy = { ...conv };
     const updatedConv = updateConvCustomization(
-      prev,
+      convCopy,
       customizationKey,
       customizationValue,
       convCopy
     );
+    console.log("updatedConvCustomization", updatedConv);
     return { ...updatedConv, lastMessage: conversation.lastMessage };
   }
   return prev;
@@ -190,7 +191,7 @@ export const updateMostRecentConvAdmin = (
   const conv = conversations.find((conv) => conv._id === conversation._id);
   if (conv) {
     const convCopy = { ...conv };
-    const updatedConv = updateConvAdmin(prev, targetUsername, changeAdmin, convCopy);
+    const updatedConv = updateConvAdmin(convCopy, targetUsername, changeAdmin, convCopy);
     return { ...updatedConv, lastMessage: conversation.lastMessage };
   }
   return prev;
