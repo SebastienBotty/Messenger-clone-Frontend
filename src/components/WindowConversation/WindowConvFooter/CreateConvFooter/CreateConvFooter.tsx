@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./CreateConvFooter.css";
 import { Send } from "react-ionicons";
 import {
@@ -118,6 +118,17 @@ function CreateConvFooter({}: {}) {
       createConversation();
     }
   };
+
+  useEffect(() => {
+    if (addedMembers.length > 0 && inputMessageRef.current) {
+      console.log("focusing");
+      setTimeout(() => {
+        inputMessageRef.current?.focus();
+      }, 100);
+    }
+    return () => {};
+  }, []);
+
   return (
     <>
       <div className="message-input" style={inputMessage ? { flex: "auto" } : {}}>

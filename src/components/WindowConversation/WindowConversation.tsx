@@ -454,6 +454,7 @@ function WindowConversation() {
       setEditingMsg(null);
       setSelectedFoundMsgId("");
       setQuotedMessage(null);
+      setAddedMembers([]);
 
       console.log("MESSSSSSSAGE RESET");
       console.log(displayedConv._id);
