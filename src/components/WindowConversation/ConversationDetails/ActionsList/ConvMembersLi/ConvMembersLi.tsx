@@ -29,9 +29,11 @@ import {
 } from "../../../../../typescript/types";
 import { socket } from "../../../../../Sockets/socket";
 import ProfilePic from "../../../../Utiles/ProfilePic/ProfilePic";
-import { leaveConv, patchRemoveMember } from "../../../../../api/conversation";
+import { leaveConv, patchRemoveMember, patchUserAdmin } from "../../../../../api/conversation";
 import {
+  updateConvAdmin,
   updateConvRemovedMembers,
+  updateMostRecentConvAdmin,
   updateMostRecentConvRemovedMembers,
 } from "../../../../../functions/updateConversation";
 
@@ -63,22 +65,17 @@ export function ConvMembersLi({
 
   const removeUser = async (
     conversationId: string,
-    removerUsername: string,
-    removerUserId: string,
-    removedUsername: string
+    username: string,
+    targetUserId: string,
+    targetUsername: string
   ) => {
     if (!displayedConv) return;
-    const res = await patchRemoveMember(
-      conversationId,
-      removerUsername,
-      removerUserId,
-      removedUsername
-    );
+    const res = await patchRemoveMember(conversationId, username, targetUserId, targetUsername);
     if (res) {
       setShowConfirmationModal(false);
-      setDisplayedConv((prev) => updateConvRemovedMembers(prev, removedUsername, displayedConv));
+      setDisplayedConv((prev) => updateConvRemovedMembers(prev, targetUsername, displayedConv));
       setMostRecentConv((prev) =>
-        updateMostRecentConvRemovedMembers(conversations, prev, removedUsername, displayedConv)
+        updateMostRecentConvRemovedMembers(conversations, prev, targetUsername, displayedConv)
       );
       setMessages((prev) => {
         return [...prev, res.conversation.lastMessage];
@@ -86,112 +83,27 @@ export function ConvMembersLi({
     }
   };
 
-  const setUserAdmin = async (
-    conversationId: string | undefined,
-    addedUsername: string,
-    userId: string | undefined,
-    username: string | undefined
-  ) => {
-    if (!conversationId || !addedUsername || !userId || !username) return;
-    //console.log("allo");
-    try {
-      const response = await fetch(RESTAPIUri + "/conversation/setAdmin", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + ApiToken(),
-        },
-        body: JSON.stringify({
-          conversationId,
-          addedUsername,
-          userId,
-          username,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorMsg = await response.json();
-        throw new Error(errorMsg.message);
-      }
-      const jsonData = await response.json();
-      //console.log(jsonData);
-      setShowConfirmationModal(false);
-      setDisplayedConv((prev) => {
-        if (prev) {
-          return {
-            ...prev,
-            admin: jsonData,
-          };
-        }
-        return prev;
-      });
-      //console.log("emitting");
-      emitToSockets("adminChange", [jsonData, conversationId]);
-      return jsonData;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-      return false;
-    }
-  };
-
-  const removeUserAdmin = async (
+  const changeUserAdmin = async (
     conversationId: string,
-    removerUsername: string,
-    removerUserId: string,
-    removedUsername: string
-  ): Promise<void> => {
-    /*  console.log(
-      conversationId,
-      removerUsername,
-      removedUsername,
-      removerUserId
-    ); */
-    try {
-      const response = await fetch(RESTAPIUri + "/conversation/removeAdmin", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + ApiToken(),
-        },
-        body: JSON.stringify({
-          conversationId: conversationId,
-          username: removerUsername,
-          removerUserId: removerUserId,
-
-          removedUsername: removedUsername,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorMsg = await response.json();
-        throw new Error(errorMsg.message);
-      }
-
-      const jsonData = await response.json();
-      setDisplayedConv((prev) => {
-        if (prev) {
-          return {
-            ...prev,
-            admin: jsonData,
-          };
-        }
-        return prev;
-      });
+    targetUsername: string,
+    userId: string,
+    username: string,
+    changeAdmin: boolean
+  ) => {
+    if (!displayedConv) return;
+    console.log("changeUserAdmin");
+    console.log(conversationId, targetUsername, userId, username, changeAdmin);
+    const res = await patchUserAdmin(conversationId, targetUsername, userId, username, changeAdmin);
+    if (res) {
       setShowConfirmationModal(false);
-      //console.log("emitting");
-      emitToSockets("adminChange", [jsonData, conversationId]);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
+      setDisplayedConv((prev) => updateConvAdmin(prev, targetUsername, changeAdmin, displayedConv));
+      setMostRecentConv((prev) =>
+        updateMostRecentConvAdmin(conversations, prev, targetUsername, changeAdmin, displayedConv)
+      );
+      setShowModal(false);
     }
   };
+
   const handleActions = (action: string, member: string): boolean => {
     if (!displayedConv || !user) return false;
     //console.log("called" + action + " " + member);
@@ -202,7 +114,7 @@ export function ConvMembersLi({
         setConfirmationModalAction({
           title: confirmationMessage.setAdmin.title,
           text: confirmationMessage.setAdmin.text,
-          action: () => setUserAdmin(displayedConv._id, member, user._id, user.userName),
+          action: () => changeUserAdmin(displayedConv._id, member, user._id, user.userName, true),
           closeModal: () => setShowConfirmationModal(false),
         });
         break;
@@ -212,7 +124,7 @@ export function ConvMembersLi({
         setConfirmationModalAction({
           title: confirmationMessage.removeAdmin.title,
           text: confirmationMessage.removeAdmin.text,
-          action: () => removeUserAdmin(displayedConv._id, user.userName, user._id, member),
+          action: () => changeUserAdmin(displayedConv._id, member, user._id, user.userName, false),
           closeModal: () => setShowConfirmationModal(false),
         });
         break;

@@ -38,6 +38,8 @@ import {
   updateMostRecentConvAddedMembers,
   updateConvCustomization,
   updateMostRecentConvCustomization,
+  updateConvAdmin,
+  updateMostRecentConvAdmin,
 } from "../../functions/updateConversation";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
@@ -604,26 +606,34 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       }
     );
 
-    socket.on("adminChange", (data) => {
-      // console.log("ADMIN CHANGE RECU");
-      const { adminArr, conversationId } = data;
-      //console.log("CONVERSATION VISE:" + conversationId);
-      //console.log("DISPLAYED CONV : " + displayedConv?._id);
-      conversations.forEach((conv) => {
-        if (conv._id === conversationId) {
-          // console.log("CONV TROUVEE");
-          conv.admin = adminArr;
-          if (displayedConv && displayedConv._id === conversationId) {
-            // console.log("DISPLAYED CONV TROUVEE" + displayedConv?._id);
-            //console.log("CONV VISE EGALE DISPLAYED CONV" + conversationId);
-            setDisplayedConv((prev) => {
-              if (prev) return { ...prev, admin: adminArr };
-              else return prev;
-            });
-          }
+    socket.on(
+      "changeConvAdmin",
+      ({
+        conversation,
+        targetUsername,
+        changeAdmin,
+      }: {
+        conversation: ConversationType;
+        targetUsername: string;
+        changeAdmin: boolean;
+      }) => {
+        console.log("ADMIN CHANGE RECU");
+        if (conversation._id === displayedConv?._id) {
+          setDisplayedConv((prev) =>
+            updateConvAdmin(prev, targetUsername, changeAdmin, conversation)
+          );
         }
-      });
-    });
+
+        setConversations((prev) => {
+          return prev.map((conv) => {
+            if (conv._id === conversation._id) {
+              return updateConvAdmin(conv, targetUsername, changeAdmin, conversation);
+            }
+            return conv;
+          });
+        });
+      }
+    );
 
     socket.on("changeStatus", (data) => {
       console.log("changesStatus", data);
@@ -705,6 +715,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       socket.off("typing");
       socket.off("removeMember");
       socket.off("addMembers");
+      socket.off("changeConvCustomization");
+      socket.off("changeConvAdmin");
     };
   }, [displayedConv?._id, user?.status]);
 

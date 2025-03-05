@@ -370,3 +370,48 @@ export const patchRemoveMember = async (
     return false;
   }
 };
+
+export const patchUserAdmin = async (
+  conversationId: string,
+  targetUsername: string,
+  userId: string,
+  username: string,
+  changeAdmin: boolean
+): Promise<
+  false | { conversation: ConversationType; targetUsername: string; changeAdmin: boolean }
+> => {
+  console.log("allo");
+  console.log(conversationId, targetUsername, userId, username, changeAdmin);
+  try {
+    const response = await fetch(RESTAPIUri + "/conversation/changeAdmin", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + ApiToken(),
+      },
+      body: JSON.stringify({
+        conversationId,
+        targetUsername,
+        userId,
+        username,
+        changeAdmin,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorMsg = await response.json();
+      throw new Error(errorMsg.message);
+    }
+    const jsonData = await response.json();
+    //console.log(jsonData);
+
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};

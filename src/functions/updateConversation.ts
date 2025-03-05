@@ -161,3 +161,37 @@ export const updateMostRecentConvCustomization = (
   }
   return prev;
 };
+
+export const updateConvAdmin = (
+  prev: any,
+  targetUsername: string,
+  changeAdmin: boolean, // true if adding admin, false if removing admin
+  conversation: ConversationType
+) => {
+  if (!prev) {
+    console.log("CONVERSATION prev is null");
+    return conversation;
+  }
+  return {
+    ...prev,
+    admin: changeAdmin
+      ? [...prev.admin, targetUsername]
+      : prev.admin.filter((admin: string) => admin !== targetUsername),
+  };
+};
+
+export const updateMostRecentConvAdmin = (
+  conversations: ConversationType[],
+  prev: any,
+  targetUsername: string,
+  changeAdmin: boolean,
+  conversation: ConversationType
+) => {
+  const conv = conversations.find((conv) => conv._id === conversation._id);
+  if (conv) {
+    const convCopy = { ...conv };
+    const updatedConv = updateConvAdmin(prev, targetUsername, changeAdmin, convCopy);
+    return { ...updatedConv, lastMessage: conversation.lastMessage };
+  }
+  return prev;
+};
