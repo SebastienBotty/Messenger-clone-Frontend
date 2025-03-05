@@ -260,7 +260,7 @@ function NormalFooter({
       seenBy: [{ username: user.userName, userId: user._id, seenDate: new Date() }],
       date: new Date(),
       conversationId: displayedConv._id,
-      responseToMsgId: null,
+      responseToMsgId: quotedMessage ? quotedMessage._id : null,
     };
 
     postMessage(messageData);
@@ -362,7 +362,7 @@ function NormalFooter({
       seenBy: [{ username: user.userName, userId: user._id, seenDate: new Date() }],
       date: new Date(),
       conversationId: displayedConv?._id,
-      responseToMsgId: null,
+      responseToMsgId: quotedMessage ? quotedMessage._id : null,
     };
     postMessage(messageData);
   };
