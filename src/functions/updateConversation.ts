@@ -1,4 +1,4 @@
-import { ConversationMemberType, ConversationType } from "../typescript/types";
+import { ConversationMemberType, ConversationType, CustomizationType } from "../typescript/types";
 
 export const updateConv = (
   prev: any,
@@ -117,6 +117,46 @@ export const updateMostRecentConvRemovedMembers = (
   if (conv) {
     const convCopy = { ...conv };
     const updatedConv = updateConvRemovedMembers(prev, removedUsername, convCopy);
+    return { ...updatedConv, lastMessage: conversation.lastMessage };
+  }
+  return prev;
+};
+
+export const updateConvCustomization = (
+  prev: any,
+  customizationKey: keyof CustomizationType,
+  customizationValue: string,
+  conversation: ConversationType
+) => {
+  if (!prev) {
+    console.log("CONVERSATION prev is null");
+    return conversation;
+  }
+  return {
+    ...prev,
+    customization: {
+      ...prev.customization,
+      [customizationKey]: customizationValue,
+    },
+  };
+};
+
+export const updateMostRecentConvCustomization = (
+  conversations: ConversationType[],
+  prev: any,
+  customizationKey: keyof CustomizationType,
+  customizationValue: string,
+  conversation: ConversationType
+) => {
+  const conv = conversations.find((conv) => conv._id === conversation._id);
+  if (conv) {
+    const convCopy = { ...conv };
+    const updatedConv = updateConvCustomization(
+      prev,
+      customizationKey,
+      customizationValue,
+      convCopy
+    );
     return { ...updatedConv, lastMessage: conversation.lastMessage };
   }
   return prev;

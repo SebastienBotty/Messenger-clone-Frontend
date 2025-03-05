@@ -3,6 +3,7 @@ import { Close, CreateOutline, EllipsisHorizontal, NotificationsOff, Search } fr
 import {
   ConversationMemberType,
   ConversationType,
+  CustomizationType,
   MessageType,
   SideBarPropsType,
 } from "../../typescript/types";
@@ -35,6 +36,8 @@ import {
   updateMostRecentConv,
   updateMostRecentConvRemovedMembers,
   updateMostRecentConvAddedMembers,
+  updateConvCustomization,
+  updateMostRecentConvCustomization,
 } from "../../functions/updateConversation";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
@@ -564,6 +567,37 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
             conversations,
             prev,
             removedUsername,
+            conversation
+          );
+        });
+      }
+    );
+
+    socket.on(
+      "changeConvCustomization",
+      ({
+        conversation,
+        customizationKey,
+        customizationValue,
+      }: {
+        conversation: ConversationType;
+        customizationKey: keyof CustomizationType;
+        customizationValue: string;
+      }) => {
+        console.log("CHANGE CONV CUSTOMIZATION LISTENED");
+        if (!conversation || !conversation.lastMessage._id) return;
+        if (conversation._id === displayedConv?._id) {
+          setDisplayedConv((prev) =>
+            updateConvCustomization(prev, customizationKey, customizationValue, conversation)
+          );
+          setMessages((prev) => [...prev, conversation.lastMessage]);
+        }
+        setMostRecentConv((prev) => {
+          return updateMostRecentConvCustomization(
+            conversations,
+            prev,
+            customizationKey,
+            customizationValue,
             conversation
           );
         });

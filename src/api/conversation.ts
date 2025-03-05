@@ -1,5 +1,5 @@
 import { ApiToken } from "../localStorage";
-import { ConversationType, UserDataType } from "../typescript/types";
+import { ConversationType, CustomizationType, UserDataType } from "../typescript/types";
 import { postMessage } from "./message";
 
 const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
@@ -141,7 +141,14 @@ export const patchConvName = async (
   conversationId: string,
   conversationName: string,
   userId: string
-) => {
+): Promise<
+  | {
+      conversation: ConversationType;
+      customizationKey: keyof CustomizationType;
+      customizationValue: string;
+    }
+  | false
+> => {
   try {
     const response = await fetch(RESTAPIUri + "/conversation/changeConversationName", {
       method: "PATCH",
@@ -179,7 +186,14 @@ export const postConvPhoto = async (
   base64String: string,
   conversationId: string,
   userId: string
-) => {
+): Promise<
+  | {
+      conversation: ConversationType;
+      customizationKey: keyof CustomizationType;
+      customizationValue: string;
+    }
+  | false
+> => {
   try {
     const response = await fetch(`${RESTAPIUri}/conversation/changeConversationPhoto`, {
       method: "PATCH",

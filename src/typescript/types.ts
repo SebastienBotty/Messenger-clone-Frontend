@@ -32,12 +32,7 @@ export type ConversationType = {
     username: string;
     removedData: Date;
   };
-  customization: {
-    conversationName: string;
-    photo: string;
-    theme: string;
-    emoji: string;
-  };
+  customization: CustomizationType;
 };
 
 export type MessageType = {
@@ -99,6 +94,13 @@ export type LastMsgSeenByMembersType = {
   userId: string;
   messageId: string | undefined;
   seenByDate: Date;
+};
+
+export type CustomizationType = {
+  conversationName: string;
+  photo: string;
+  theme: string;
+  emoji: string;
 };
 
 export type Date15minDifference = {

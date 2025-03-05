@@ -7,7 +7,11 @@ import {
 import { ConvMembersLi } from "./ConvMembersLi/ConvMembersLi";
 import imageCompression from "browser-image-compression";
 
-import { useMessagesContext, useUserContext } from "../../../../constants/context";
+import {
+  useConversationsContext,
+  useMessagesContext,
+  useUserContext,
+} from "../../../../constants/context";
 
 import {
   ChevronDownOutline,
@@ -19,24 +23,26 @@ import {
   PersonAdd,
 } from "react-ionicons";
 import AddMembersModal from "./AddMembersModal/AddMembersModal";
-import { ApiToken } from "../../../../localStorage";
 import LoadingSpinner from "../../../Utiles/loadingSpinner/loadingSpinner";
 import ConfirmationModal from "../../../Utiles/ConfirmationModal/ConfirmationModal";
 import ChangeConvName from "./ChangeConvName/ChangeConvName";
-import { confirmationMessage, muteConv } from "../../../../constants/ConfirmationMessage";
+import { confirmationMessage } from "../../../../constants/ConfirmationMessage";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { isConvMuted } from "../../../../functions/conversation";
 import NotificationsDisplay from "../../../Utiles/NotificationsDisplay/NotificationsDisplay";
 import { leaveConv, patchConvEmoji, postConvPhoto } from "../../../../api/conversation";
 import ChangeNicknames from "./ChangeNicknames/ChangeNicknames";
+import {
+  updateConvCustomization,
+  updateMostRecentConvCustomization,
+} from "../../../../functions/updateConversation";
 
 function ActionsList({
   openMoreDetailsComp,
 }: {
   openMoreDetailsComp: (componentName: string) => void;
 }) {
-  const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
-
+  const { conversations } = useConversationsContext();
   const [active1, setActive1] = useState<boolean>(false);
   const [active2, setActive2] = useState<boolean>(false);
   const [active3, setActive3] = useState<boolean>(false);
@@ -133,9 +139,24 @@ function ActionsList({
     if (!displayedConv || !user) return;
     const changeEmoji = await patchConvEmoji(emojiData.emoji, displayedConv._id, user._id);
     if (changeEmoji) {
-      setDisplayedConv(changeEmoji.conversation);
-      setMostRecentConv(changeEmoji.conversation);
-      setMessages((prev) => [...prev, changeEmoji.message]);
+      setDisplayedConv((prev) =>
+        updateConvCustomization(
+          prev,
+          changeEmoji.customizationKey,
+          changeEmoji.customizationValue,
+          changeEmoji.conversation
+        )
+      );
+      setMostRecentConv((prev) =>
+        updateMostRecentConvCustomization(
+          conversations,
+          prev,
+          changeEmoji.customizationKey,
+          changeEmoji.customizationValue,
+          changeEmoji.conversation
+        )
+      );
+      setMessages((prev) => [...prev, changeEmoji.conversation.lastMessage]);
       setShowConfirmationModal(false);
     }
   };
@@ -172,10 +193,25 @@ function ActionsList({
             //console.log(size + "Ko");
             const response = await postConvPhoto(setBase64Image, displayedConv._id, user._id);
             if (response) {
-              setDisplayedConv(response.conversation);
-              setMostRecentConv(response.conversation);
+              setDisplayedConv((prev) =>
+                updateConvCustomization(
+                  prev,
+                  response.customizationKey,
+                  response.customizationValue,
+                  response.conversation
+                )
+              );
+              setMostRecentConv((prev) =>
+                updateMostRecentConvCustomization(
+                  conversations,
+                  prev,
+                  response.customizationKey,
+                  response.customizationValue,
+                  response.conversation
+                )
+              );
               setMessages((prev) => {
-                return [...prev, response.message];
+                return [...prev, response.conversation.lastMessage];
               });
               setChangePhotoLoading(false);
               //console.log(jsonData);

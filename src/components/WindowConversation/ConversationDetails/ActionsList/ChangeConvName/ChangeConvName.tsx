@@ -3,13 +3,22 @@ import {
   useDisplayedConvContext,
   useMostRecentConvContext,
 } from "../../../../../screens/userLoggedIn/userLoggedIn";
-import { useMessagesContext, useUserContext } from "../../../../../constants/context";
+import {
+  useMessagesContext,
+  useUserContext,
+  useConversationsContext,
+} from "../../../../../constants/context";
 import "./ChangeConvName.css";
 import { ApiToken } from "../../../../../localStorage";
 import { patchConvName } from "../../../../../api/conversation";
+import {
+  updateConvCustomization,
+  updateMostRecentConvCustomization,
+} from "../../../../../functions/updateConversation";
 function ChangeConvName({ closeModal, text }: { closeModal: () => void; text: string }) {
   const { user, setUser } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { conversations } = useConversationsContext();
   const { setMostRecentConv } = useMostRecentConvContext();
   const { setMessages } = useMessagesContext();
   const [nbCharS, setNbCharS] = useState<number>(0);
@@ -47,8 +56,23 @@ function ChangeConvName({ closeModal, text }: { closeModal: () => void; text: st
     }
     const response = await patchConvName(displayedConv._id, value, user._id);
     if (response) {
-      setDisplayedConv(response.conversation);
-      setMostRecentConv(response.conversation);
+      setDisplayedConv((prev) =>
+        updateConvCustomization(
+          prev,
+          response.customizationKey,
+          response.customizationValue,
+          response.conversation
+        )
+      );
+      setMostRecentConv((prev) =>
+        updateMostRecentConvCustomization(
+          conversations,
+          prev,
+          response.customizationKey,
+          response.customizationValue,
+          response.conversation
+        )
+      );
       setMessages((prev) => {
         return [...prev, response.conversation.lastMessage];
       });
