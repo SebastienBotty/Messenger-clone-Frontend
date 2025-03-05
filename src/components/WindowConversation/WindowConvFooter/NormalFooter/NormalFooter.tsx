@@ -448,29 +448,13 @@ function NormalFooter({
                   style={{ transform: "rotate(270deg)" }}
                 />
               </div>
-              <div className="icon">
-                {" "}
-                <ImagesOutline
-                  onClick={() => console.log(droppedFiles)}
-                  color={"black"}
-                  width={"1.5rem"}
-                  height={"1.5rem"}
-                  style={{ transform: "rotate(270deg)" }}
-                />
-              </div>
 
               <div
                 className="gif-icon icon"
                 ref={gifPickerRef}
                 onClick={() => setShowGifPicker(!showGifPicker)}
               >
-                <ImagesOutline
-                  width={"1.5rem"}
-                  height={"1.5rem"}
-                  color={"black"}
-                  title={"Envoyer un GIF"}
-                  style={{ transform: "rotate(270deg)" }}
-                />
+                GIF
                 <div className="gif-picker-container" onClick={(e) => e.stopPropagation()}>
                   {" "}
                   {showGifPicker && (

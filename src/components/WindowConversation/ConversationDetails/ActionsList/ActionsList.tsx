@@ -21,6 +21,10 @@ import {
   TextOutline,
   PencilOutline,
   PersonAdd,
+  DocumentTextOutline,
+  BanOutline,
+  LockClosedOutline,
+  TimerOutline,
 } from "react-ionicons";
 import AddMembersModal from "./AddMembersModal/AddMembersModal";
 import LoadingSpinner from "../../../Utiles/loadingSpinner/loadingSpinner";
@@ -334,13 +338,13 @@ function ActionsList({
         <ul className={"actions-content" + (active3 ? " active" : "")}>
           <li className="li-actions" onClick={() => openMoreDetailsComp("ConvMedia-Medias")}>
             <div className="li-icon">
-              <Disc color={"#00000"} />
+              <ImagesOutline color={"#00000"} />
             </div>
             <span>Contenu multimédia</span>
           </li>
           <li className="li-actions" onClick={() => openMoreDetailsComp("ConvMedia-Files")}>
             <div className="li-icon">
-              <Disc color={"#00000"} />
+              <DocumentTextOutline color={"#00000"} />
             </div>
             <span>Fichiers</span>
           </li>
@@ -362,27 +366,27 @@ function ActionsList({
               iconSize="1.5rem"
             />
           </li>
-          <li className="li-actions">
+          <li className="li-actions" onClick={() => alert("Not implemented")}>
             <div className="li-icon">
-              <Disc color={"#00000"} />
+              <TimerOutline color={"#00000"} />
             </div>
             <span>Messages éphémères</span>
           </li>
-          <li className="li-actions">
+          <li className="li-actions" onClick={() => alert("Not implemented")}>
             <div className="li-icon">
-              <Disc color={"#00000"} />
+              <LockClosedOutline color={"#00000"} />
             </div>
             <span>Vérifier le chiffrement bout en bout</span>
           </li>
-          <li className="li-actions">
+          <li className="li-actions" onClick={() => alert("Not implemented")}>
             <div className="li-icon">
               <Disc color={"#00000"} />
             </div>
             <span>Restreindre</span>
           </li>
-          <li className="li-actions">
+          <li className="li-actions" onClick={() => alert("Not implemented")}>
             <div className="li-icon">
-              <Disc color={"#00000"} />
+              <BanOutline color={"#00000"} />
             </div>
             <span>Bloquer</span>
           </li>
