@@ -454,7 +454,6 @@ function WindowConversation() {
       setEditingMsg(null);
       setSelectedFoundMsgId("");
       setQuotedMessage(null);
-      setAddedMembers([]);
 
       console.log("MESSSSSSSAGE RESET");
       console.log(displayedConv._id);
@@ -972,11 +971,21 @@ function WindowConversation() {
                             className="message-container"
                             id="message-system"
                             onClick={() => console.log(message)}
+                            onMouseEnter={() => handleMouseEnter(message._id)}
+                            onMouseLeave={handleMouseLeave}
+                            style={{ position: "relative" }}
                           >
                             <ConvSystemMsg
                               textProps={message.text[message.text.length - 1]}
                               members={displayedConv?.members}
                             />
+                            {hoveredId === message._id && (
+                              <div className="msg-date">
+                                <div className="sent-date">
+                                  {formatDateMsg(new Date(message.date))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                           {lastMsgSeenByConvMembers.some(
                             (member) => member.messageId === message._id
