@@ -419,21 +419,15 @@ function WindowConversation() {
     setHoveredId(null);
   };
 
-  const handleTextareaResize = (newTextareaHeight: number, reset?: string) => {
-    if (reset) {
-      setFooterHeight("7.5%");
-      setBodyHeight("85%");
-      return;
+  const handleTextAreaResize = (newTextareaHeight: number, reset?: string) => {
+    if (reset === "reset") {
+      setFooterHeight("7.5vh");
+      setBodyHeight("85vh");
+    } else {
+      setFooterHeight(`${newTextareaHeight}vh`);
+      // Ajuster la hauteur du corps en conséquence pour maintenir la hauteur totale constante
+      setBodyHeight(`${92.5 - newTextareaHeight}vh`);
     }
-    const maxFooterHeight = 30; //Percentage
-    /* console.log("xx");
-    console.log(newTextareaHeight); */
-    const newFooterHeight = Math.min(newTextareaHeight, maxFooterHeight);
-    const newBodyHeight = 100 - newFooterHeight;
-    /* console.log("làlàlà");
-    console.log(newBodyHeight); */
-    setBodyHeight(`${newBodyHeight}%`);
-    setFooterHeight(`${newFooterHeight}%`);
   };
   useEffect(() => {
     if (editingMsg) {
@@ -449,7 +443,6 @@ function WindowConversation() {
     if (displayedConv) {
       fetchMsgIndex.current = 0;
       setDroppedFiles([]);
-      setShowDragOverOverlay(false);
       setMessages([]);
       setEditingMsg(null);
       setSelectedFoundMsgId("");
@@ -844,7 +837,6 @@ function WindowConversation() {
     });
     setShowConfirmationModal(true);
   };
-
   const renderWindowConvFooter = () => {
     if (displayedConv === null) return <CreateConvFooter />;
     else if (editingMsg !== null)
@@ -852,7 +844,7 @@ function WindowConversation() {
         <EditingMsgFooter
           message={editingMsg}
           setEditingMsg={setEditingMsg}
-          onTextAreaResize={handleTextareaResize}
+          onTextAreaResize={handleTextAreaResize}
           height={footerHeight}
         />
       );
@@ -866,7 +858,7 @@ function WindowConversation() {
           setShowDragOverOverlay={setShowDragOverOverlay}
           droppedFiles={droppedFiles}
           setDroppedFiles={setDroppedFiles}
-          onTextAreaResize={handleTextareaResize}
+          onTextAreaResize={handleTextAreaResize}
           height={footerHeight}
           quotedMessage={quotedMessage}
           setQuotedMessage={setQuotedMessage}
@@ -908,7 +900,10 @@ function WindowConversation() {
                 className="conversation-body"
                 ref={scrollViewRef}
                 onScroll={handleScroll}
-                style={{ height: bodyHeight }}
+                style={{
+                  height: bodyHeight,
+                  transition: "height 0.1s ease",
+                }}
               >
                 {editingMsg && (
                   <div className="editingMsgOverlay" onClick={() => setEditingMsg(null)}>
@@ -1049,11 +1044,6 @@ function WindowConversation() {
                           <div
                             className="message-container"
                             id="message-me"
-                            style={
-                              editingMsg?._id === message._id
-                                ? { zIndex: 1, backgroundColor: "red" }
-                                : {}
-                            }
                             onClick={() => console.log(quotedMessage)}
                           >
                             <MessagesOptions
@@ -1314,7 +1304,10 @@ function WindowConversation() {
               </div>
               <div
                 className="conversation-footer"
-                style={{ height: footerHeight, maxHeight: "15vh" }}
+                style={{
+                  height: footerHeight,
+                  transition: "height 0.1s ease",
+                }}
               >
                 {renderWindowConvFooter()}
               </div>

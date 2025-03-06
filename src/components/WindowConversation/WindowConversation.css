@@ -13,7 +13,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 .conversation-details {
   width: 0;
@@ -77,17 +77,6 @@
   flex-direction: column;
   width: 100%;
   box-sizing: border-box;
-}
-
-.editingMsgOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(229, 229, 229, 0.5); /* Blanc avec 50% d'opacité */
-  z-index: 1;
-  pointer-events: none;
 }
 
 .load-more-messages {
@@ -285,6 +274,25 @@
 .button-go-to-last-message > button:hover {
   background-color: #f4f5f8;
 }
+
+/* .editingMsgOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(229, 229, 229, 0.3); /* Blanc avec 50% d'opacité 
+  z-index: 1;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.editing-message-highlight {
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  background-color: white !important;
+} */
 
 /*---------------------------------------------------------------FOOTER---------------------*/
 .conversation-footer {

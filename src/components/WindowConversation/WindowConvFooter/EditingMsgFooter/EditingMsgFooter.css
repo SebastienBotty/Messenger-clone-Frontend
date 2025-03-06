@@ -2,6 +2,9 @@
   height: 5rem;
   font-size: medium;
   width: 100%;
+  position: relative;
+  z-index: 2;
+  background-color: white;
 }
 
 .editing-msg-header {
@@ -9,17 +12,20 @@
   display: flex;
   justify-content: space-between;
 }
+
 .close-icon {
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .close-icon > * {
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .close-icon:hover {
   cursor: pointer;
   background-color: #f2f2f2;
@@ -27,4 +33,23 @@
 
 .disabled-click:hover {
   cursor: not-allowed !important;
+}
+
+.editingMsgOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(229, 229, 229, 0.3);
+  z-index: 1;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.editing-message-highlight {
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  background-color: white !important;
 }

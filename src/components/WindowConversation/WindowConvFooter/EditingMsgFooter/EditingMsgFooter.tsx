@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { CheckmarkCircleOutline, Close } from "react-ionicons";
 import { MessageType } from "../../../../typescript/types";
 
@@ -9,6 +9,7 @@ import {
   useConversationsContext,
   useMessagesContext,
   useUserContext,
+  useMessagesRefContext,
 } from "../../../../constants/context";
 import { updateConvLastMsgEdited, updateMsgText } from "../../../../functions/updateMessage";
 
@@ -27,6 +28,7 @@ function EditingMsgFooter({
   const { user } = useUserContext();
   const { setMessages } = useMessagesContext();
   const { setConversations } = useConversationsContext();
+  const { messagesRef } = useMessagesRefContext();
   const [inputMessage, setInputMessage] = useState<string>(message.text[message.text.length - 1]);
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const [validEdit, setValidEdit] = useState<boolean>(false);
@@ -34,28 +36,33 @@ function EditingMsgFooter({
 
   const adjustTextareaHeight = () => {
     const textarea = textAreaRef.current;
-    const maxHeight = 10; // 10vh
-    const maxHeightInPixels = (maxHeight * window.innerHeight) / 100; // Convertir 10vh en pixels
     if (!textarea) return;
-    console.log(textarea.scrollHeight, textareaHeight);
-    if (textarea.scrollHeight !== textareaHeight && textarea.scrollHeight <= maxHeightInPixels) {
-      textarea.style.overflowY = "hidden";
 
-      const newHeight = textarea.scrollHeight; // Obtenir la hauteur du contenu
-      console.log(textarea.scrollHeight, "xxxxxxxxxxxxxx");
+    // Sauvegarde la position du curseur
+    const selectionStart = textarea.selectionStart;
+    const selectionEnd = textarea.selectionEnd;
 
-      // Convertir la hauteur en pourcentage (par rapport à la hauteur du parent)
-      const parentHeight = textarea.parentElement?.clientHeight || 0;
-      console.log("ICICICIC");
-      console.log(textarea.parentElement?.clientHeight);
-      const newHeightPercentage = (newHeight / parentHeight) * 100;
-      textarea.style.height = newHeight + "px";
+    // Réinitialise complètement la hauteur
+    textarea.style.height = "auto";
 
-      // Appeler la fonction du parent pour mettre à jour les hauteurs
-      onTextAreaResize(newHeightPercentage);
-    } else if (textarea.scrollHeight > maxHeightInPixels) {
-      textarea.style.overflowY = "scroll";
-    }
+    // Calcul de la hauteur maximale et minimale
+    const maxHeight = window.innerHeight * 0.3;
+    const minHeight = window.innerHeight * 0.04; // 4vh en pixels
+
+    // Définit la nouvelle hauteur en fonction du contenu
+    const scrollHeight = Math.max(textarea.scrollHeight, minHeight);
+    const newHeight = Math.min(scrollHeight, maxHeight);
+    textarea.style.height = `${newHeight}px`;
+
+    // Gestion du scroll si le contenu dépasse la hauteur maximale
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+
+    // Met à jour la hauteur du footer
+    const footerHeightPercentage = (newHeight / window.innerHeight) * 100;
+    onTextAreaResize(Math.max(7.5, footerHeightPercentage));
+
+    // Restaure la position du curseur
+    textarea.setSelectionRange(selectionStart, selectionEnd);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -75,6 +82,7 @@ function EditingMsgFooter({
       setValidEdit(false);
     }
   };
+
   const editMsg = async () => {
     if (!message._id || !message.conversationId || !displayedConv || !user) return;
     const editedMsg = await editTextMessage(
@@ -95,13 +103,45 @@ function EditingMsgFooter({
     const textarea = textAreaRef.current;
     if (textarea) {
       textarea.focus();
-      setTextareaHeight(textarea.scrollHeight);
       adjustTextareaHeight();
-      console.log(textarea.scrollHeight, "xxxxxxxxxxxxxx");
       textarea.setSelectionRange(textarea.value.length, textarea.value.length); //Place the focus at the end of the text
-      console.log(textarea.parentElement?.clientHeight);
     }
+
+    // Scroll to the message being edited
+    if (message._id && message._id in messagesRef.current) {
+      messagesRef.current[message._id]?.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+
+    // Add overlay class to highlight the edited message
+    if (message._id && message._id in messagesRef.current) {
+      messagesRef.current[message._id]?.current?.classList.add("editing-message-highlight");
+    }
+
+    // Add overlay to the conversation container
+    const conversationContainer = document.querySelector(".conversation-container");
+    if (conversationContainer) {
+      const overlay = document.createElement("div");
+      overlay.className = "editingMsgOverlay";
+      conversationContainer.appendChild(overlay);
+    }
+
+    return () => {
+      // Remove highlight class when component unmounts
+      if (message._id && message._id in messagesRef.current) {
+        messagesRef.current[message._id]?.current?.classList.remove("editing-message-highlight");
+      }
+
+      // Remove overlay
+      const overlay = document.querySelector(".editingMsgOverlay");
+      if (overlay) {
+        overlay.remove();
+      }
+    };
   }, []);
+
   return (
     <div className="editing-msg-footer" style={{ height: height }}>
       <div className="editing-msg-header">
@@ -117,10 +157,14 @@ function EditingMsgFooter({
             className="send-message"
             placeholder="Aa"
             value={inputMessage}
-            rows={3}
             onKeyDown={handleKeyDown}
             ref={textAreaRef}
             onChange={handleValueChange}
+            style={{
+              minHeight: "4vh",
+              maxHeight: "30vh",
+              resize: "none",
+            }}
           />
         </div>
         <div className="like-icon">

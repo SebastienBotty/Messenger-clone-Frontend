@@ -53,43 +53,56 @@ function NormalFooter({
   const gifPickerRef = useRef<HTMLDivElement>(null);
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [textareaHeight, setTextareaHeight] = useState<number>(0);
-  const [initialTextAreaHeight, setInitialTextAreaHeight] = useState<number>(0);
 
   const handleValueChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(e.target.value);
-    adjustTextareaHeight();
-    console.log("ALLO");
+
+    // Force le recalcul de la hauteur à chaque changement
+    setTimeout(adjustTextareaHeight, 0);
+
+    if (e.target.value.trim() !== "") {
+      emitUserWrittingToSocket(true);
+    } else {
+      emitUserWrittingToSocket(false);
+
+      // Réinitialise explicitement la hauteur quand le textarea est vide
+      if (textAreaRef.current) {
+        console.log("OCOCOCOCOCOC");
+        onTextAreaResize(0, "reset");
+        if (textAreaRef.current) textAreaRef.current.style.height = "4vh";
+      }
+    }
   };
+
   const adjustTextareaHeight = () => {
     const textarea = textAreaRef.current;
-    const maxHeight = 10; // 10vh
-    const maxHeightInPixels = (maxHeight * window.innerHeight) / 100; // Convertir 10vh en pixels
     if (!textarea) return;
-    /*     console.log(textarea.scrollHeight, textareaHeight);
-     */ if (textarea.scrollHeight <= maxHeightInPixels) {
-      textarea.style.overflowY = "hidden";
 
-      const newHeight = textarea.scrollHeight; // Obtenir la hauteur du contenu
-      /*       console.log(textarea.scrollHeight, "xxxxxxxxxxxxxx");
-       */
-      // Convertir la hauteur en pourcentage (par rapport à la hauteur du parent)
-      const parentHeight = textarea.parentElement?.clientHeight || 0;
-      /*  console.log("ICICICIC");
-      console.log(textarea.parentElement?.clientHeight); */
-      const newHeightPercentage = (newHeight / parentHeight) * 100;
-      textarea.style.height = newHeight + "px";
+    // Sauvegarde la position du curseur
+    const selectionStart = textarea.selectionStart;
+    const selectionEnd = textarea.selectionEnd;
 
-      // Appeler la fonction du parent pour mettre à jour les hauteurs
-      if (textarea.scrollHeight !== textareaHeight) {
-        setTextareaHeight(textarea.scrollHeight);
-        onTextAreaResize(newHeightPercentage);
-      }
-    } else if (textarea.scrollHeight > maxHeightInPixels) {
-      textarea.style.overflowY = "scroll";
-    }
+    // Réinitialise complètement la hauteur
+    textarea.style.height = "auto";
 
-    setTextareaHeight(textarea.scrollHeight);
+    // Calcul de la hauteur maximale et minimale
+    const maxHeight = window.innerHeight * 0.3;
+    const minHeight = window.innerHeight * 0.04; // 4vh en pixels
+
+    // Définit la nouvelle hauteur en fonction du contenu
+    const scrollHeight = Math.max(textarea.scrollHeight, minHeight);
+    const newHeight = Math.min(scrollHeight, maxHeight);
+    textarea.style.height = `${newHeight}px`;
+
+    // Gestion du scroll si le contenu dépasse la hauteur maximale
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+
+    // Met à jour la hauteur du footer
+    const footerHeightPercentage = (newHeight / window.innerHeight) * 100;
+    onTextAreaResize(Math.max(7.5, footerHeightPercentage));
+
+    // Restaure la position du curseur
+    textarea.setSelectionRange(selectionStart, selectionEnd);
   };
 
   const emitMsgToSocket = (
@@ -157,7 +170,7 @@ function NormalFooter({
       //console.log(displayedConv);
       setMessages((prev) => [...prev, jsonData]); //--------------------------------------------------------------------------!!!!!!!!!!!!!!!!!
       setQuotedMessage(null);
-      onTextAreaResize(0, "reset"); //Reload the sideBar component to fetch the latest conversation
+      onTextAreaResize(0, "reset");
       if (textAreaRef.current) textAreaRef.current.style.height = "4vh";
 
       setTrigger(!trigger);
@@ -386,11 +399,14 @@ function NormalFooter({
 
   useEffect(() => {
     document.addEventListener("mousedown", handleGifPickerContainerClick);
+
+    // Initialise la hauteur du textarea
     if (textAreaRef.current) {
+      const minHeight = window.innerHeight * 0.04;
+      textAreaRef.current.style.height = `${minHeight}px`;
       textAreaRef.current.focus();
-      setTextareaHeight(textAreaRef.current.scrollHeight);
-      setInitialTextAreaHeight(textAreaRef.current.scrollHeight);
     }
+
     return () => {
       document.removeEventListener("mousedown", handleGifPickerContainerClick);
     };
@@ -405,7 +421,7 @@ function NormalFooter({
   }, [quotedMessage]);
 
   return (
-    <div className="normal-footer" style={{ height: height }}>
+    <div className="normal-footer" style={{ height: "100%" }}>
       {quotedMessage && (
         <div className="normal-msg-header">
           <div className="normal-msg-header-author">
@@ -468,7 +484,10 @@ function NormalFooter({
             </>
           )}
         </div>
-        <div className="message-input" style={inputMessage ? { flex: "auto" } : {}}>
+        <div
+          className="message-input"
+          style={inputMessage ? { flex: "auto", overflow: "hidden" } : {}}
+        >
           <input
             type="file"
             ref={inputFileRef}
@@ -483,12 +502,16 @@ function NormalFooter({
               className="send-message"
               placeholder="Aa"
               value={inputMessage}
-              rows={3}
-              onKeyDown={handleKeyDown}
               ref={textAreaRef}
               onChange={handleValueChange}
+              onKeyDown={handleKeyDown}
               onFocus={() => emitUserWrittingToSocket(true)}
               onBlur={() => emitUserWrittingToSocket(false)}
+              style={{
+                minHeight: "4vh",
+                maxHeight: "30vh",
+                resize: "none",
+              }}
             />
           )}
         </div>
