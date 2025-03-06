@@ -243,7 +243,11 @@ export function ConvMembersLi({
                   <li
                     className="li-members-options"
                     onClick={() => {
-                      handleActions("leaveConv", user.userName);
+                      displayedConv.admin.length === 1 && displayedConv.admin[0] === user?.userName
+                        ? alert(
+                            "Vous devez d'abord nomber une autre personne admin avant de quitter la conversation"
+                          )
+                        : handleActions("leaveConv", user.userName);
                     }}
                   >
                     <div className="members-options-icon">
