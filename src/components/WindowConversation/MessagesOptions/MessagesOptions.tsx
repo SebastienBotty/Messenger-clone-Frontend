@@ -185,6 +185,7 @@ function MessagesOptions({
 
   const editMessage = async () => {
     if (!message._id || !setEditingMsg) return;
+    setShowMoreOptions(false);
     setEditingMsg(message);
     console.log("set editingMsgId: " + message._id);
   };
