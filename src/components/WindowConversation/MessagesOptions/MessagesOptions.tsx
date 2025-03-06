@@ -27,10 +27,12 @@ import { moreThanXmins } from "../../../functions/time";
 function MessagesOptions({
   message,
   setEditingMsg,
+  editingMsg,
   setQuotedMessage,
 }: {
   message: MessageType;
   setEditingMsg?: React.Dispatch<React.SetStateAction<MessageType | null>>;
+  editingMsg: MessageType | null;
   setQuotedMessage: React.Dispatch<React.SetStateAction<QuotedMessageType | null>>;
 }) {
   const { user } = useUserContext();
@@ -225,16 +227,18 @@ function MessagesOptions({
                       Modifier
                     </li>
                   )}{" "}
-                <li
-                  className="message-more-options-li"
-                  onClick={() =>
-                    isUserAuthor
-                      ? openConfirmationModal("deleteUserMsg")
-                      : openConfirmationModal("deleteMsgOther")
-                  }
-                >
-                  {isUserAuthor ? "Retirer" : "Supprimer"}
-                </li>
+                {!editingMsg && (
+                  <li
+                    className="message-more-options-li"
+                    onClick={() =>
+                      isUserAuthor
+                        ? openConfirmationModal("deleteUserMsg")
+                        : openConfirmationModal("deleteMsgOther")
+                    }
+                  >
+                    {isUserAuthor ? "Retirer" : "Supprimer"}
+                  </li>
+                )}
                 {!message.deletedForEveryone && (
                   <li className="message-more-options-li">Transférer</li>
                 )}

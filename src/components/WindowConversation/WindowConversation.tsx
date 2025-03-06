@@ -1049,6 +1049,7 @@ function WindowConversation() {
                             <MessagesOptions
                               message={message}
                               setEditingMsg={setEditingMsg}
+                              editingMsg={editingMsg}
                               setQuotedMessage={setQuotedMessage}
                             />
                             <div
@@ -1175,6 +1176,7 @@ function WindowConversation() {
                             <MessagesOptions
                               message={message}
                               setQuotedMessage={setQuotedMessage}
+                              editingMsg={null}
                             />
                           </div>
                           {lastMsgSeenByConvMembers.some(
@@ -1272,7 +1274,11 @@ function WindowConversation() {
                             <AsyncMsg message={message} />
                             <MessageReactions message={message} />
                           </div>
-                          <MessagesOptions message={message} setQuotedMessage={setQuotedMessage} />
+                          <MessagesOptions
+                            message={message}
+                            setQuotedMessage={setQuotedMessage}
+                            editingMsg={null}
+                          />
                         </div>
                         {lastMsgSeenByConvMembers.some(
                           (member) => member.messageId === message._id
