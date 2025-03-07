@@ -183,15 +183,15 @@ function WindowConversation() {
     console.log("lastMsgSeenByMembers");
     const tempArray: LastMsgSeenByMembersType[] = [];
     if (displayedConv) {
-      console.log("displayedConv");
-      console.log(displayedConv.members);
+      /* console.log("displayedConv");
+      console.log(displayedConv.members); */
       for (const member of displayedConv.members) {
-        console.log("member" + member.username);
-        if (member.username !== user?.userName) {
+        /*         console.log("member" + member.username);
+         */ if (member.username !== user?.userName) {
           for (const msg of messagesArr) {
             if (msg.seenBy.some((seenBy) => seenBy.username === member.username)) {
-              console.log("PUSHED FOR" + member.username + " " + msg._id);
-              const seenByDate = msg.seenBy.find(
+              /*               console.log("PUSHED FOR" + member.username + " " + msg._id);
+               */ const seenByDate = msg.seenBy.find(
                 (seenBy) => seenBy.username === member.username
               )?.seenDate;
 

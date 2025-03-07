@@ -24,7 +24,7 @@ function ProfilePic({
     if (picSrc.length > 0) {
       return (
         <div className="profile-pic">
-          <img src={picSrc} />
+          <img src={picSrc} loading="lazy" />
         </div>
       );
     } else {
@@ -38,7 +38,7 @@ function ProfilePic({
     if (picSrc.length > 0 && status) {
       return (
         <div className="profile-pic">
-          <img src={picSrc} />
+          <img src={picSrc} loading="lazy" />
           {showStatus && isOnline && (
             <div className="profile-pic-user-status">
               <UserStatus status={status} />

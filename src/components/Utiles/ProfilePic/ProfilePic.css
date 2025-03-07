@@ -1,7 +1,8 @@
 .profile-pic {
   border-radius: 50%;
-  height: 100%;
+
   width: 100%;
+  aspect-ratio: 1/1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -18,6 +19,8 @@
 
 .profile-pic > *:has(svg) {
   background-color: #f0f2f5;
+  width: 100%;
+  height: 100%;
 }
 .profile-pic > img {
   border-radius: 50%;
@@ -26,10 +29,20 @@
   object-fit: cover;
 }
 
+.profile-pic > *:has(svg) svg {
+  width: 75%;
+  height: 75%;
+}
+.profile-pic svg {
+  width: 100%;
+  height: 100%;
+}
+
 .profile-pic-user-status {
   position: absolute;
   bottom: 0;
   right: 0;
   width: 25%;
   height: 25%;
+  transform: translate(-25%, -25%);
 }

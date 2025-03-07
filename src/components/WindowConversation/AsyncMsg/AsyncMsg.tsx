@@ -69,6 +69,7 @@ function AsyncMsg({ message }: { message: MessageType }) {
                 alt="gif"
                 onClick={() => window.open(gifUrl)}
                 style={{ cursor: "pointer" }}
+                loading="lazy"
               />
             }
           </div>
@@ -85,6 +86,7 @@ function AsyncMsg({ message }: { message: MessageType }) {
             tempContent.push(
               <div className="file-preview-item">
                 <img
+                  loading="lazy"
                   onClick={() => handleImgClick(file.url, file.fileName)}
                   src={file.url}
                   alt={file.fileName}
@@ -96,7 +98,7 @@ function AsyncMsg({ message }: { message: MessageType }) {
               <div>
                 {" "}
                 <a href={file.url} download={file.fileName.split("-")[1]}>
-                  <img src="/file-icon.png" alt={file.fileName} />
+                  <img src="/file-icon.png" alt={file.fileName} loading="lazy" />
                   <div className="file-name">{file.fileName.split("-")[1]}</div>
                 </a>
               </div>
