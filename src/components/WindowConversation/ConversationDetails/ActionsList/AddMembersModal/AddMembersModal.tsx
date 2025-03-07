@@ -116,13 +116,17 @@ function AddMembersModal({
 
     const res = await patchAddMembers(arrMembers, conversationId, userUsername, userId);
     if (res) {
-      setDisplayedConv((prev) => updateConvAddedMembers(prev, res.addedUsersArr, res.conversation));
+      if (displayedConv?._id === res.conversation._id) {
+        setDisplayedConv((prev) =>
+          updateConvAddedMembers(prev, res.addedUsersArr, res.conversation)
+        );
+        setMessages((prev) => [...prev, res.conversation.lastMessage]);
+      }
     }
     setMostRecentConv((prev) =>
       updateMostRecentConvAddedMembers(conversations, prev, res.addedUsersArr, res.conversation)
     );
     closeModal();
-    setMessages((prev) => [...prev, res.conversation.lastMessage]);
   };
   useEffect(() => {
     if (searchInputRef.current) {
