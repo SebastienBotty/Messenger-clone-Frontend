@@ -604,68 +604,6 @@ function WindowConversation() {
         }
       });
 
-      socket.on(
-        "changeStatus",
-        ({ userId, status, lastSeen }: { userId: string; status: StatusType; lastSeen: Date }) => {
-          const memberTarget = displayedConv?.members.find((member) => member.userId === userId);
-          if (memberTarget) {
-            console.log("CHANGE STATUS DISPLAYED CONV");
-            setDisplayedConv((prev) => {
-              if (prev) {
-                return {
-                  ...prev,
-                  members: prev.members.map((member) =>
-                    member.userId === userId
-                      ? { ...member, status, lastSeen: new Date(lastSeen) }
-                      : member
-                  ),
-                };
-              }
-              return prev;
-            });
-          }
-        }
-      );
-      socket.on(
-        "isUserOnline",
-        ({ userId, isOnline, lastSeen }: { userId: string; isOnline: boolean; lastSeen: Date }) => {
-          console.log("IS USER ONLINE");
-          const memberTarget = displayedConv?.members.find((member) => member.userId === userId);
-          if (memberTarget) {
-            console.log("IS USER ONLINE DISPLAYED CONV");
-            setDisplayedConv((prev) => {
-              if (prev) {
-                console.log("IS USER ONLINE DISPLAYED CONV");
-                return {
-                  ...prev,
-                  members: prev.members.map((member) =>
-                    member.userId === userId
-                      ? { ...member, isOnline, lastSeen: new Date(lastSeen) }
-                      : member
-                  ),
-                };
-              }
-              return prev;
-            });
-            if (isOnline === false && memberTarget.isTyping) {
-              //When someone is offline, we remove him from the typing list
-              console.log("IS USER OFFLINE");
-              console.log(memberTarget);
-              setDisplayedConv((prev) => {
-                if (prev) {
-                  return {
-                    ...prev,
-                    members: prev.members.map((member) =>
-                      member.userId === userId ? { ...member, isTyping: false } : member
-                    ),
-                  };
-                }
-                return prev;
-              });
-            }
-          }
-        }
-      );
       socket.on("deletedMessage", (data) => {
         const msg: MessageType = data[0];
         const conversationId: string = data[1];
@@ -708,8 +646,6 @@ function WindowConversation() {
       socket.off("typing");
       socket.off("convUpdate");
       socket.off("newFile");
-      socket.off("changeStatus");
-      socket.off("isUserOnline");
       socket.off("deletedMessage");
       socket.off("changeReaction");
       socket.off("editedMessage");

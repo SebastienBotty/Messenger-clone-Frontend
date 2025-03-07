@@ -6,6 +6,7 @@ import {
   CustomizationType,
   MessageType,
   SideBarPropsType,
+  StatusType,
 } from "../../typescript/types";
 import "./SideBarConversations.css";
 
@@ -635,18 +636,69 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       }
     );
 
-    socket.on("changeStatus", (data) => {
-      console.log("changesStatus", data);
-      setConversations((prev) => {
-        return prev.map((conv) => {
-          const member = conv.members.find((member) => member.userId === data.userId);
-          if (member) {
-            member.status = data.status;
-          }
-          return conv;
+    socket.on(
+      "changeStatus",
+      ({
+        isOnline,
+        status,
+        userId,
+        lastSeen,
+      }: {
+        isOnline: boolean;
+        status: StatusType | null;
+        userId: string;
+        lastSeen: Date;
+      }) => {
+        console.log("changesStatus", { isOnline, status, userId, lastSeen });
+        setConversations((prev) => {
+          return prev.map((conv) => {
+            return {
+              ...conv,
+              members: conv.members.map((mbr) => {
+                if (mbr.userId === userId) {
+                  /*  console.log("STATS", status);
+                  console.log(status ? "STATUS CHANGED" : "STATUS NOT CHANGED");
+                  console.log("MEMBER STATUS", mbr.status);
+ */
+                  return {
+                    ...mbr,
+                    isOnline: isOnline,
+                    status: status !== null ? status : "Offline",
+                    lastSeen: lastSeen,
+                  };
+                }
+                return mbr;
+              }),
+            };
+          });
         });
-      });
-    });
+        if (displayedConv?.members.find((member) => member.userId === userId)) {
+          setDisplayedConv((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              members: prev.members.map((mbr) => {
+                if (mbr.userId === userId) {
+                  console.log("STATS", status);
+                  console.log(status ? "STATUS CHANGED" : "STATUS NOT CHANGED");
+                  console.log("MEMBER STATUS", mbr.status);
+                  const newStatus = status !== null ? status : mbr.status;
+                  console.log("newStatus", newStatus);
+                  return {
+                    ...mbr,
+                    isOnline: isOnline,
+                    status: newStatus,
+                    lastSeen: lastSeen,
+                  };
+                }
+                console.log("retun mbr");
+                return mbr;
+              }),
+            };
+          });
+        }
+      }
+    );
 
     socket.on("profilPicUpdate", ({ userId, picSrc }: { userId: string; picSrc: string }) => {
       console.log("profilPicUpdate", userId, picSrc);
@@ -660,26 +712,6 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         });
       });
     });
-
-    socket.on(
-      "isUserOnline",
-      ({ userId, isOnline, lastSeen }: { userId: string; isOnline: boolean; lastSeen: Date }) => {
-        console.log("isUserOnline listened");
-        console.log(userId);
-        setConversations((prev) => {
-          return prev.map((conv) => {
-            const member = conv.members.find((member) => member.userId === userId);
-
-            if (member) {
-              member.isOnline = isOnline;
-              member.lastSeen = lastSeen;
-              member.isTyping = false;
-            }
-            return conv;
-          });
-        });
-      }
-    );
 
     socket.on(
       "typing",
@@ -711,7 +743,6 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       socket.off("convUpdate");
       socket.off("adminChange");
       socket.off("changeStatus");
-      socket.off("isUserOnline");
       socket.off("typing");
       socket.off("removeMember");
       socket.off("addMembers");

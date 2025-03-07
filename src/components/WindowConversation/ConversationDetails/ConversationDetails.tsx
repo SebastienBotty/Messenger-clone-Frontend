@@ -16,6 +16,7 @@ import { ApiToken } from "../../../localStorage";
 import { isConvMuted } from "../../../functions/conversation";
 import { ConfirmationModalPropsType } from "../../../typescript/types";
 import { getNickNameByUsername } from "../../../functions/StrFormatter";
+import { statusTranslate } from "../../../constants/status";
 
 function ConversationDetails() {
   const { user, setUser } = useUserContext();
@@ -204,7 +205,11 @@ function ConversationDetails() {
                       )}
               </div>
               <span className="user-online">
-                {displayedConv?.isGroupConversation ? "" : "Online"}
+                {displayedConv?.isGroupConversation
+                  ? ""
+                  : statusTranslate(
+                      displayedConv.members.find((member) => member.userId !== user?._id)?.status
+                    )}
               </span>
               <div className="conversations-details-buttons">
                 {" "}
