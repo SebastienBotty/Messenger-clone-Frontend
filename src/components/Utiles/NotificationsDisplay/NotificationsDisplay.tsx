@@ -19,10 +19,12 @@ function NotificationsDisplay({
   conversation,
   outlineNotifSvg,
   iconSize,
+  closeConvParams,
 }: {
   conversation: ConversationType;
   outlineNotifSvg: boolean;
   iconSize: string;
+  closeConvParams?: () => void;
 }) {
   const { user, setUser } = useUserContext();
   const [mutedConv, setMutedConv] = useState<boolean>();
@@ -54,6 +56,7 @@ function NotificationsDisplay({
       text: (
         <MuteConversation
           closeModal={() => {
+            if (closeConvParams) closeConvParams();
             setShowConfirmationModal(false);
           }}
           conversationId={conversation._id}
@@ -61,6 +64,7 @@ function NotificationsDisplay({
       ),
       action: () => {},
       closeModal: () => {
+        if (closeConvParams) closeConvParams();
         setShowConfirmationModal(false);
       },
     });
@@ -80,6 +84,7 @@ function NotificationsDisplay({
           };
         return prev;
       });
+      if (closeConvParams) closeConvParams();
       setMutedConv(false);
     }
   };

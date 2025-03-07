@@ -108,27 +108,35 @@ function ConversationParams({
     <div ref={ref} onClick={(e) => e.stopPropagation()}>
       <div className="conversation-params-dropdown">
         <ul>
-          {conversation.isGroupConversation && conversation.admin.includes(user.userName) && (
-            <li className="conversation-params-li" onClick={() => setShowAddMembersModal(true)}>
-              <div className="conversation-params-action">
-                <div className="conversation-params-action-icon">
-                  {" "}
-                  <PersonAddOutline color={"#00000"} />
+          {conversation.isGroupConversation &&
+            conversation.admin.includes(user.userName) &&
+            conversation.members.some((member) => member.username === user.userName) && (
+              <li className="conversation-params-li" onClick={() => setShowAddMembersModal(true)}>
+                <div className="conversation-params-action">
+                  <div className="conversation-params-action-icon">
+                    {" "}
+                    <PersonAddOutline color={"#00000"} />
+                  </div>
+                  <div className="conversation-params-action-text">Ajouter des membres</div>
                 </div>
-                <div className="conversation-params-action-text">Ajouter des membres</div>
+              </li>
+            )}
+
+          {conversation.members.some((member) => member.username === user.userName) && (
+            <li className="conversation-params-li">
+              <div className="conversation-params-action">
+                <NotificationsDisplay
+                  conversation={conversation}
+                  outlineNotifSvg={true}
+                  iconSize="2rem"
+                  closeConvParams={closeComponent}
+                />
               </div>
             </li>
           )}
-          <li className="conversation-params-li">
-            <div className="conversation-params-action">
-              <NotificationsDisplay
-                conversation={conversation}
-                outlineNotifSvg={true}
-                iconSize="2rem"
-              />
-            </div>
-          </li>
-          <div className="separator"></div>
+          {conversation.members.some((member) => member.username === user.userName) && (
+            <div className="separator"></div>
+          )}
 
           <li className="conversation-params-li" onClick={() => handleActionsClick("deleteConv")}>
             <div className="conversation-params-action">
@@ -161,6 +169,7 @@ function ConversationParams({
             <AddMembersModal
               conversation={conversation}
               closeModal={() => setShowAddMembersModal(false)}
+              closeConvParams={closeComponent}
             />
           )}
         </div>

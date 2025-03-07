@@ -24,9 +24,11 @@ import {
 function AddMembersModal({
   conversation,
   closeModal,
+  closeConvParams,
 }: {
   conversation: ConversationType;
   closeModal: () => void;
+  closeConvParams?: () => void;
 }) {
   const { user } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
@@ -126,6 +128,8 @@ function AddMembersModal({
     setMostRecentConv((prev) =>
       updateMostRecentConvAddedMembers(conversations, prev, res.addedUsersArr, res.conversation)
     );
+    if (closeConvParams) closeConvParams();
+
     closeModal();
   };
   useEffect(() => {
