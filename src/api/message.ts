@@ -54,7 +54,7 @@ export const getRecentMessages = async (conversationId: string, userId: string) 
 
     if (!response.ok) {
       const errorMsg = await response.json();
-      throw new Error("Erreur lors du fetch Recent Messages: " + errorMsg);
+      throw new Error("Erreur lors du fetch Recent Messages: " + errorMsg.message);
     }
 
     const jsonData = await response.json();
@@ -68,6 +68,89 @@ export const getRecentMessages = async (conversationId: string, userId: string) 
     return false;
   }
 };
+
+export const getOlderMessages = async (
+  messageId: string,
+  conversationId: string,
+  userId: string
+): Promise<MessageType[] | false> => {
+  console.log("getOlderMessages");
+  console.log(messageId);
+  try {
+    const response = await fetch(
+      RESTAPIUri +
+        "/message/userId/" +
+        userId +
+        "/getOlderMessages?conversationId=" +
+        conversationId +
+        "&messageId=" +
+        messageId,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + ApiToken(),
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorMsg = await response.json();
+      throw new Error("Erreur lors du fetch GetOlderMessages: " + errorMsg.message);
+    }
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unkown error occured");
+    }
+    return false;
+  }
+};
+
+export const getNewerMessages = async (
+  messageId: string,
+  conversationId: string,
+  userId: string
+): Promise<MessageType[] | false> => {
+  console.log("geNewerMessages");
+  console.log(messageId);
+  try {
+    const response = await fetch(
+      RESTAPIUri +
+        "/message/userId/" +
+        userId +
+        "/getNewerMessages?conversationId=" +
+        conversationId +
+        "&messageId=" +
+        messageId,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + ApiToken(),
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorMsg = await response.json();
+      throw new Error("Erreur lors du fetch GetNewerMessages: " + errorMsg.message);
+    }
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unkown error occured");
+    }
+    return false;
+  }
+};
+
 export const getMessageById = async (messageId: string, conversationId: string, userId: string) => {
   console.log("getMsgById");
   try {

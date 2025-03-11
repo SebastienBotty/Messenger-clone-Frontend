@@ -58,7 +58,7 @@ import { getNickNameById, getNickNameByUsername } from "../../functions/StrForma
 import CreateConvHeader from "./WindowConvheader/CreateConvHeader/CreateConvHeader";
 import NormalConvHeader from "./WindowConvheader/NormalConvHeader/NormalConvHeader";
 import SeenByMember from "../Utiles/SeenByMember/SeenByMember";
-import { getRecentMessages } from "../../api/message";
+import { getNewerMessages, getOlderMessages, getRecentMessages } from "../../api/message";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -91,8 +91,6 @@ function WindowConversation() {
   const [mediasCtxt, setMediasCtxt] = useState<MediasType[]>([]);
   const [filesCtxt, setFilesCtxt] = useState<MediasType[]>([]);
 
-  const fetchMsgIndex = useRef(0);
-  const limitFetchMsg: number = 20;
   const { messages, setMessages } = useMessagesContext();
   const messagesRef = useRef<{ [key: string]: React.RefObject<HTMLDivElement> }>({});
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -124,60 +122,57 @@ function WindowConversation() {
 
     if (response) {
       setMessages(response);
+      return response;
     }
   };
-  const fetchMessages = async (): Promise<MessageType[] | false> => {
-    const response = await fetch(
-      RESTAPIUri +
-        "/message/userId/" +
-        user?._id +
-        "/getMessages?conversationId=" +
-        displayedConv?._id +
-        "&start=" +
-        fetchMsgIndex.current +
-        "&limit=" +
-        limitFetchMsg,
-      {
-        headers: { authorization: `Bearer ${ApiToken()}` },
-      }
-    );
-    console.log(fetchMsgIndex.current);
-    try {
-      if (!response.ok) {
-        const jsonData = await response.json();
-        throw new Error(jsonData.message);
-      }
-      const jsonData: MessageType[] = await response.json();
-      //console.log("iciiiiiiiiiiiiiiiiiiiiii");
-      //console.log(messages, jsonData);
-      let messageTemp: MessageType[] = [];
-      if (fetchMsgIndex.current > 0) messageTemp = messages;
-      setMessages([]); //Again, had to to clear messages before adding new ones??? Probably an asynch shit or smt like that.
-      setTimeout(() => {
-        setMessages([...messageTemp, ...jsonData]);
-      }, 1);
-      if (jsonData.length > 0) {
-        fetchMsgIndex.current += jsonData.length;
-      }
-      if (firstMessageRef.current) {
-        firstMessageRef.current.scrollIntoView({ behavior: "smooth" });
+
+  const fetchOlderMessages = async () => {
+    const oldestMsgId = messages[0]._id;
+
+    if (!user?._id || !displayedConv?._id || !oldestMsgId) return;
+
+    const response = await getOlderMessages(oldestMsgId, displayedConv._id, user._id);
+
+    if (response) {
+      setMessages((prev) => [...response, ...prev]);
+    }
+  };
+
+  const fetchNewerMessages = async () => {
+    const lastVisibleMsgId = messages[messages.length - 1]._id;
+
+    if (!user?._id || !displayedConv?._id || !lastVisibleMsgId) return;
+
+    const response = await getNewerMessages(lastVisibleMsgId, displayedConv._id, user._id);
+
+    if (response) {
+      setMessages((prev) => [...prev, ...response]);
+    }
+  };
+  const updateLastMsgSeenByMember = (userId: string, username: string, messageId: string) => {
+    setLastMsgSeenByConvMembers((prev) => {
+      if (!prev) return [];
+
+      const updatedMembers = [...prev];
+      const convMemberIndex = updatedMembers.findIndex((member) => member.userId === userId);
+
+      if (convMemberIndex !== -1) {
+        updatedMembers[convMemberIndex] = {
+          ...updatedMembers[convMemberIndex],
+          messageId: messageId,
+          seenByDate: new Date(),
+        };
+      } else {
+        updatedMembers.push({
+          username,
+          userId,
+          messageId,
+          seenByDate: new Date(),
+        });
       }
 
-      /*  jsonData.filter((msg: MessageType) => {
-        if (msg.text === "Ideein-removeUser-Alex") {
-          console.log("ici");
-          console.log(jsonData);
-        }
-      }); */
-      return jsonData;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-      return false;
-    }
+      return updatedMembers;
+    });
   };
 
   /**
@@ -199,7 +194,7 @@ function WindowConversation() {
       for (const member of displayedConv.members) {
         /*         console.log("member" + member.username);
          */ if (member.username !== user?.userName) {
-          for (const msg of messagesArr) {
+          for (const msg of messagesArr.reverse()) {
             if (msg.seenBy.some((seenBy) => seenBy.username === member.username)) {
               /*               console.log("PUSHED FOR" + member.username + " " + msg._id);
                */ const seenByDate = msg.seenBy.find(
@@ -323,6 +318,8 @@ function WindowConversation() {
     conversation: ConversationType | null
   ) => {
     if (!user) return;
+    console.log("messageData");
+    console.log(messageData);
     const isMsgSeen = messageData.seenBy.some((seenBy) => seenBy.username === user.userName);
     if (isMsgSeen) {
       console.log("message already seen");
@@ -406,12 +403,10 @@ function WindowConversation() {
   };
 
   const asyncFetchMsg = async () => {
-    const fetchedMessages = await fetchMessages();
+    const fetchedMessages = await fetchRecentMessages();
     if (!fetchedMessages || fetchedMessages.length === 0) return;
 
     lastMsgSeenByMembers(fetchedMessages);
-    console.log("XXXXXXXXXXXXXXXXXXXXX");
-    console.log(fetchedMessages[0]);
     emitSeenMsgToSocket(fetchedMessages[0], displayedConv);
   };
 
@@ -470,7 +465,6 @@ function WindowConversation() {
 
   useEffect(() => {
     if (displayedConv) {
-      fetchMsgIndex.current = 0;
       setDroppedFiles([]);
       setMessages([]);
       setEditingMsg(null);
@@ -483,12 +477,11 @@ function WindowConversation() {
 
       // Utiliser une fonction de référence pour accéder aux valeurs les plus récentes
       const messageHandler = (data: any) => {
-        const message = data[0];
+        const message: MessageType = data[0];
         const convId = data[1]._id;
         console.log("MESSAGE RECU");
         console.log(message);
         console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id);
-
         if (convId === displayedConv?._id) {
           // Utiliser une fonction pour obtenir l'état le plus récent
           // Accéder aux valeurs actuelles via une fonction de rappel
@@ -506,7 +499,9 @@ function WindowConversation() {
               emitSeenMsgToSocket(message, displayedConv);
               setLastMsgSeenByConvMembers((prev) =>
                 prev.map((item) =>
-                  item.username === message.seenBy[0] ? { ...item, messageId: message._id } : item
+                  item.username === message.seenBy[0].username
+                    ? { ...item, messageId: message._id }
+                    : item
                 )
               );
               return [...currentMessages, message];
@@ -933,7 +928,7 @@ function WindowConversation() {
                 {displayedConv && (
                   <>
                     <div className="load-more-messages">
-                      <span onClick={() => fetchMessages()}>Charger plus de message</span>
+                      <span onClick={() => fetchOlderMessages()}>Charger plus de message</span>
                     </div>
                     {!isAtBottom && hasScroll && (
                       <div className="button-go-to-last-message">
