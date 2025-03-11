@@ -58,6 +58,7 @@ import { getNickNameById, getNickNameByUsername } from "../../functions/StrForma
 import CreateConvHeader from "./WindowConvheader/CreateConvHeader/CreateConvHeader";
 import NormalConvHeader from "./WindowConvheader/NormalConvHeader/NormalConvHeader";
 import SeenByMember from "../Utiles/SeenByMember/SeenByMember";
+import { getRecentMessages } from "../../api/message";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -115,6 +116,16 @@ function WindowConversation() {
   const [bodyHeight, setBodyHeight] = useState<string>("85%");
   const [footerHeight, setFooterHeight] = useState<string>("7.5%");
 
+  const lastMessageIdRef = useRef("");
+
+  const fetchRecentMessages = async () => {
+    if (!displayedConv?._id || !user?._id) return;
+    const response: MessageType[] = await getRecentMessages(displayedConv._id, user._id);
+
+    if (response) {
+      setMessages(response);
+    }
+  };
   const fetchMessages = async (): Promise<MessageType[] | false> => {
     const response = await fetch(
       RESTAPIUri +
@@ -429,6 +440,24 @@ function WindowConversation() {
       setBodyHeight(`${92.5 - newTextareaHeight}vh`);
     }
   };
+
+  // Fonction pour vérifier si le dernier message affiché correspond au dernier message de la conversation
+  const isLastMessageVisible = () => {
+    const lastVisibleMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+    const lastConvMsgId = lastMessageIdRef.current;
+    console.log("Last visible message:", lastVisibleMessage?._id);
+    console.log("LASTMESSAGE:" + lastConvMsgId);
+
+    // Si nous sommes au bas de la conversation ou si c'est le premier message
+    if (!lastVisibleMessage || lastVisibleMessage._id === lastConvMsgId) {
+      console.log("CEST OK");
+      return true;
+    } else {
+      console.log("c'est pas ok");
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (editingMsg) {
       setBodyHeight("80%");
@@ -452,21 +481,54 @@ function WindowConversation() {
       console.log(displayedConv._id);
       asyncFetchMsg();
 
-      socket.on("message", (data) => {
+      // Utiliser une fonction de référence pour accéder aux valeurs les plus récentes
+      const messageHandler = (data: any) => {
         const message = data[0];
         const convId = data[1]._id;
         console.log("MESSAGE RECU");
         console.log(message);
+        console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id);
+
         if (convId === displayedConv?._id) {
-          setMessages((prev) => [...prev, message]);
-          emitSeenMsgToSocket(message, displayedConv);
-          setLastMsgSeenByConvMembers((prev) =>
-            prev.map((item) =>
-              item.username === message.seenBy[0] ? { ...item, messageId: message._id } : item
-            )
-          );
+          // Utiliser une fonction pour obtenir l'état le plus récent
+          // Accéder aux valeurs actuelles via une fonction de rappel
+          setMessages((currentMessages) => {
+            // Vérifier si le dernier message visible est le dernier message de la conversation
+            const lastVisibleMessage =
+              currentMessages.length > 0 ? currentMessages[currentMessages.length - 1] : null;
+            const lastConvMsgId = lastMessageIdRef.current;
+            console.log("Last visible message:", lastVisibleMessage?._id);
+            console.log("LASTMESSAGE:" + lastConvMsgId);
+
+            // Si nous sommes au bas de la conversation ou si c'est le premier message
+            if (!lastVisibleMessage || lastVisibleMessage._id === lastConvMsgId) {
+              console.log("LE DERNIER MESSAGE EST LE DERNIER MESSAGE VISIBLE");
+              emitSeenMsgToSocket(message, displayedConv);
+              setLastMsgSeenByConvMembers((prev) =>
+                prev.map((item) =>
+                  item.username === message.seenBy[0] ? { ...item, messageId: message._id } : item
+                )
+              );
+              return [...currentMessages, message];
+            } else {
+              console.log("LE DERNIER MESSAGE N'EST PAS LE DERNIER MESSAGE VISIBLE");
+              // Ici vous pouvez ajouter une notification
+              return currentMessages;
+            }
+          });
+
+          // Mettre à jour d'abord displayedConv
+          setDisplayedConv((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              lastMessage: message,
+            };
+          });
         }
-      });
+      };
+
+      socket.on("message", messageHandler);
 
       socket.on(
         "seenMessage",
@@ -656,6 +718,7 @@ function WindowConversation() {
     if (isAtBottom && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView();
     }
+    console.log("USE EFFECT MTN");
 
     messages.forEach((message) => {
       if (!message._id) return;
@@ -663,6 +726,8 @@ function WindowConversation() {
         messagesRef.current[message._id] = React.createRef<HTMLDivElement>();
       }
     });
+
+    return () => {};
   }, [messages.length, displayedConv?._id]);
 
   /* Scroll Management --------------------------------------------------------------------------------------------
@@ -812,6 +877,25 @@ function WindowConversation() {
       setBodyHeight("85%");
     }
   }, [quotedMessage]);
+
+  useEffect(() => {
+    if (displayedConv?.lastMessage?._id) {
+      lastMessageIdRef.current = displayedConv.lastMessage._id;
+    }
+  }, [displayedConv?.lastMessage?._id]);
+
+  function goToBottom(): void {
+    if (isLastMessageVisible()) {
+      console.log("scrolling to bottom");
+      scrollViewRef.current?.scrollTo({
+        top: scrollViewRef.current.scrollHeight,
+      });
+    } else {
+      console.log("fetchRecentMessages");
+      fetchRecentMessages();
+    }
+  }
+
   return (
     <AddedMembersContext.Provider value={{ addedMembers, setAddedMembers }}>
       <SelectedFoundMsgIdContext.Provider value={{ selectedFoundMsgId, setSelectedFoundMsgId }}>
@@ -853,13 +937,7 @@ function WindowConversation() {
                     </div>
                     {!isAtBottom && hasScroll && (
                       <div className="button-go-to-last-message">
-                        <button
-                          onClick={() =>
-                            scrollViewRef.current?.scrollTo({
-                              top: scrollViewRef.current.scrollHeight,
-                            })
-                          }
-                        >
+                        <button onClick={() => goToBottom()}>
                           <ArrowDown
                             color={"#00000"}
                             title="Défiler tout en bas"
@@ -1042,8 +1120,7 @@ function WindowConversation() {
                         <div
                           key={message.author + "-" + index}
                           onClick={() => {
-                            const test = new Date(message.date);
-                            console.log(test.getTime());
+                            console.log(message);
                           }}
                           ref={firstMessage ? firstMessageRef : messagesRef.current[message._id]}
                         >

@@ -33,6 +33,41 @@ export const postMessage = async (
     return false;
   }
 };
+
+export const getRecentMessages = async (conversationId: string, userId: string) => {
+  console.log("getRecentMessages");
+  try {
+    const response = await fetch(
+      RESTAPIUri +
+        "/message/userId/" +
+        userId +
+        "/getRecentMessages?conversationId=" +
+        conversationId,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${ApiToken()}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorMsg = await response.json();
+      throw new Error("Erreur lors du fetch Recent Messages: " + errorMsg);
+    }
+
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occured");
+    }
+    return false;
+  }
+};
 export const getMessageById = async (messageId: string, conversationId: string, userId: string) => {
   console.log("getMsgById");
   try {
