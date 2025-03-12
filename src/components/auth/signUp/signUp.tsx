@@ -1,12 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
+import "./signUp.css";
 
 function SignUp() {
   const [userName, setUserName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  const [passwordsMatch, setPasswordsMatch] = useState<boolean>(false);
+
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
+
+  // Vérifier si les mots de passe correspondent
+  useEffect(() => {
+    if (password && confirmPassword) {
+      setPasswordsMatch(password === confirmPassword);
+    } else {
+      setPasswordsMatch(false);
+    }
+  }, [password, confirmPassword]);
 
   const createUserinDb = async () => {
     const postData = {
@@ -30,119 +48,190 @@ function SignUp() {
       return true;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.error(error.message);
+        throw error;
       } else {
-        console.error("An unknown error occurred");
+        throw new Error("Une erreur inconnue s'est produite");
       }
     }
   };
+
   const createUserFireBase = async (): Promise<boolean> => {
-    let created = false;
-    await createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed up
-        const user = userCredential.user;
-        created = true;
-        // ...
-        console.log(user);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // ..
-        console.error(errorCode, errorMessage);
-      });
-    return created;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log(user);
+      return true;
+    } catch (error: any) {
+      const errorCode = error.code;
+      let errorMessage = "Une erreur s'est produite lors de la création du compte";
+
+      if (errorCode === "auth/email-already-in-use") {
+        errorMessage = "Cet email est déjà utilisé";
+      } else if (errorCode === "auth/weak-password") {
+        errorMessage = "Le mot de passe est trop faible";
+      }
+
+      throw new Error(errorMessage);
+    }
   };
 
-  // Check if mail already exists in DB
   const checkEmail = async () => {
     try {
       const response = await fetch(RESTAPIUri + "/user/checkMail/" + email);
       if (!response.ok) {
-        throw new Error("Erreur lors de la recherche de données");
+        throw new Error("Erreur lors de la vérification de l'email");
       }
       const jsonData = await response.json();
-      console.log("Mail : " + jsonData.mailExists);
       return jsonData.mailExists;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.error(error.message);
+        throw error;
       } else {
-        console.error("An unknown error occurred");
+        throw new Error("Une erreur inconnue s'est produite");
       }
-      return true; //if there is an error, returns true to be sure user can't use this mail in case it is only used but there was an error
     }
   };
 
   const checkUserName = async () => {
     try {
-      const response = await fetch(
-        RESTAPIUri + "/user/checkUserName/" + userName
-      );
+      const response = await fetch(RESTAPIUri + "/user/checkUserName/" + userName);
       if (!response.ok) {
-        throw new Error("Erreur lors de la recherche de données");
+        throw new Error("Erreur lors de la vérification du nom d'utilisateur");
       }
       const jsonData = await response.json();
-      console.log("Username : " + jsonData.userExists);
       return jsonData.userExists === true;
     } catch (error) {
       if (error instanceof Error) {
-        console.error(error.message);
+        throw error;
       } else {
-        console.error("An unknown error occurred");
+        throw new Error("Une erreur inconnue s'est produite");
       }
-      return true; //if there is an error, returns true to be sure user can't use this mail in case it is only used but there was an error
     }
   };
 
   const signUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+    setSuccess(false);
+    setLoading(true);
+
+    // Vérification des mots de passe
+    if (password !== confirmPassword) {
+      setError("Les mots de passe ne correspondent pas");
+      setLoading(false);
+      return;
+    }
 
     try {
       const isMailExisting = await checkEmail();
       const isUserExisting = await checkUserName();
-      if (isMailExisting || isUserExisting) {
-        console.log("Mail ou username déja utilisé");
+
+      if (isMailExisting) {
+        setError("Cet email est déjà utilisé");
+      } else if (isUserExisting) {
+        setError("Ce nom d'utilisateur est déjà utilisé");
       } else {
-        if (await createUserinDb()) {
-          console.log("User created db");
-          if (!(await createUserFireBase())) {
-            console.log("User not created in firebase"); // TODO DELETE USER FROM DB
-          }
-        }
+        await createUserinDb();
+        await createUserFireBase();
+        setSuccess(true);
+        setUserName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
       }
     } catch (error) {
-      console.error("Erreur lors de la vérification de l'email", error);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Une erreur inconnue s'est produite");
+      }
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
-    <div className="signin-form">
-      <form onSubmit={(e) => signUp(e)}>
+    <form className="auth-form" onSubmit={(e) => signUp(e)}>
+      <h2 className="auth-title">Créer un compte</h2>
+      <p className="auth-subtitle">Rejoignez notre communauté</p>
+
+      <div className="form-group">
+        <label htmlFor="username">Nom d'utilisateur</label>
         <input
-          type="mail"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
+          id="username"
           type="text"
-          placeholder="Username"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
           required
         />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="signup-email">Email</label>
         <input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          id="signup-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
-        ></input>
-        <button type="submit"> Connecter</button>
-      </form>
-    </div>
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="signup-password">Mot de passe</label>
+        <div className="password-input-container">
+          <input
+            id="signup-password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "Cacher" : "Voir"}
+          </button>
+        </div>
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="confirm-password">Confirmer le mot de passe</label>
+        <div className="password-input-container">
+          <input
+            id="confirm-password"
+            type={showConfirmPassword ? "text" : "password"}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className={confirmPassword ? (passwordsMatch ? "match" : "no-match") : ""}
+            required
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            {showConfirmPassword ? "Cacher" : "Voir"}
+          </button>
+        </div>
+        {confirmPassword && (
+          <div className={`password-match-indicator ${passwordsMatch ? "match" : "no-match"}`}>
+            {passwordsMatch
+              ? "Les mots de passe correspondent"
+              : "Les mots de passe ne correspondent pas"}
+          </div>
+        )}
+      </div>
+
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">Compte créé avec succès!</div>}
+
+      <button type="submit" className="auth-button" disabled={loading}>
+        {loading ? "Création en cours..." : "S'inscrire"}
+      </button>
+    </form>
   );
 }
 

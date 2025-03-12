@@ -1,0 +1,54 @@
+/* Utilise les mêmes styles que signIn.css */
+
+/* Styles spécifiques pour la visibilité du mot de passe */
+.password-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-container input {
+  flex: 1;
+  padding-right: 70px; /* Espace pour le bouton */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #6e8efb;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.toggle-password:hover {
+  text-decoration: underline;
+}
+
+/* Styles pour l'indicateur de correspondance des mots de passe */
+.password-match-indicator {
+  font-size: 12px;
+  margin-top: 5px;
+  transition: all 0.3s ease;
+}
+
+.password-match-indicator.match {
+  color: #2e7d32;
+}
+
+.password-match-indicator.no-match {
+  color: #d32f2f;
+}
+
+/* Styles pour les champs de mot de passe */
+input.match {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 1px rgba(46, 125, 50, 0.2);
+}
+
+input.no-match {
+  border-color: #d32f2f;
+  box-shadow: 0 0 0 1px rgba(211, 47, 47, 0.2);
+}
