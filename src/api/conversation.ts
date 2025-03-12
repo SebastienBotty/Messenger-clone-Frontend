@@ -1,6 +1,5 @@
 import { ApiToken } from "../localStorage";
 import { ConversationType, CustomizationType, UserDataType } from "../typescript/types";
-import { postMessage } from "./message";
 
 const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
@@ -39,6 +38,35 @@ export const postConversation = async (
       console.error(error.message);
     } else {
       console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
+
+export const getConversations = async (userId: string): Promise<ConversationType[] | false> => {
+  try {
+    const response = await fetch(
+      RESTAPIUri + "/conversation/userId/" + userId + "/getConversations",
+      {
+        method: "GET",
+        headers: {
+          "Application-type": "Application/json",
+          Authorization: "Bearer " + ApiToken(),
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorMsg = await response.json();
+      throw new Error("Erreur lors du fetch Conversations :" + errorMsg.message);
+    }
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occured");
     }
     return false;
   }

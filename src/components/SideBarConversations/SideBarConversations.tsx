@@ -42,6 +42,7 @@ import {
   updateConvAdmin,
   updateMostRecentConvAdmin,
 } from "../../functions/updateConversation";
+import { getConversations } from "../../api/conversation";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const { user, setUser } = useUserContext();
@@ -61,6 +62,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const authApiToken = ApiToken();
 
   const fetchConversationLastMsg = async (conversationArr: ConversationType[]) => {
+    //Done this a while ago, kinda ugly but it is working and dont want to change it
     //Disgusting code i gotta modify later
     const responseArr: ConversationType[] = [];
     for (let conversation of conversationArr) {
@@ -103,68 +105,18 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       .reverse();
     return responseArr;
   };
-  const fetchConversations = async (idsArray: string[]) => {
-    console.log("Fetching conversations");
-    const conversationsIdStr: string = idsArray.join("-");
-    try {
-      const response = await fetch(
-        RESTAPIUri +
-          "/conversation/userId/" +
-          user?._id +
-          "/getConversations?conversationsId=" +
-          conversationsIdStr,
-        {
-          headers: {
-            Authorization: `Bearer ${authApiToken}`,
-          },
-        }
-      );
-      if (!response.ok) {
-        console.log("Error fetching conversations");
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-      console.log("Conversations fetched");
-      const jsonData = await response.json();
-      console.log("CONVERSATIONS");
-      console.log(jsonData);
-      const test = await fetchConversationLastMsg(jsonData);
-      setDisplayedConv(test[0]);
-      setMostRecentConv(test[0]);
-      setConversations((prev) => [...test, ...prev]);
-      set5LatestConversation(test);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  };
 
-  const fetchConversationsId = async () => {
-    try {
-      const response = await fetch(RESTAPIUri + "/user/userConversationsId/userId/" + user?._id, {
-        headers: {
-          Authorization: `Bearer ${authApiToken}`,
-        },
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-      const jsonData = await response.json();
-      if (jsonData[0].conversations.length > 0) {
-        fetchConversations(jsonData[0].conversations);
-      } else {
-        setShowConversationWindow(true);
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
+  const fetchConversations = async () => {
+    if (!user?._id) return;
+    const conversations = await getConversations(user?._id);
+
+    if (conversations && conversations.length > 0) {
+      setShowConversationWindow(true);
+      console.log(conversations);
+      setConversations(conversations);
+      setDisplayedConv(conversations[0]);
+      setMostRecentConv(conversations[0]);
+      set5LatestConversation(conversations);
     }
   };
 
@@ -175,6 +127,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     const conv = await fetchConversationLastMsg([lastConv]);
     lastConv.lastMessage.date = new Date(conv[0].lastMessage.date);
     filteredConvArr.unshift(lastConv);
+    console.log(lastConv);
     setConversations(filteredConvArr);
   };
 
@@ -272,7 +225,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   };
 
   useEffect(() => {
-    fetchConversationsId();
+    fetchConversations();
     return () => {};
   }, []);
 
@@ -331,45 +284,50 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                   .filter((item) => item.username !== user?.userName)
                   .map((member) => getNickNameByUsername(conversation.members, member.username))}
           </div>
-          <div id="conversation-last-message">
-            <div
-              className="truncated-text"
-              id={
-                conversation.lastMessage.seenBy.some((seenBy) => seenBy.username === user?.userName)
-                  ? "seen"
-                  : "unseen-conversation"
-              }
-            >
-              {
-                //Kinda messy yeah
-              }
-              {conversation.lastMessage.author === "System/" + conversation._id ? (
-                <ConvSystemMsg
-                  textProps={
+
+          {conversation.lastMessage && (
+            <div id="conversation-last-message">
+              <div
+                className="truncated-text"
+                id={
+                  conversation.lastMessage.seenBy.some(
+                    (seenBy) => seenBy.username === user?.userName
+                  )
+                    ? "seen"
+                    : "unseen-conversation"
+                }
+              >
+                {
+                  //Kinda messy yeah
+                }
+                {conversation.lastMessage.author === "System/" + conversation._id ? (
+                  <ConvSystemMsg
+                    textProps={
+                      conversation.lastMessage.text[conversation.lastMessage.text.length - 1]
+                    }
+                    members={conversation.members}
+                  />
+                ) : (
+                  getMessageText(
+                    conversation._id,
+                    user?.userName,
+                    conversation.lastMessage.author,
                     conversation.lastMessage.text[conversation.lastMessage.text.length - 1]
-                  }
-                  members={conversation.members}
-                />
-              ) : (
-                getMessageText(
-                  conversation._id,
-                  user?.userName,
-                  conversation.lastMessage.author,
-                  conversation.lastMessage.text[conversation.lastMessage.text.length - 1]
-                )
-              )}
-            </div>{" "}
-            &nbsp;- {timeSince(conversation.lastMessage.date)} &nbsp;
-            <div className="conversation-right-icons-container">
-              {" "}
-              {isConvMuted(user?.mutedConversations, conversation._id) && (
-                <NotificationsOff height="1rem" width="1rem" color="#B0B3B8" />
-              )}
-              {!conversation.lastMessage.seenBy.some((seenBy) => seenBy.userId === user?._id) && (
-                <div className="unseen-conversation-notification"></div>
-              )}
+                  )
+                )}
+              </div>{" "}
+              &nbsp;- {timeSince(conversation.lastMessage.date)} &nbsp;
+              <div className="conversation-right-icons-container">
+                {" "}
+                {isConvMuted(user?.mutedConversations, conversation._id) && (
+                  <NotificationsOff height="1rem" width="1rem" color="#B0B3B8" />
+                )}
+                {!conversation.lastMessage.seenBy.some((seenBy) => seenBy.userId === user?._id) && (
+                  <div className="unseen-conversation-notification"></div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           <div
             className="conversation-params"
             style={{
@@ -443,16 +401,17 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       console.log(data[0]);
       const currentMsg = data[0];
       const conversation = data[1];
+
       setConversations((prev) => {
         return prev.map((conv) => {
-          console.log("conv: " + conv._id + " currentMsg: " + currentMsg.conversationId);
-          if (conv._id === currentMsg.conversationId) {
-            console.log("CONVO ICI XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-
+          /*           console.log("conv: " + conv._id + " currentMsg: " + currentMsg.conversationId);
+           */ if (conv._id === currentMsg.conversationId) {
+            /*             console.log("CONVO ICI XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+             */
             return { ...conv, lastMessage: { ...currentMsg, date: new Date(currentMsg.date) } };
           } else {
-            console.log("là");
-            return conv;
+            /*             console.log("là");
+             */ return conv;
           }
         });
       });
