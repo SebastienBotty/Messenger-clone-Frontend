@@ -125,7 +125,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       (conversation) => conversation._id !== lastConv._id
     );
     const conv = await fetchConversationLastMsg([lastConv]);
-    lastConv.lastMessage.date = new Date(conv[0].lastMessage.date);
+    lastConv.lastMessage = conv[0].lastMessage;
     filteredConvArr.unshift(lastConv);
     console.log(lastConv);
     setConversations(filteredConvArr);
