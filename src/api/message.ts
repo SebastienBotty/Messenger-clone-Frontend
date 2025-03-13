@@ -6,7 +6,7 @@ export const postMessage = async (
   messageData: MessageType,
   conversationData?: ConversationType
 ) => {
-  console.log("post message called");
+  //console.log("post message called");
   try {
     const response = await fetch(RESTAPIUri + "/message/", {
       method: "POST",
@@ -20,7 +20,7 @@ export const postMessage = async (
       throw new Error("Erreur lors du POST MEssage");
     }
     const jsonData = await response.json();
-    console.log(jsonData);
+    //console.log(jsonData);
     //console.log(displayedConv);
     //Reload the sideBar component to fetch the latest conversation
     return jsonData;
@@ -35,7 +35,7 @@ export const postMessage = async (
 };
 
 export const getRecentMessages = async (conversationId: string, userId: string) => {
-  console.log("getRecentMessages");
+  //console.log("getRecentMessages");
   try {
     const response = await fetch(
       RESTAPIUri +
@@ -74,8 +74,8 @@ export const getOlderMessages = async (
   conversationId: string,
   userId: string
 ): Promise<MessageType[] | false> => {
-  console.log("getOlderMessages");
-  console.log(messageId);
+  //console.log("getOlderMessages");
+  //console.log(messageId);
   try {
     const response = await fetch(
       RESTAPIUri +
@@ -115,8 +115,8 @@ export const getNewerMessages = async (
   conversationId: string,
   userId: string
 ): Promise<MessageType[] | false> => {
-  console.log("geNewerMessages");
-  console.log(messageId);
+  //console.log("geNewerMessages");
+  //console.log(messageId);
   try {
     const response = await fetch(
       RESTAPIUri +
@@ -152,7 +152,7 @@ export const getNewerMessages = async (
 };
 
 export const getMessageById = async (messageId: string, conversationId: string, userId: string) => {
-  console.log("getMsgById");
+  //console.log("getMsgById");
   try {
     const response = await fetch(
       RESTAPIUri +
@@ -168,7 +168,7 @@ export const getMessageById = async (messageId: string, conversationId: string, 
       throw new Error("Erreur lors du get messageById:" + errorMsg.message);
     }
     const jsonData = await response.json();
-    console.log(jsonData);
+    //console.log(jsonData);
     return jsonData;
   } catch (error) {
     if (error instanceof Error) {
@@ -186,9 +186,9 @@ export const deleteMessageForUser = async (
   username: string
 ): Promise<boolean> => {
   /*  console.log(messageId, userId, username);
-  console.log(); */
+ //console.log(); */
   if (!messageId) return false;
-  console.log(RESTAPIUri + "/message/userId/" + userId + "/markMessageAsDeletedByUser");
+  //console.log(RESTAPIUri + "/message/userId/" + userId + "/markMessageAsDeletedByUser");
   try {
     const response = await fetch(
       RESTAPIUri + "/message/userId/" + userId + "/markMessageAsDeletedByUser",
@@ -207,7 +207,7 @@ export const deleteMessageForUser = async (
     //console.log("ALOALOALOALO");
 
     if (!response.ok) {
-      console.log("ERREUR ICI");
+      //console.log("ERREUR ICI");
       const errorMsg = await response.json();
       throw new Error(errorMsg.message);
     }
@@ -246,12 +246,12 @@ export const deleteMessageForEveryone = async (
       }
     );
     if (!response.ok) {
-      console.log("ERREUR ICI");
+      //console.log("ERREUR ICI");
       const errorMsg = await response.json();
       throw new Error(errorMsg.message);
     }
     const data = await response.json();
-    console.log(data.message);
+    //console.log(data.message);
     return true;
   } catch (error) {
     if (error instanceof Error) {
@@ -287,12 +287,12 @@ export const changeMsgReaction = async (
     });
 
     if (!response.ok) {
-      console.log("ERREUR ICI");
+      //console.log("ERREUR ICI");
       const errorMsg = await response.json();
       throw new Error(errorMsg.message);
     }
     const jsonData = await response.json();
-    console.log(jsonData);
+    //console.log(jsonData);
 
     return jsonData.data;
   } catch (error) {
@@ -325,12 +325,12 @@ export const removeMsgReaction = async (
     });
 
     if (!response.ok) {
-      console.log("ERREUR ICI");
+      //console.log("ERREUR ICI");
       const errorMsg = await response.json();
       throw new Error(errorMsg.message);
     }
     const jsonData = await response.json();
-    console.log(jsonData);
+    //console.log(jsonData);
     return true;
   } catch (error) {
     if (error instanceof Error) {
@@ -366,12 +366,12 @@ export const editTextMessage = async (
     });
 
     if (!response.ok) {
-      console.log("ERREUR LORS DU PATCH MESSAGE TEXT");
+      //console.log("ERREUR LORS DU PATCH MESSAGE TEXT");
       const errorMsg = await response.json();
       throw new Error(errorMsg.message);
     }
     const jsonData = await response.json();
-    console.log(jsonData);
+    //console.log(jsonData);
     return jsonData;
   } catch (error) {
     if (error instanceof Error) {
@@ -410,6 +410,8 @@ export const fetchMessagesBeforeAndAfter = async (
       throw new Error("Erreur lor du fetch");
     }
     const jsonData = await response.json();
+    console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    console.log(jsonData);
     return jsonData;
   } catch (error) {
     if (error instanceof Error) {
@@ -449,7 +451,7 @@ export const searchMsgInConversation = async (
     }
 
     const jsonData = await response.json();
-    console.log(jsonData);
+    //console.log(jsonData);
     return jsonData;
   } catch (error) {
     if (error instanceof Error) {

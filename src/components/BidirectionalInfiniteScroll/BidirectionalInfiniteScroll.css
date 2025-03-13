@@ -1,0 +1,22 @@
+.loading-indicator {
+  text-align: center;
+  width: 100%;
+  padding: 10px;
+  color: #0084ff;
+  font-size: 14px;
+}
+
+.end-message {
+  text-align: center;
+  width: 100%;
+  padding: 10px;
+  color: #0084ff;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.conversation-messages {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}

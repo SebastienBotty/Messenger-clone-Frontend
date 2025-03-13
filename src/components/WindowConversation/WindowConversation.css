@@ -70,9 +70,13 @@
 
 .conversation-body {
   height: 85%;
-  overflow-y: scroll;
   overflow-x: hidden;
   flex: 1;
+}
+
+.conversation-body-infinite-scroll {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   width: 100%;
