@@ -486,9 +486,9 @@ function WindowConversation() {
       setFooterHeight("7.5vh");
       setBodyHeight("85vh");
     } else {
-      setFooterHeight(`${newTextareaHeight}vh`);
       // Ajuster la hauteur du corps en conséquence pour maintenir la hauteur totale constante
       setBodyHeight(`${92.5 - newTextareaHeight}vh`);
+      setFooterHeight(`${newTextareaHeight}vh`);
     }
   };
 
@@ -510,16 +510,6 @@ function WindowConversation() {
       return false;
     }
   };
-
-  useEffect(() => {
-    if (editingMsg) {
-      setBodyHeight("80%");
-      setFooterHeight("12.5%");
-    } else {
-      setFooterHeight("7.5%");
-      setBodyHeight("85%");
-    }
-  }, [editingMsg]);
 
   useEffect(() => {
     if (displayedConv) {
@@ -932,14 +922,10 @@ function WindowConversation() {
   };
 
   useEffect(() => {
-    if (quotedMessage) {
-      setBodyHeight("75%");
-      setFooterHeight("15%");
-    } else {
-      setFooterHeight("7.5%");
-      setBodyHeight("85%");
-    }
-  }, [quotedMessage]);
+    if (editingMsg || quotedMessage) handleTextAreaResize(15);
+    else handleTextAreaResize(15, "reset");
+    return () => {};
+  }, [editingMsg, quotedMessage]);
 
   useEffect(() => {
     if (displayedConv?.lastMessage?._id) {
@@ -1177,6 +1163,7 @@ function WindowConversation() {
                                   setEditingMsg={setEditingMsg}
                                   editingMsg={editingMsg}
                                   setQuotedMessage={setQuotedMessage}
+                                  quotedMessage={quotedMessage}
                                 />
                                 <div
                                   className={`message ${
@@ -1304,6 +1291,7 @@ function WindowConversation() {
                                   message={message}
                                   setQuotedMessage={setQuotedMessage}
                                   editingMsg={null}
+                                  quotedMessage={quotedMessage}
                                 />
                               </div>
                               {lastMsgSeenByConvMembers.some(
@@ -1405,6 +1393,7 @@ function WindowConversation() {
                                 message={message}
                                 setQuotedMessage={setQuotedMessage}
                                 editingMsg={null}
+                                quotedMessage={quotedMessage}
                               />
                             </div>
                             {lastMsgSeenByConvMembers.some(

@@ -29,11 +29,13 @@ function MessagesOptions({
   setEditingMsg,
   editingMsg,
   setQuotedMessage,
+  quotedMessage,
 }: {
   message: MessageType;
   setEditingMsg?: React.Dispatch<React.SetStateAction<MessageType | null>>;
   editingMsg: MessageType | null;
   setQuotedMessage: React.Dispatch<React.SetStateAction<QuotedMessageType | null>>;
+  quotedMessage: QuotedMessageType | null;
 }) {
   const { user } = useUserContext();
   const { messages, setMessages } = useMessagesContext();
@@ -191,7 +193,7 @@ function MessagesOptions({
   };
 
   const openRespondMsg = () => {
-    if (!message?._id || !message.conversationId) return null;
+    if (!message?._id || !message.conversationId || editingMsg) return null;
 
     setQuotedMessage({
       _id: message._id,
@@ -223,12 +225,13 @@ function MessagesOptions({
                 {!moreThanXmins(message.date, 10) &&
                   setEditingMsg &&
                   !isImg &&
-                  !message.deletedForEveryone && (
+                  !message.deletedForEveryone &&
+                  quotedMessage === null && (
                     <li className="message-more-options-li" onClick={editMessage}>
                       Modifier
                     </li>
                   )}{" "}
-                {!editingMsg && (
+                {!editingMsg && !quotedMessage && (
                   <li
                     className="message-more-options-li"
                     onClick={() =>
