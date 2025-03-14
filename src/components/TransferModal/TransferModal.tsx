@@ -142,7 +142,6 @@ function TransferModal({
               <div className="modal-searchbar">
                 <label htmlFor="search-conversations" className="modal-search-conversations-label">
                   <div className="modal-search-icon-container">
-                    {" "}
                     <SearchOutline color={"#65676b"} />
                   </div>
                 </label>

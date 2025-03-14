@@ -129,6 +129,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     filteredConvArr.unshift(lastConv);
     console.log(lastConv);
     setConversations(filteredConvArr);
+    return true;
   };
 
   const handleConversationClick = async (conversation: ConversationType) => {
@@ -202,15 +203,20 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     setRecentConversations(sortedConvArr.slice(0, 5));
   };
 
-  const update5LatestConversations = (conversation: ConversationType): void => {
-    if (recentConversations) {
-      let recentConvs = [...recentConversations];
-      recentConvs.push(conversation);
-      recentConvs.shift();
-      //console.log("UPDATE 5 LATEST CONVERSATIONS  RECENT CONVERSATIONS");
-      //console.log(recentConvs);
-      setRecentConversations(recentConvs);
-    }
+  const update5LatestConversations = (): void => {
+    setTimeout(() => {
+      const convs = [...conversations].sort(
+        (a, b) => new Date(b.lastMessage.date).getTime() - new Date(a.lastMessage.date).getTime()
+      );
+      let slicedArr: ConversationType[] = [];
+      if (convs.length > 4) {
+        slicedArr = convs.slice(0, 5);
+      } else {
+        slicedArr = convs.slice(0, convs.length);
+      }
+      console.log(slicedArr);
+      set5LatestConversation(slicedArr);
+    }, 500);
   };
 
   const handleConvParamsClick = (e: React.MouseEvent, conversation: ConversationType) => {
@@ -713,7 +719,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   useEffect(() => {
     if (mostRecentConv) {
       editConvLastMsg(mostRecentConv);
-      update5LatestConversations(mostRecentConv);
+
+      update5LatestConversations();
     }
     return () => {};
   }, [mostRecentConv, trigger]);
@@ -780,7 +787,12 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                 );
               })
               .map((conversation, index) => conversationsMap(conversation, index))
-          : conversations.map((conversation, index) => conversationsMap(conversation, index))}
+          : conversations
+              .sort(
+                (a, b) =>
+                  new Date(b.lastMessage.date).getTime() - new Date(a.lastMessage.date).getTime()
+              )
+              .map((conversation, index) => conversationsMap(conversation, index))}
       </div>
     </div>
   );
