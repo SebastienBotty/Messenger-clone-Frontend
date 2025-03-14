@@ -84,7 +84,7 @@ function EditingMsgFooter({
   };
 
   const editMsg = async () => {
-    if (!message._id || !message.conversationId || !displayedConv || !user) return;
+    if (!message._id || !message.conversationId || !displayedConv || !user || !validEdit) return;
     const editedMsg = await editTextMessage(
       message._id,
       inputMessage.trim(),
