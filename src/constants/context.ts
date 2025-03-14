@@ -8,6 +8,7 @@ import {
   ConversationContextType,
   MessagesRefContextType,
   AddedMembersContextType,
+  HasMoreMsgContextType,
 } from "../typescript/types";
 
 //User Context
@@ -98,6 +99,16 @@ export const useAddedMembersContext = () => {
   const context = useContext(AddedMembersContext);
   if (!context) {
     throw new Error("useAddedMembersContext must be used within a AddedMembersProvider");
+  }
+  return context;
+};
+
+export const HasMoreContext = createContext<HasMoreMsgContextType | undefined>(undefined);
+
+export const useHasMoreContext = () => {
+  const context = useContext(HasMoreContext);
+  if (!context) {
+    throw new Error("useHasMoreContext doit être utilisé dans un MessagesRefProvider");
   }
   return context;
 };

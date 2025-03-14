@@ -17,6 +17,7 @@ interface BidirectionalInfiniteScrollProps {
   height?: number | string;
   threshold?: number;
   onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
+  scrollRef: React.RefObject<HTMLDivElement>; // Ajoutez cette ligne
 }
 
 const BidirectionalInfiniteScroll: React.FC<BidirectionalInfiniteScrollProps> = ({
@@ -26,25 +27,19 @@ const BidirectionalInfiniteScroll: React.FC<BidirectionalInfiniteScrollProps> = 
   fetchNewer,
   hasMoreOlder,
   hasMoreNewer,
-  loaderOlder = <h4>Chargement des messages plus anciens...</h4>,
-  loaderNewer = <h4>Chargement des messages plus récents...</h4>,
-  endMessageOlder = <p>Aucun message plus ancien</p>,
-  endMessageNewer = <p>Vous êtes à jour</p>,
   scrollableTarget,
   className,
   style,
   height,
-  threshold = 20,
+  threshold = 50,
   onScroll,
+  scrollRef,
 }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [isAtTop, setIsAtTop] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
   const [prevDataLength, setPrevDataLength] = useState(dataLength);
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [loadingOlder, setLoadingOlder] = useState(false);
-  const [loadingNewer, setLoadingNewer] = useState(false);
 
   // Surveiller le défilement
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
@@ -92,7 +87,9 @@ const BidirectionalInfiniteScroll: React.FC<BidirectionalInfiniteScrollProps> = 
       const heightDifference = newScrollHeight - prevScrollHeight;
 
       if (heightDifference > 0 && scrollRef.current) {
-        scrollRef.current.scrollTop = scrollPosition + heightDifference;
+        scrollRef.current.scrollTo({
+          top: scrollPosition + heightDifference,
+        });
       }
     }
 
@@ -111,11 +108,7 @@ const BidirectionalInfiniteScroll: React.FC<BidirectionalInfiniteScrollProps> = 
       }}
       onScroll={handleScroll}
     >
-      {hasMoreOlder ? loaderOlder : endMessageOlder}
-
       {children}
-
-      {hasMoreNewer ? loaderNewer : endMessageNewer}
     </div>
   );
 };

@@ -215,3 +215,10 @@ export type AddedMembersContextType = {
   addedMembers: string[];
   setAddedMembers: React.Dispatch<React.SetStateAction<string[]>>;
 };
+
+export type HasMoreMsgContextType = {
+  hasMoreOlder: boolean;
+  setHasMoreOlder: React.Dispatch<React.SetStateAction<boolean>>;
+  hasMoreNewer: boolean;
+  setHasMoreNewer: React.Dispatch<React.SetStateAction<boolean>>;
+};

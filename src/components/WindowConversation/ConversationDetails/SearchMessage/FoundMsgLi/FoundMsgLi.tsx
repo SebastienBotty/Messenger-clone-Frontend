@@ -8,6 +8,7 @@ import {
   useSelectedFoundMsgIdContext,
   useUserContext,
   useMessagesRefContext,
+  useHasMoreContext,
 } from "../../../../../constants/context";
 import { fetchMessagesBeforeAndAfter } from "../../../../../api/message";
 import { isMsgInMessages } from "../../../../../functions/updateMessage";
@@ -31,6 +32,7 @@ function FoundMsgLi({
   const { messages, setMessages } = useMessagesContext();
   const { setSelectedFoundMsgId } = useSelectedFoundMsgIdContext();
   const { messagesRef } = useMessagesRefContext();
+  const { setHasMoreOlder, setHasMoreNewer } = useHasMoreContext();
 
   const extractSurroundingText = (phrase: string, mot: string): JSX.Element => {
     const indexMot = phrase.search(new RegExp(mot, "i"));
@@ -81,11 +83,19 @@ function FoundMsgLi({
         setMessages([]); //No idea why it is not working when i instantly setMessages(messagesAround)  but it does if i setMessages([]) then timeout and setMessages(messagesAround)
         setTimeout(() => {
           setMessages(messagesAround);
+
+          setTimeout(() => {
+            setHasMoreNewer(true);
+            setHasMoreOlder(true);
+          }, 500);
         }, 500);
       }
     }
     if (messagesRef.current && messagesRef.current[msg._id]?.current) {
-      messagesRef.current[msg._id].current?.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        if (!msg._id) return;
+        messagesRef.current[msg._id].current?.scrollIntoView({ behavior: "smooth" });
+      }, 500);
     }
     setSelectedFoundMsgId(msg._id);
   };

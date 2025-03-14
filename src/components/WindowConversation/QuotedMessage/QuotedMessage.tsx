@@ -4,6 +4,7 @@ import { ArrowUndo, AttachOutline } from "react-ionicons";
 import "./QuotedMessage.css";
 import { MessageType, QuotedMessageType } from "../../../typescript/types";
 import {
+  useHasMoreContext,
   useMessagesContext,
   useMessagesRefContext,
   useSelectedFoundMsgIdContext,
@@ -28,6 +29,7 @@ function QuotedMessage({
   const { messages, setMessages } = useMessagesContext();
   const { messagesRef } = useMessagesRefContext();
   const { setSelectedFoundMsgId } = useSelectedFoundMsgIdContext();
+  const { setHasMoreOlder, setHasMoreNewer } = useHasMoreContext();
 
   if (!user || typeof quotedMessage === "string" || !quotedMessage) return null;
 
@@ -61,6 +63,10 @@ function QuotedMessage({
         setMessages([]); //No idea why it is not working when i instantly setMessages(messagesAround)  but it does if i setMessages([]) then timeout and setMessages(messagesAround)
         setTimeout(() => {
           setMessages(messagesAround);
+          setTimeout(() => {
+            setHasMoreNewer(true);
+            setHasMoreOlder(true);
+          }, 500);
         }, 500);
         // Gotta repeat this because scroll doesn't work when i setMessages(messagesAround) (probably because it takes time to set Messages and create new Refs) ---- Not full working
         if (messagesRef.current && messagesRef.current[msg._id]?.current) {

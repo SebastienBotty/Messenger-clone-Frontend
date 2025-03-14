@@ -190,7 +190,6 @@
 }
 .message:has(.async-msg .msg-file-container div img) {
   background-color: transparent !important;
-  z-index: 1;
 }
 
 .selectedFoundMsg {
@@ -258,14 +257,18 @@
 }
 
 .button-go-to-last-message {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
   bottom: 0;
   margin-bottom: 7.5rem;
-  left: 50%;
-  width: fit-content;
-  cursor: pointer;
+  left: 0;
+
+  width: 100%;
   border-radius: 50%;
+  z-index: 1;
+  pointer-events: none;
 }
 .button-go-to-last-message > button {
   cursor: pointer;
@@ -273,6 +276,16 @@
   padding: 0.5rem;
   border: none;
   box-shadow: rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.button-go-to-last-message > button > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .button-go-to-last-message > button:hover {
@@ -293,7 +306,7 @@
 
 .editing-message-highlight {
   position: relative;
-  z-index: 2;
+  : 2;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   background-color: white !important;
 } */
