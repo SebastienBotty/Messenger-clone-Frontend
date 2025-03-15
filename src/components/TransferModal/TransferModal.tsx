@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback, useContext, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import "./TransferModal.css";
 import { SearchOutline, Close } from "react-ionicons";
 import { useRecentConversationContext } from "../../screens/userLoggedIn/userLoggedIn";
 import { useUserContext } from "../../constants/context";
 import _ from "lodash";
-import { ApiToken } from "../../localStorage";
 import { ConversationType, MessageType } from "../../typescript/types";
 import ConversationLi from "./ConversationLi";
+import { searchConversationWithUser } from "../../api/conversation";
 
 function TransferModal({
   closeModal,
@@ -22,7 +22,6 @@ function TransferModal({
   const [searchConversationInput, setSearchConversationInput] = useState<string>("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [conversationsList, setConversationsList] = useState<ConversationType[]>([]);
-  const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const { recentConversations } = useRecentConversationContext();
 
@@ -38,49 +37,17 @@ function TransferModal({
     debouncedFetConversations(e.target.value);
   };
 
-  const searchConversationWithUser = async (searchQuery: string) => {
-    try {
-      if (!user) {
-        throw new Error("L'utilisateur n'est pas défini.");
-      }
-      const response = await fetch(
-        RESTAPIUri +
-          "/conversation/userId/" +
-          user?._id +
-          "/conversationsWith?members=" +
-          searchQuery +
-          "&user=" +
-          user?.userName,
-        {
-          headers: { authorization: `Bearer ${ApiToken()}` },
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Erreur lors de la recherche d'utilisateur");
-      }
-      const jsonData = await response.json();
-      console.log("SEARCH VONERSATION ICI");
-      console.log(jsonData);
-      //setUsersPrediction(jsonData);
-      return jsonData;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-      return false;
-    }
-  };
-
   const debouncedFetConversations = useCallback(
     _.debounce(async (searchQuery: string) => {
+      if (!user?._id) return;
       console.log("))))))))");
       console.log(searchQuery);
       if (searchQuery.length > 2) {
-        let conversations = await searchConversationWithUser(searchQuery);
-        console.log(conversations);
-        setConversationsList(conversations.sort(sortConversationList));
+        let conversations = await searchConversationWithUser(searchQuery, user._id, user.userName);
+        if (conversations && conversations.length > 0) {
+          console.log(conversations);
+          setConversationsList(conversations.sort(sortConversationList));
+        }
       }
     }, 300),
     []

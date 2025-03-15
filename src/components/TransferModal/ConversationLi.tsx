@@ -7,6 +7,7 @@ import { useMostRecentConvContext } from "../../screens/userLoggedIn/userLoggedI
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { transferMsg } from "../../api/message";
 import { getNickNameByUsername } from "../../functions/StrFormatter";
+import { postTransferImage } from "../../api/file";
 
 function ConversationLi(props: {
   conversation: ConversationType;
@@ -19,6 +20,8 @@ function ConversationLi(props: {
   const user = props.user;
   const selectedImg = props.selectedImg;
   const selectedMsg = props.selectedMsg;
+  console.log("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
+  console.log(selectedImg);
 
   const [sendingStatus, setSendingStatus] = useState<number>(-1);
   const [btnMessage, setBtnMessage] = useState<string>("Envoyer");
@@ -30,53 +33,20 @@ function ConversationLi(props: {
     partner = conversation.members.find((member) => member.userId !== user?._id);
   }
 
-  const transferImage = async (): Promise<MessageType | false> => {
-    console.log("TEST MSG");
-    if (user) {
-      console.log("Envoie image");
+  const transferImage = async () => {
+    if (!user?._id) return;
+    setSendingStatus(0);
+    setBtnMessage("Envoi");
 
-      setSendingStatus(0);
-      setBtnMessage("Envoi");
-      const postData = {
-        userId: user?._id,
-        sender: user?.userName,
-        targetConversationId: conversation._id,
-        fileUrl: selectedImg,
-        date: new Date(),
-      };
-      try {
-        const response = await fetch(RESTAPIUri + "/file/userId/" + user?._id + "/transferImage", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${ApiToken()}`,
-          },
-          body: JSON.stringify(postData),
-        });
+    const postData = {
+      userId: user._id,
+      sender: user.userName,
+      targetConversationId: conversation._id,
+      fileUrl: selectedImg,
+      date: new Date(),
+    };
 
-        if (!response.ok) {
-          console.log(response.statusText);
-          throw new Error(response.statusText);
-        }
-        setTimeout(() => {
-          setBtnMessage("Envoyé");
-          setSendingStatus(1);
-        }, 500);
-        console.log("msg envoyé");
-        const jsonData = await response.json();
-
-        return jsonData;
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error(error.message);
-        } else {
-          console.error("An unknown error occurred");
-        }
-      }
-    } else {
-      console.log("no user");
-    }
-    return false;
+    return await postTransferImage(postData);
   };
 
   const getUsersSocket = async (conversation: ConversationType | null) => {
@@ -122,6 +92,18 @@ function ConversationLi(props: {
       : await transferImage();
     if (messageData) {
       emitMsgTransferedMsgToSocket(messageData, convMembersSocket, conversation);
+      setTimeout(() => {
+        setBtnMessage("Envoyé");
+        setSendingStatus(1);
+      }, 500);
+    } else {
+      setBtnMessage("Echec");
+      setSendingStatus(1);
+
+      setTimeout(() => {
+        setBtnMessage("Envoyer");
+        setSendingStatus(-1);
+      }, 1000);
     }
     setMostRecentConv(conversation);
   };

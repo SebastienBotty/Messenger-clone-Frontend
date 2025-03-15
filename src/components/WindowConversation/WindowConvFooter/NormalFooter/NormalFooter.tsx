@@ -19,6 +19,7 @@ import { socket } from "../../../../Sockets/socket";
 import { calculateTotalSize, formatFileSize } from "../../../../functions/file";
 
 import "./NormalFooter.css";
+import { uploadFiles } from "../../../../api/file";
 
 function NormalFooter({
   setShowDragOverOverlay,
@@ -58,10 +59,10 @@ function NormalFooter({
     setInputMessage(e.target.value);
 
     // Force le recalcul de la hauteur à chaque changement
-    setTimeout(adjustTextareaHeight, 0);
 
     if (e.target.value.trim() !== "") {
       emitUserWrittingToSocket(true);
+      setTimeout(adjustTextareaHeight, 0);
     } else {
       emitUserWrittingToSocket(false);
 
@@ -69,7 +70,9 @@ function NormalFooter({
       if (textAreaRef.current) {
         console.log("OCOCOCOCOCOC");
         onTextAreaResize(0, "reset");
-        if (textAreaRef.current) textAreaRef.current.style.height = "4vh";
+        const height = window.innerHeight * 0.04; // 4vh en pixels
+        console.log(height);
+        textAreaRef.current.style.height = height + "px";
       }
     }
   };
@@ -89,17 +92,19 @@ function NormalFooter({
     const maxHeight = window.innerHeight * 0.3;
     const minHeight = window.innerHeight * 0.04; // 4vh en pixels
 
-    // Définit la nouvelle hauteur en fonction du contenu
+    // Définit la nouvelle hauteur en fonction du contenu - part 1
     const scrollHeight = Math.max(textarea.scrollHeight, minHeight);
     const newHeight = Math.min(scrollHeight, maxHeight);
-    textarea.style.height = `${newHeight}px`;
-
-    // Gestion du scroll si le contenu dépasse la hauteur maximale
-    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
 
     // Met à jour la hauteur du footer
     const footerHeightPercentage = (newHeight / window.innerHeight) * 100;
     onTextAreaResize(Math.max(7.5, footerHeightPercentage));
+
+    // Définit la nouvelle hauteur en fonction du contenu - part 2
+    textarea.style.height = `${newHeight}px`;
+
+    // Gestion du scroll si le contenu dépasse la hauteur maximale
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
 
     // Restaure la position du curseur
     textarea.setSelectionRange(selectionStart, selectionEnd);
@@ -211,7 +216,13 @@ function NormalFooter({
       //console.log(MAX_FILE_SIZE_BYTES);
 
       if (totalSize <= MAX_FILE_SIZE_BYTES) {
-        setDroppedFiles((prevFiles) => [...prevFiles, file]);
+        const encodedFileName = encodeURIComponent(file.name);
+        const newFile = new File([file], encodedFileName, {
+          type: file.type,
+          lastModified: file.lastModified,
+        });
+        console.log(newFile);
+        setDroppedFiles((prevFiles) => [...prevFiles, newFile]);
         setShowDragOverOverlay(false);
       } else {
         alert(
@@ -299,7 +310,7 @@ function NormalFooter({
         {droppedFiles.map((file, index) => (
           <div key={index} className="file-preview-item">
             <div className="delete-file" onClick={() => deleteSelectedFile(index)}>
-              <Close color={"red"} title={"Supprimer"} height="1.5rem" width="1.5rem" />
+              <Close color={"red"} title={"Supprimer"} height="1rem" width="1rem" />
             </div>
             {file.type.startsWith("image/") ? (
               <img
@@ -319,50 +330,21 @@ function NormalFooter({
     );
   };
 
-  const uploadFiles = async () => {
-    if (droppedFiles.length < 1) {
-      return;
-    }
-    const filesFormData = new FormData();
-    for (const file of droppedFiles) {
-      filesFormData.append("files", file);
-    }
-    //console.log(droppedFiles);
-    //console.log(filesFormData);
+  const sendFile = async () => {
+    if (!displayedConv?._id) return;
 
-    try {
-      const response = await fetch(RESTAPIUri + "/file/upload/" + displayedConv?._id, {
-        method: "POST",
+    const fileNamesTimeStamped = await uploadFiles(droppedFiles, displayedConv._id);
 
-        headers: {
-          authorization: `Bearer ${ApiToken()}`,
-        },
-        body: filesFormData,
-      });
-      if (!response.ok) {
-        throw new Error("Error uploading files");
-      }
-      const data = await response.json();
-      //console.log(data);
+    if (fileNamesTimeStamped) {
       if (inputFileRef.current) {
         inputFileRef.current.value = "";
       }
       setDroppedFiles([]);
-      return data;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
+      console.log("fichiers envoyés");
+      console.log(fileNamesTimeStamped);
+      sendMessage(fileNamesTimeStamped.fileNames);
     }
-  };
 
-  const sendFile = async () => {
-    const fileNamesTimeStamped = await uploadFiles();
-    console.log("fichiers envoyés");
-    console.log(fileNamesTimeStamped);
-    await sendMessage(fileNamesTimeStamped.fileNames);
     //console.log("msg envoyé");
   };
 
@@ -421,7 +403,7 @@ function NormalFooter({
   }, [quotedMessage]);
 
   return (
-    <div className="normal-footer" style={{ height: "100%" }}>
+    <div className="normal-footer">
       {quotedMessage && (
         <div className="normal-msg-header">
           <div className="normal-msg-header-author">
@@ -496,7 +478,7 @@ function NormalFooter({
             onChange={handleFileChange}
           />
           {droppedFiles.length > 0 ? (
-            <div>{filePreview()}</div>
+            <>{filePreview()}</>
           ) : (
             <textarea
               className="send-message"

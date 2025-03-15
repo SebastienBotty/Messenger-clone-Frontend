@@ -3,6 +3,7 @@ import { ConversationType, CustomizationType, UserDataType } from "../typescript
 
 const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
+// ----------------------------------------------------------POST
 export const postConversation = async (
   user: UserDataType,
   addedMembers: string[],
@@ -43,6 +44,7 @@ export const postConversation = async (
   }
 };
 
+//------------------------------------------GET-----------------------------------------
 export const getConversations = async (userId: string): Promise<ConversationType[] | false> => {
   try {
     const response = await fetch(
@@ -102,6 +104,43 @@ export const isPrivateConvExisting = async (user: UserDataType, addedMembers: st
     }
   }
 };
+
+export const searchConversationWithUser = async (
+  searchQuery: string,
+  userId: string,
+  username: string
+): Promise<ConversationType[] | false> => {
+  try {
+    const response = await fetch(
+      RESTAPIUri +
+        "/conversation/userId/" +
+        userId +
+        "/conversationsWith?members=" +
+        searchQuery +
+        "&user=" +
+        username,
+      {
+        headers: { authorization: `Bearer ${ApiToken()}` },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Erreur lors de la recherche d'utilisateur");
+    }
+    const jsonData = await response.json();
+    console.log("SEARCH VONERSATION ICI");
+    console.log(jsonData);
+    //setUsersPrediction(jsonData);
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
+
 export const leaveConv = async (
   conversationId: string,
   username: string,
