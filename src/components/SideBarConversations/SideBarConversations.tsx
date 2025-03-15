@@ -732,15 +732,15 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           <div className="first-line-title">Discussions</div>
           <div className="sideBar-header-buttons">
             <button onClick={() => console.log(user)}>
-              <EllipsisHorizontal color={"#00000"} title="Paramètres" height="2rem" width="2rem" />
+              <EllipsisHorizontal color={"#00000"} title="Paramètres" height="75%" width="75%" />
             </button>
 
             <button onClick={() => setDisplayedConv(null)}>
               <CreateOutline
                 color={"#00000"}
                 title="Nouvelle discussion"
-                height="2rem"
-                width="2rem"
+                height="75%"
+                width="75%"
               />
             </button>
           </div>
