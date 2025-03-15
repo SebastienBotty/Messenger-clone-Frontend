@@ -9,6 +9,7 @@ import { timeSince } from "../../functions/time";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
 import { socket } from "../../Sockets/socket";
 import { statusTranslate } from "../../constants/status";
+import { postProfilePic } from "../../api/file";
 
 function NavBar(props: NavBarProps) {
   const { user, setUser } = useUserContext();
@@ -71,45 +72,21 @@ function NavBar(props: NavBarProps) {
         alert("La taille de l'image ne doit pas depasser 2 Mo.");
         return;
       }
-      postProfilePic(file);
+      postPic(file);
     } else {
       console.log("no file");
     }
   };
 
-  const postProfilePic = async (file: File) => {
-    if (!user || !file) return;
-    const formData = new FormData();
-    formData.append("profilePic", file);
-    console.log("allo");
-    try {
-      const response = await fetch(RESTAPIUri + "/file/profilePic/" + user._id, {
-        method: "POST",
-        headers: {
-          authorization: "Bearer " + ApiToken(),
-        },
-        body: formData,
-      });
-      console.log("iciii");
-      if (!response.ok) {
-        const error = await response.json();
-        console.log("erreur");
-        throw new Error(error.message);
-      }
-      console.log("okokk");
-      const jsonData = await response.json();
-      console.log("papapapap");
-      console.log(jsonData);
+  const postPic = async (file: File) => {
+    if (!user?._id) return;
+
+    const response = await postProfilePic(file, user._id);
+    if (response) {
       setUser({
         ...user,
-        photo: jsonData.image,
+        photo: response.image,
       });
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
     }
   };
 

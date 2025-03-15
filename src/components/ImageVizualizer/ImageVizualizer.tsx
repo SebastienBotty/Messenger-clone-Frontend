@@ -1,7 +1,6 @@
 import React from "react";
 import "./ImageVizualizer.css";
 import { useRef, useState, useEffect } from "react";
-import { ApiToken } from "./../../localStorage";
 
 import {
   ArrowBackCircleOutline,
@@ -12,18 +11,15 @@ import {
 } from "react-ionicons";
 import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn";
 import TransferModal from "../TransferModal/TransferModal";
-import { ImgS3DataType } from "../../typescript/types";
+import { ImgS3DataType, ThumbnailsImgType } from "../../typescript/types";
 import { useUserContext } from "../../constants/context";
+import { fetchConvImages } from "../../api/file";
 
 type SelectedImageType = {
   src: string;
   index: number;
 };
 
-type thumbnailsImgType = {
-  name: string;
-  src: string;
-};
 function ImageVizualizer({
   closeVisualizer,
   imgData,
@@ -33,10 +29,9 @@ function ImageVizualizer({
 }) {
   const thumbnailsRef = useRef<HTMLDivElement>(null);
   //const { imgData, setImgData } = useImgVisualizerInitialImgContext();
-  const RESTAPIuri = process.env.REACT_APP_REST_API_URI;
   const { user } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
-  const [images, setImages] = useState<thumbnailsImgType[]>([]);
+  const [images, setImages] = useState<ThumbnailsImgType[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   /*  const [selectedImg, setSelectedImg] = useState<SelectedImageType>(()=>{
     if (imgData) {
@@ -128,43 +123,18 @@ function ImageVizualizer({
 
   useEffect(() => {
     const fetchImages = async () => {
-      console.log(displayedConv?._id);
-      if (displayedConv && imgData && user) {
-        try {
-          const response = await fetch(
-            RESTAPIuri +
-              "/file/UserId/" +
-              user._id +
-              "/conversationId/" +
-              displayedConv._id +
-              "/getConversationImages?fileName=" +
-              imgData.name,
-            {
-              method: "GET",
-              headers: {
-                authorization: "Bearer " + ApiToken(),
-              },
-            }
-          );
-          if (!response.ok) {
-            throw new Error(response.statusText);
-          }
-          const jsonData = await response.json();
-          console.log(jsonData);
-          setImages(jsonData);
-          setSelectedImg({
-            src: imgData.src,
-            index: Math.ceil(jsonData.length / 2),
-          });
-        } catch (error) {
-          if (error instanceof Error) {
-            console.error(error.message);
-          } else {
-            console.error("An unknown error occurred");
-          }
-        }
+      if (!user?._id || !displayedConv?._id) return;
+      const images = await fetchConvImages(user._id, displayedConv._id, imgData.name);
+
+      if (images) {
+        setImages(images);
+        setSelectedImg({
+          src: imgData.src,
+          index: Math.ceil(images.length / 2),
+        });
       }
     };
+
     setSelectedImg({ src: imgData ? imgData.src : images[0].src, index: -1 });
 
     fetchImages();

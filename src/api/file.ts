@@ -1,5 +1,5 @@
 import { ApiToken } from "../localStorage";
-import { MessageType } from "../typescript/types";
+import { MessageType, ThumbnailsImgType } from "../typescript/types";
 
 const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
@@ -77,6 +77,117 @@ export const postTransferImage = async (postData: TransferImageT): Promise<Messa
     const jsonData = await response.json();
 
     return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
+
+export const postProfilePic = async (
+  file: File,
+  userId: string
+): Promise<{ image: string } | false> => {
+  try {
+    const formData = new FormData();
+    formData.append("profilePic", file);
+    console.log("allo");
+    const response = await fetch(RESTAPIUri + "/file/profilePic/" + userId, {
+      method: "POST",
+      headers: {
+        authorization: "Bearer " + ApiToken(),
+      },
+      body: formData,
+    });
+    console.log("iciii");
+    if (!response.ok) {
+      const error = await response.json();
+      console.log("erreur");
+      throw new Error(error.message);
+    }
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
+
+//---------------------------------------GET-------------------------------
+
+export const fetchConvImages = async (
+  userId: string,
+  conversationId: string,
+  filename: string
+): Promise<ThumbnailsImgType[] | false> => {
+  try {
+    const response = await fetch(
+      RESTAPIUri +
+        "/file/UserId/" +
+        userId +
+        "/conversationId/" +
+        conversationId +
+        "/getConversationImages?fileName=" +
+        filename,
+      {
+        method: "GET",
+        headers: {
+          authorization: "Bearer " + ApiToken(),
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    const jsonData = await response.json();
+    console.log(jsonData);
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};
+
+interface FileData {
+  fileName: string;
+  type: string;
+  url: string;
+}
+
+export const fetchFilesData = async (
+  fileNamesStr: string,
+  conversationId: string
+): Promise<FileData[] | false> => {
+  try {
+    const response = await fetch(
+      RESTAPIUri + "/file/conversationId/" + conversationId + "/getFiles?fileNames=" + fileNamesStr,
+      {
+        method: "GET",
+        headers: {
+          authorization: "Bearer " + ApiToken(),
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message);
+    }
+
+    const JSONData = await response.json();
+
+    return JSONData.files;
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);

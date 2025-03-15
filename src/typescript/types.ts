@@ -150,6 +150,11 @@ export type ImgS3DataType = {
   convId?: string;
 };
 
+export type ThumbnailsImgType = {
+  name: string;
+  src: string;
+};
+
 export type displayedConvContextType = {
   displayedConv: ConversationType | null;
   setDisplayedConv: React.Dispatch<React.SetStateAction<ConversationType | null>>;

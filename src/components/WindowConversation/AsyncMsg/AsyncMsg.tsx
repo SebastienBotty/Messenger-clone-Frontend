@@ -5,6 +5,7 @@ import { ApiToken } from "../../../localStorage";
 import { LinkFormatter } from "../../Utiles/LinkFormatter/LinkFormatter";
 import ImageVizualizer from "../../ImageVizualizer/ImageVizualizer";
 import { ImgS3DataType, MessageType } from "../../../typescript/types";
+import { fetchFilesData } from "../../../api/file";
 
 function AsyncMsg({ message }: { message: MessageType }) {
   const convId = message.conversationId;
@@ -18,33 +19,11 @@ function AsyncMsg({ message }: { message: MessageType }) {
     convId: "",
   });
 
-  const fetchFilesUrl = async (fileNamesStr: string) => {
-    try {
-      const response = await fetch(
-        RESTAPIUri + "/file/conversationId/" + convId + "/getFiles?fileNames=" + fileNamesStr,
-        {
-          method: "GET",
-          headers: {
-            authorization: "Bearer " + ApiToken(),
-          },
-        }
-      );
+  const getFiles = async (fileNamesStr: string) => {
+    if (!message.conversationId) return false;
+    const response = await fetchFilesData(fileNamesStr, message.conversationId);
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
-      const JSONData = await response.json();
-
-      return JSONData.files;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
+    return response;
   };
 
   const handleImgClick = (fileUrl: string, fileName: string) => {
@@ -78,9 +57,14 @@ function AsyncMsg({ message }: { message: MessageType }) {
         setContent(<span>{<LinkFormatter text={text} />}</span>); // <span>{text}</span>);
       } else {
         const fileNamesStr = text.split("PATHIMAGE/" + convId + ":")[1];
-        const files = await fetchFilesUrl(fileNamesStr);
+        const files = await getFiles(fileNamesStr);
 
         const tempContent: ReactNode[] = [];
+        if (!files) {
+          tempContent.push(<span>Erreur lors du chargement</span>);
+          return;
+        }
+
         for (const file of files) {
           if (file.type === "image") {
             tempContent.push(
