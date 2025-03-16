@@ -244,7 +244,9 @@ function MessagesOptions({
                   </li>
                 )}
                 {!message.deletedForEveryone && (
-                  <li className="message-more-options-li">Transférer</li>
+                  <li className="message-more-options-li" onClick={() => alert("Not implemented")}>
+                    Transférer
+                  </li>
                 )}
               </ul>
             </div>

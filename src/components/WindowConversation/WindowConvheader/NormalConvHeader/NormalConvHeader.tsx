@@ -8,6 +8,7 @@ import { InformationCircle } from "react-ionicons";
 import { Call } from "react-ionicons";
 import { timeSince } from "../../../../functions/time";
 import "./NormalConvHeader.css";
+import { statusTranslate } from "../../../../constants/status";
 function NormalConvHeader({
   setShowConvDetails,
 }: {
@@ -23,11 +24,11 @@ function NormalConvHeader({
   }
 
   const renderOnlineSince = () => {
-    if (!displayedConv || !user) return null;
-    if (displayedConv.isGroupConversation) return null;
+    if (!displayedConv || !user || displayedConv.isGroupConversation) return null;
     const partnerInfos = displayedConv.members.find((member) => member.userId !== user._id);
     if (!partnerInfos) return null;
-    if (partnerInfos.isOnline && partnerInfos.status !== "Offline") return "En ligne";
+    if (partnerInfos.isOnline && partnerInfos.status !== "Offline")
+      return statusTranslate(partnerInfos.status);
     return "Hors ligne depuis " + timeSince(new Date(partnerInfos.lastSeen));
   };
   if (!displayedConv) return null;
@@ -72,8 +73,20 @@ function NormalConvHeader({
         </div>
       </div>
       <div className="conversation-buttons">
-        <Call color={"#00000"} title="Passer un appel vocal" height="3vh" width="3vh" />
-        <Videocam color={"#00000"} title="Lancer un appel vidéo" height="3vh" width="3vh" />
+        <Call
+          color={"#00000"}
+          title="Passer un appel vocal"
+          height="3vh"
+          width="3vh"
+          onClick={() => alert("Not implemented")}
+        />
+        <Videocam
+          color={"#00000"}
+          title="Lancer un appel vidéo"
+          height="3vh"
+          width="3vh"
+          onClick={() => alert("Not implemented")}
+        />
         <InformationCircle
           color={"#00000"}
           title="Informations sur la conversation"

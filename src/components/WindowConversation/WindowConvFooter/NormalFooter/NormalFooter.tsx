@@ -423,14 +423,7 @@ function NormalFooter({
       <div className="normal-msg-body">
         <div className="icons">
           <div className="icon" onClick={() => console.log(quotedMessage)}>
-            {" "}
-            <AddCircle
-              color={"black"}
-              title="Ouvrir plus d'actions"
-              height="3vh"
-              width="3vh"
-              style={{ marginRight: "0.5rem" }}
-            />
+            <AddCircle color={"black"} title="Ouvrir plus d'actions" height="3vh" width="3vh" />
           </div>
 
           {!inputMessage && displayedConv !== null && (

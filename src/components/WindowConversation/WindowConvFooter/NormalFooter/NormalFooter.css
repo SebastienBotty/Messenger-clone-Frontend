@@ -7,7 +7,7 @@
 
 .normal-msg-header {
   min-height: 2.5rem;
-
+  height: 25%;
   padding: 0.5rem;
   display: flex;
   justify-content: space-between;
