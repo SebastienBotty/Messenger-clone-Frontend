@@ -13,7 +13,7 @@ import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn
 import TransferModal from "../TransferModal/TransferModal";
 import { ImgS3DataType, ThumbnailsImgType } from "../../typescript/types";
 import { useUserContext } from "../../constants/context";
-import { fetchConvImages } from "../../api/file";
+import { fetchConvImages, getOlderFiles } from "../../api/file";
 
 type SelectedImageType = {
   src: string;
@@ -72,7 +72,20 @@ function ImageVizualizer({
     }
   };
 
-  const slideCarousel = (side: boolean) => {
+  const slideCarousel = async (side: boolean) => {
+    if (!side) {
+      if (!user?._id || !displayedConv?._id) return;
+      console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+      console.log(images);
+      console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+
+      const response = await getOlderFiles(user._id, displayedConv?._id, images[0].fileName);
+      if (response) {
+        console.log("RESPONSE/");
+        console.log(response);
+        //setImages((prev) => [...response, ...prev]);
+      }
+    }
     if (thumbnailsRef.current && selectedImg !== null) {
       if (side && selectedImg.index !== images.length - 1) {
         console.log("slide right");

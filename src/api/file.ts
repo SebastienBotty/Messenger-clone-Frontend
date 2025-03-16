@@ -197,3 +197,39 @@ export const fetchFilesData = async (
     return false;
   }
 };
+
+export const getOlderFiles = async (userId: string, conversationId: string, fileName: string) => {
+  console.log(
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  );
+  console.log(userId, conversationId, fileName);
+  try {
+    const response = await fetch(
+      `${RESTAPIUri}/file/userId/${userId}/conversationId/${conversationId}/getOlderFiles?fileName=${encodeURIComponent(
+        fileName
+      )}`,
+      {
+        method: "GET",
+        headers: {
+          authorization: "Bearer " + ApiToken(),
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};

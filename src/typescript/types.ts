@@ -151,7 +151,7 @@ export type ImgS3DataType = {
 };
 
 export type ThumbnailsImgType = {
-  name: string;
+  fileName: string;
   src: string;
 };
 
