@@ -15,9 +15,11 @@ function MediasGrid() {
   const { mediasCtxt, setMediasCtxt } = useConversationMediasContext();
   const { user, setUser } = useUserContext();
   const [imgData, setImgData] = useState<ImgS3DataType>({
+    _id: "",
     src: "",
     name: "",
     convId: "",
+    lastModified: new Date(),
   });
 
   const [showImgVisualizer, setShowImgVisualizer] = useState<boolean>(false);
@@ -27,7 +29,13 @@ function MediasGrid() {
   const handleImgClick = (media: MediasType) => {
     if (!displayedConv) return;
     const fileName = getFilenameFromUrl(media.Url);
-    setImgData({ src: media.Url, name: fileName, convId: displayedConv._id });
+    setImgData({
+      src: media.Url,
+      name: fileName,
+      convId: displayedConv._id,
+      _id: media._id,
+      lastModified: media.LastModified,
+    });
     setShowImgVisualizer(true);
   };
   const getFilenameFromUrl = (url: string) => {

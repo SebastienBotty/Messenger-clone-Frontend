@@ -122,10 +122,10 @@ export const postProfilePic = async (
 
 //---------------------------------------GET-------------------------------
 
-export const fetchConvImages = async (
+export const fetchConvImagesAround = async (
   userId: string,
   conversationId: string,
-  filename: string
+  fileId: string
 ): Promise<ThumbnailsImgType[] | false> => {
   try {
     const response = await fetch(
@@ -134,8 +134,8 @@ export const fetchConvImages = async (
         userId +
         "/conversationId/" +
         conversationId +
-        "/getConversationImages?fileName=" +
-        filename,
+        "/getConversationImagesAround?fileId=" +
+        fileId,
       {
         method: "GET",
         headers: {
@@ -160,9 +160,11 @@ export const fetchConvImages = async (
 };
 
 interface FileData {
+  _id: string;
   fileName: string;
   type: string;
   url: string;
+  lastModified: Date;
 }
 
 export const fetchFilesData = async (
@@ -186,7 +188,8 @@ export const fetchFilesData = async (
     }
 
     const JSONData = await response.json();
-
+    console.log("77777777777777777777777777777771111111111555555555555555555");
+    console.log(JSONData.files);
     return JSONData.files;
   } catch (error) {
     if (error instanceof Error) {
@@ -198,16 +201,24 @@ export const fetchFilesData = async (
   }
 };
 
-export const getOlderFiles = async (userId: string, conversationId: string, fileName: string) => {
+export const getMoreFiles = async (
+  userId: string,
+  conversationId: string,
+  fileId: string,
+  isPrev: boolean,
+  rejectedFilesId: string[]
+) => {
+  console.log(userId, conversationId, fileId, rejectedFilesId);
+
+  const rejectedFilesIdStr =
+    rejectedFilesId.length > 1 ? rejectedFilesId.join("-") : rejectedFilesId[0];
   console.log(
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
   );
-  console.log(userId, conversationId, fileName);
+  console.log(rejectedFilesIdStr);
   try {
     const response = await fetch(
-      `${RESTAPIUri}/file/userId/${userId}/conversationId/${conversationId}/getOlderFiles?fileName=${encodeURIComponent(
-        fileName
-      )}`,
+      `${RESTAPIUri}/file/userId/${userId}/conversationId/${conversationId}/getMoreImages?fileId=${fileId}&prev=${isPrev}&rejectedFilesIds=${rejectedFilesIdStr}`,
       {
         method: "GET",
         headers: {
@@ -223,6 +234,7 @@ export const getOlderFiles = async (userId: string, conversationId: string, file
     }
 
     const data = await response.json();
+
     return data;
   } catch (error) {
     if (error instanceof Error) {

@@ -13,11 +13,13 @@ import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn
 import TransferModal from "../TransferModal/TransferModal";
 import { ImgS3DataType, ThumbnailsImgType } from "../../typescript/types";
 import { useUserContext } from "../../constants/context";
-import { fetchConvImages, getOlderFiles } from "../../api/file";
+import { fetchConvImagesAround, getMoreFiles } from "../../api/file";
 
 type SelectedImageType = {
   src: string;
   index: number;
+  _id: string;
+  lastModified: Date;
 };
 
 function ImageVizualizer({
@@ -28,24 +30,17 @@ function ImageVizualizer({
   imgData: ImgS3DataType;
 }) {
   const thumbnailsRef = useRef<HTMLDivElement>(null);
-  //const { imgData, setImgData } = useImgVisualizerInitialImgContext();
   const { user } = useUserContext();
   const { displayedConv } = useDisplayedConvContext();
   const [images, setImages] = useState<ThumbnailsImgType[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
-  /*  const [selectedImg, setSelectedImg] = useState<SelectedImageType>(()=>{
-    if (imgData) {
-      return { src: imgData.src, index: 11 };
-  }else{
-    return { src: images[0], index: 0 };
-  }}); */
-  //const [selectedImg, setSelectedImg] = useState<SelectedImageType>({src: imgData?imgData.src:images[0].src, index: images.indexOf(imgData?imgData:images[0])});
   const [selectedImg, setSelectedImg] = useState<SelectedImageType | null>(null);
   const [translateValue, setTranslateValue] = useState<number>(0);
   const [mouseMoved, setMouseMoved] = useState<boolean>(false);
   let timeoutId: NodeJS.Timeout | null = null;
 
   const handleImgClick = (image: SelectedImageType) => {
+    console.log(image);
     if (selectedImg !== null) {
       let indexDifference: number = image.index - selectedImg.index;
       if (thumbnailsRef.current) {
@@ -73,47 +68,78 @@ function ImageVizualizer({
   };
 
   const slideCarousel = async (side: boolean) => {
+    const rejectedFilesId = images.map((image) => image._id);
     if (!side) {
       if (!user?._id || !displayedConv?._id) return;
-      console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-      console.log(images);
-      console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-
-      const response = await getOlderFiles(user._id, displayedConv?._id, images[0].fileName);
+      console.log("REFERENCE:");
+      console.log(images[0]);
+      const response = await getMoreFiles(
+        user._id,
+        displayedConv?._id,
+        images[0]._id,
+        true,
+        rejectedFilesId
+      );
       if (response) {
         console.log("RESPONSE/");
         console.log(response);
-        //setImages((prev) => [...response, ...prev]);
+        setImages((prev) => [...response, ...prev]);
       }
     }
-    if (thumbnailsRef.current && selectedImg !== null) {
-      if (side && selectedImg.index !== images.length - 1) {
-        console.log("slide right");
-        thumbnailsRef.current.style.transform = `translateX(${translateValue - 5}rem)`;
-        setTranslateValue((prev) => prev - 5);
-        setSelectedImg((prev) => {
-          if (prev !== null) {
-            return { src: images[prev.index + 1].src, index: prev.index + 1 };
-          } else {
-            return { src: images[0].src, index: 0 };
-          }
-        });
-      } else if (!side && selectedImg.index !== 0) {
-        console.log("slide left");
-        thumbnailsRef.current.style.transform = `translateX(${translateValue + 5}rem)`;
-        setTranslateValue((prev) => prev + 5);
-        setSelectedImg((prev) => {
-          if (prev !== null) {
-            return { src: images[prev.index - 1].src, index: prev.index - 1 };
-          } else {
-            return {
-              src: images[images.length - 1].src,
-              index: images.length - 1,
-            };
-          }
-        });
+
+    setTimeout(() => {
+      if (thumbnailsRef.current && selectedImg !== null) {
+        if (side && selectedImg.index !== images.length - 1) {
+          console.log("slide right");
+          thumbnailsRef.current.style.transform = `translateX(${translateValue - 5}rem)`;
+          setTranslateValue((prev) => prev - 5);
+          setSelectedImg((prev) => {
+            if (prev !== null) {
+              return {
+                src: images[prev.index + 1].src,
+                index: prev.index + 1,
+                _id: images[prev.index + 1]._id,
+                lastModified: images[prev.index + 1].lastModified,
+              };
+            } else {
+              return {
+                src: images[0].src,
+                index: 0,
+                _id: images[0]._id,
+                lastModified: images[0].lastModified,
+              };
+            }
+          });
+        } else if (!side && selectedImg.index !== 0) {
+          console.log("slide left");
+          thumbnailsRef.current.style.transform = `translateX(${translateValue + 5}rem)`;
+          setTranslateValue((prev) => prev + 5);
+          setSelectedImg((prev) => {
+            if (prev !== null) {
+              return {
+                src: images[prev.index - 1].src,
+                index: prev.index - 1,
+                _id: images[prev.index - 1]._id,
+                lastModified: images[prev.index - 1].lastModified,
+              };
+            } else {
+              console.log({
+                src: images[images.length - 1].src,
+                index: images.length - 1,
+                _id: images[0]._id,
+                lastModified: images[0].lastModified,
+              });
+              return {
+                src: images[images.length - 1].src,
+                index: images.length - 1,
+                _id: images[0]._id,
+                lastModified: images[0].lastModified,
+              };
+            }
+          });
+        }
       }
-    }
+    }, 500);
   };
 
   const handleMouseMove = () => {
@@ -137,18 +163,29 @@ function ImageVizualizer({
   useEffect(() => {
     const fetchImages = async () => {
       if (!user?._id || !displayedConv?._id) return;
-      const images = await fetchConvImages(user._id, displayedConv._id, imgData.name);
+      console.log("IMMMMMG DATAAAAAAAAAAAAAAA");
+      console.log(imgData);
+      const images = await fetchConvImagesAround(user._id, displayedConv._id, imgData._id);
 
       if (images) {
+        console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        console.log(images);
         setImages(images);
         setSelectedImg({
           src: imgData.src,
-          index: Math.ceil(images.length / 2),
+          index: images.findIndex((img) => img._id === imgData._id) || 0,
+          _id: imgData._id,
+          lastModified: imgData.lastModified,
         });
       }
     };
 
-    setSelectedImg({ src: imgData ? imgData.src : images[0].src, index: -1 });
+    setSelectedImg({
+      src: imgData ? imgData.src : images[0].src,
+      index: -1,
+      _id: imgData ? imgData._id : images[0]._id,
+      lastModified: imgData ? imgData.lastModified : images[0].lastModified,
+    });
 
     fetchImages();
     document.addEventListener("mousemove", handleMouseMove);
@@ -240,7 +277,14 @@ function ImageVizualizer({
                 return (
                   <img
                     src={image.src}
-                    onClick={() => handleImgClick({ src: image.src, index })}
+                    onClick={() =>
+                      handleImgClick({
+                        src: image.src,
+                        index,
+                        _id: image._id,
+                        lastModified: image.lastModified,
+                      })
+                    }
                     key={index + "-" + image}
                     style={index === selectedImg.index ? { filter: "brightness(1)" } : {}}
                   ></img>

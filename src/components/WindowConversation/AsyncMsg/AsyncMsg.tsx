@@ -1,7 +1,6 @@
 import React, { ReactNode, useEffect, useState } from "react";
 
 import "./AsyncMsg.css";
-import { ApiToken } from "../../../localStorage";
 import { LinkFormatter } from "../../Utiles/LinkFormatter/LinkFormatter";
 import ImageVizualizer from "../../ImageVizualizer/ImageVizualizer";
 import { ImgS3DataType, MessageType } from "../../../typescript/types";
@@ -11,12 +10,13 @@ function AsyncMsg({ message }: { message: MessageType }) {
   const convId = message.conversationId;
   const text = message.text[message.text.length - 1];
   const [content, setContent] = useState<ReactNode | null | JSX.Element[]>(null);
-  const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const [showImgVisualizer, setShowImgVisualizer] = useState<boolean | null>(false);
   const [imgData, setImgData] = useState<ImgS3DataType>({
+    _id: "",
     src: "",
     name: "",
     convId: "",
+    lastModified: new Date(),
   });
 
   const getFiles = async (fileNamesStr: string) => {
@@ -26,11 +26,22 @@ function AsyncMsg({ message }: { message: MessageType }) {
     return response;
   };
 
-  const handleImgClick = (fileUrl: string, fileName: string) => {
+  const handleImgClick = (
+    fileUrl: string,
+    fileName: string,
+    fileId: string,
+    lastModified: Date
+  ) => {
     if (convId) {
       console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
       console.log(fileName);
-      setImgData({ src: fileUrl, name: fileName, convId: convId });
+      setImgData({
+        src: fileUrl,
+        name: fileName,
+        convId: convId,
+        _id: fileId,
+        lastModified: lastModified,
+      });
     }
     setShowImgVisualizer(true);
   };
@@ -71,7 +82,9 @@ function AsyncMsg({ message }: { message: MessageType }) {
               <div className="file-preview-item">
                 <img
                   loading="lazy"
-                  onClick={() => handleImgClick(file.url, file.fileName)}
+                  onClick={() =>
+                    handleImgClick(file.url, file.fileName, file._id, file.lastModified)
+                  }
                   src={file.url}
                   alt={file.fileName}
                 />

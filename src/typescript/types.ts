@@ -111,6 +111,7 @@ export type Date15minDifference = {
 };
 
 export type MediasType = {
+  _id: string;
   Key: string;
   LastModified: Date;
   Size: number;
@@ -145,14 +146,18 @@ export type ConversationMemberType = {
 export type StatusType = "Online" | "Offline" | "Busy";
 
 export type ImgS3DataType = {
+  _id: string;
   src: string;
   name: string;
   convId?: string;
+  lastModified: Date;
 };
 
 export type ThumbnailsImgType = {
+  _id: string;
   fileName: string;
   src: string;
+  lastModified: Date;
 };
 
 export type displayedConvContextType = {
