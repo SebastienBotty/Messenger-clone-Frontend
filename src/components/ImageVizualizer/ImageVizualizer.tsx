@@ -54,13 +54,15 @@ function ImageVizualizer({
             translateValue + 4 * -indexDifference
           }rem)`;
           setTranslateValue((prev) => prev + 4 * -indexDifference);
+          getNewerPhotos();
         } else if (indexDifference < 0) {
-          // slide left
+          // slide right
 
           thumbnailsRef.current.style.transform = `translateX(${
             translateValue + 4 * -indexDifference
           }rem)`;
           setTranslateValue((prev) => prev + 4 * -indexDifference);
+          getOlderPhotos();
         }
         setSelectedImg(image);
       }
@@ -68,78 +70,76 @@ function ImageVizualizer({
   };
 
   const slideCarousel = async (side: boolean) => {
-    const rejectedFilesId = images.map((image) => image._id);
-    if (!side) {
-      if (!user?._id || !displayedConv?._id) return;
-      console.log("REFERENCE:");
-      console.log(images[0]);
-      const response = await getMoreFiles(
-        user._id,
-        displayedConv?._id,
-        images[0]._id,
-        true,
-        rejectedFilesId
-      );
-      if (response) {
-        console.log("RESPONSE/");
-        console.log(response);
-        setImages((prev) => [...response, ...prev]);
+    if (!user?._id || !displayedConv?._id) return;
+
+    if (thumbnailsRef.current && selectedImg !== null) {
+      if (side && selectedImg.index !== images.length - 1) {
+        getNewerPhotos();
+        thumbnailsRef.current.style.transform = `translateX(${translateValue - 5}rem)`;
+      } else if (!side && selectedImg.index !== 0) {
+        getOlderPhotos();
+        thumbnailsRef.current.style.transform = `translateX(${translateValue + 5}rem)`;
       }
     }
+  };
 
-    setTimeout(() => {
-      if (thumbnailsRef.current && selectedImg !== null) {
-        if (side && selectedImg.index !== images.length - 1) {
-          console.log("slide right");
-          thumbnailsRef.current.style.transform = `translateX(${translateValue - 5}rem)`;
-          setTranslateValue((prev) => prev - 5);
-          setSelectedImg((prev) => {
-            if (prev !== null) {
-              return {
-                src: images[prev.index + 1].src,
-                index: prev.index + 1,
-                _id: images[prev.index + 1]._id,
-                lastModified: images[prev.index + 1].lastModified,
-              };
-            } else {
-              return {
-                src: images[0].src,
-                index: 0,
-                _id: images[0]._id,
-                lastModified: images[0].lastModified,
-              };
-            }
-          });
-        } else if (!side && selectedImg.index !== 0) {
-          console.log("slide left");
-          thumbnailsRef.current.style.transform = `translateX(${translateValue + 5}rem)`;
-          setTranslateValue((prev) => prev + 5);
-          setSelectedImg((prev) => {
-            if (prev !== null) {
-              return {
-                src: images[prev.index - 1].src,
-                index: prev.index - 1,
-                _id: images[prev.index - 1]._id,
-                lastModified: images[prev.index - 1].lastModified,
-              };
-            } else {
-              console.log({
-                src: images[images.length - 1].src,
-                index: images.length - 1,
-                _id: images[0]._id,
-                lastModified: images[0].lastModified,
-              });
-              return {
-                src: images[images.length - 1].src,
-                index: images.length - 1,
-                _id: images[0]._id,
-                lastModified: images[0].lastModified,
-              };
-            }
-          });
-        }
-      }
-    }, 500);
+  const getOlderPhotos = async () => {
+    if (!user?._id || !selectedImg || !displayedConv?._id) return;
+    const rejectedFilesId = images.map((image) => image._id);
+    const previousImage = images[selectedImg.index - 1];
+    console.log("slide left");
+
+    setTranslateValue((prev) => prev + 5);
+    setSelectedImg({
+      src: previousImage.src,
+      index: 0,
+      _id: previousImage._id,
+      lastModified: previousImage.lastModified,
+    });
+    const response = await getMoreFiles(
+      user._id,
+      displayedConv?._id,
+      images[images.length - 1]._id,
+      true,
+      rejectedFilesId
+    );
+    if (response) {
+      console.log("RESPONSE/");
+      console.log(response);
+      setImages((prev) => [...response, ...prev]);
+      return response;
+    }
+    return false;
+  };
+
+  const getNewerPhotos = async () => {
+    if (!user?._id || !selectedImg || !displayedConv?._id) return;
+    const rejectedFilesId = images.map((image) => image._id);
+    const nextImage = images[selectedImg.index + 1];
+    console.log("slide right");
+
+    setTranslateValue((prev) => prev - 5);
+    setSelectedImg({
+      src: nextImage.src,
+      index: 0,
+      _id: nextImage._id,
+      lastModified: nextImage.lastModified,
+    });
+
+    const response = await getMoreFiles(
+      user._id,
+      displayedConv?._id,
+      images[0]._id,
+      false,
+      rejectedFilesId
+    );
+    if (response) {
+      console.log("RESPONSE/");
+      console.log(response);
+      setImages((prev) => [...prev, ...response]);
+      return response;
+    }
+    return false;
   };
 
   const handleMouseMove = () => {
@@ -200,12 +200,24 @@ function ImageVizualizer({
   }, [displayedConv]);
 
   useEffect(() => {
-    if (selectedImg !== null) {
-      console.log(selectedImg);
-    }
+    if (!selectedImg) return;
+    setSelectedImg((prev) => {
+      if (!prev) return prev;
+
+      const newIndex = images.findIndex((img) => img._id === selectedImg?._id);
+      if (newIndex !== -1) {
+        return {
+          src: prev.src,
+          index: newIndex,
+          _id: prev._id,
+          lastModified: prev.lastModified,
+        };
+      }
+      return prev;
+    });
 
     return () => {};
-  }, [selectedImg]);
+  }, [images, selectedImg?._id]);
 
   return (
     <div
@@ -285,8 +297,8 @@ function ImageVizualizer({
                         lastModified: image.lastModified,
                       })
                     }
-                    key={index + "-" + image}
-                    style={index === selectedImg.index ? { filter: "brightness(1)" } : {}}
+                    key={image._id + "-" + index}
+                    style={image._id === selectedImg._id ? { filter: "brightness(1)" } : {}}
                   ></img>
                 );
               })}
