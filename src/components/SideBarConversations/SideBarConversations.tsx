@@ -114,7 +114,6 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       setShowConversationWindow(true);
       console.log(conversations);
       setConversations(conversations);
-      setDisplayedConv(conversations[0]);
       setMostRecentConv(conversations[0]);
       set5LatestConversation(conversations);
     }
