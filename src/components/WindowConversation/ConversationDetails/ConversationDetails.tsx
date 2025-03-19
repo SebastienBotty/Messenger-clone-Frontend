@@ -15,7 +15,7 @@ import { muteConv } from "../../../constants/ConfirmationMessage";
 import { ApiToken } from "../../../localStorage";
 import { isConvMuted } from "../../../functions/conversation";
 import { ConfirmationModalPropsType } from "../../../typescript/types";
-import { getNickNameByUsername } from "../../../functions/StrFormatter";
+import { formatListWithLimit, getNickNameByUsername } from "../../../functions/StrFormatter";
 import { statusTranslate } from "../../../constants/status";
 
 function ConversationDetails() {
@@ -192,12 +192,14 @@ function ConversationDetails() {
                 {displayedConv?.isGroupConversation
                   ? displayedConv?.customization.conversationName
                     ? displayedConv?.customization.conversationName
-                    : displayedConv?.members
-                        .filter((item) => item.username !== user?.userName)
-                        .map((member) =>
-                          getNickNameByUsername(displayedConv.members, member.username)
-                        )
-                        .join(", ")
+                    : formatListWithLimit(
+                        displayedConv?.members
+                          .filter((item) => item.username !== user?.userName)
+                          .map((member) =>
+                            getNickNameByUsername(displayedConv.members, member.username)
+                          ),
+                        4
+                      )
                   : displayedConv?.members
                       .filter((item) => item.username !== user?.userName)
                       .map((member) =>

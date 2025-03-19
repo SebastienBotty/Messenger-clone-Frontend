@@ -199,32 +199,6 @@ function WindowConversation() {
     }
   };
 
-  const updateLastMsgSeenByMember = (userId: string, username: string, messageId: string) => {
-    setLastMsgSeenByConvMembers((prev) => {
-      if (!prev) return [];
-
-      const updatedMembers = [...prev];
-      const convMemberIndex = updatedMembers.findIndex((member) => member.userId === userId);
-
-      if (convMemberIndex !== -1) {
-        updatedMembers[convMemberIndex] = {
-          ...updatedMembers[convMemberIndex],
-          messageId: messageId,
-          seenByDate: new Date(),
-        };
-      } else {
-        updatedMembers.push({
-          username,
-          userId,
-          messageId,
-          seenByDate: new Date(),
-        });
-      }
-
-      return updatedMembers;
-    });
-  };
-
   useEffect(() => {
     console.log("newer");
     console.log(hasMoreNewer);

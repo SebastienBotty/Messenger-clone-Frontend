@@ -2,7 +2,7 @@ import React from "react";
 import ProfilePic from "../../../Utiles/ProfilePic/ProfilePic";
 import { useUserContext } from "../../../../constants/context";
 import { useDisplayedConvContext } from "../../../../screens/userLoggedIn/userLoggedIn";
-import { getNickNameByUsername } from "../../../../functions/StrFormatter";
+import { formatListWithLimit, getNickNameByUsername } from "../../../../functions/StrFormatter";
 import { Videocam } from "react-ionicons";
 import { InformationCircle } from "react-ionicons";
 import { Call } from "react-ionicons";
@@ -55,10 +55,12 @@ function NormalConvHeader({
           {displayedConv?.isGroupConversation
             ? displayedConv?.customization.conversationName
               ? displayedConv?.customization.conversationName
-              : displayedConv?.members
-                  .filter((item) => item.username !== user?.userName)
-                  .map((member) => getNickNameByUsername(displayedConv.members, member.username))
-                  .join(", ")
+              : formatListWithLimit(
+                  displayedConv?.members
+                    .filter((item) => item.username !== user?.userName)
+                    .map((member) => getNickNameByUsername(displayedConv.members, member.username)),
+                  4
+                )
             : displayedConv?.members
                 .filter((item) => item.username !== user?.userName)
                 .map((member) => getNickNameByUsername(displayedConv.members, member.username))}

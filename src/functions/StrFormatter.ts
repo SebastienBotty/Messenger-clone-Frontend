@@ -98,3 +98,17 @@ export const getNickNameByUsername = (members: ConversationMemberType[], usernam
   if (!member?.nickname) return username;
   return member.nickname;
 };
+export const formatListWithLimit = (
+  arr: string[],
+  max: number,
+  separator: string = ", ",
+  otherText: string = "autres..."
+): string => {
+  if (arr.length > max) {
+    const remaining = arr.length - max;
+    return (
+      arr.slice(0, max).join(separator) + ` et ${remaining} ${remaining > 1 ? otherText : "autre"}.`
+    );
+  }
+  return arr.join(separator);
+};
