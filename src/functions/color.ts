@@ -14,7 +14,7 @@ const calculateLuminance = (r: number, g: number, b: number) => {
 const isLightColor = (backgroundColor: string) => {
   const { r, g, b } = hexToRgb(backgroundColor);
   const luminance = calculateLuminance(r, g, b);
-  return luminance > 0.7;
+  return luminance > 0.6;
 };
 
 export const getTextColor = (backgroundColor: string) => {
