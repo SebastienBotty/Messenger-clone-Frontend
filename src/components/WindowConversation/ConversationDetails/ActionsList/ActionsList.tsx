@@ -40,6 +40,8 @@ import {
   updateConvCustomization,
   updateMostRecentConvCustomization,
 } from "../../../../functions/updateConversation";
+import { HexColorPicker } from "react-colorful";
+import ColorThemePicker from "./ColorThemePicker/ColorThemePicker";
 
 function ActionsList({
   openMoreDetailsComp,
@@ -47,6 +49,10 @@ function ActionsList({
   openMoreDetailsComp: (componentName: string) => void;
 }) {
   const { conversations } = useConversationsContext();
+  const { user, setUser } = useUserContext();
+  const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { setMostRecentConv } = useMostRecentConvContext();
+  const { setMessages } = useMessagesContext();
   const [active1, setActive1] = useState<boolean>(false);
   const [active2, setActive2] = useState<boolean>(false);
   const [active3, setActive3] = useState<boolean>(false);
@@ -55,6 +61,7 @@ function ActionsList({
   const [changePhotoLoading, setChangePhotoLoading] = useState<boolean>(false);
   const [showAddMembersModal, setShowAddMembersModal] = useState<boolean>(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
+  const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
 
   const [confirmationModalAction, setConfirmationModalAction] = useState<{
     title: string;
@@ -70,12 +77,6 @@ function ActionsList({
   });
 
   const [mutedConv, setMutedConv] = useState<boolean>();
-
-  const { user, setUser } = useUserContext();
-  const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
-  const { setMostRecentConv } = useMostRecentConvContext();
-  const { setMessages } = useMessagesContext();
-
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleActionsClick = (actionName: string) => {
@@ -138,6 +139,11 @@ function ActionsList({
         break;
     }
   };
+
+  const handleThemeClick = () => {
+    setShowColorPicker(true);
+  };
+  const changeColor = () => {};
 
   const handleEmojiClick = async (emojiData: EmojiClickData) => {
     if (!displayedConv || !user) return;
@@ -283,11 +289,17 @@ function ActionsList({
               )}
             </>
           )}
-          <li className="li-actions">
+          <li className="li-actions" id="conversation-theme" onClick={() => handleThemeClick()}>
             <div className="li-icon">
               <Disc color={displayedConv.customization.theme} />
             </div>
             <span>Modifier le thème</span>
+            {showColorPicker && (
+              <ColorThemePicker
+                conversation={displayedConv}
+                setShowColorPicker={setShowColorPicker}
+              />
+            )}
           </li>
           <li className="li-actions" onClick={() => handleActionsClick("changeEmoji")}>
             <div className="li-icon">{displayedConv.customization.emoji}</div>

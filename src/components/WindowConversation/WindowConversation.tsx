@@ -61,6 +61,7 @@ import NormalConvHeader from "./WindowConvheader/NormalConvHeader/NormalConvHead
 import SeenByMember from "../Utiles/SeenByMember/SeenByMember";
 import { getNewerMessages, getOlderMessages, getRecentMessages } from "../../api/message";
 import BidirectionalInfiniteScroll from "./BidirectionalInfiniteScroll/BidirectionalInfiniteScroll";
+import { getTextColor } from "../../functions/color";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -1172,6 +1173,14 @@ function WindowConversation() {
                                   ref={lastMessage ? messagesEndRef : null}
                                   onMouseEnter={() => handleMouseEnter(message._id)}
                                   onMouseLeave={handleMouseLeave}
+                                  style={
+                                    displayedConv
+                                      ? {
+                                          backgroundColor: displayedConv.customization.theme,
+                                          color: getTextColor(displayedConv.customization.theme),
+                                        }
+                                      : {}
+                                  }
                                 >
                                   {hoveredId === message._id && (
                                     <div className="msg-date">

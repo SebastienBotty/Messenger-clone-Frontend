@@ -57,6 +57,9 @@ export const convMemberMsg = (
       return `${agentName}envoyé un gif.`;
     case "changeNickname":
       return `${agentName}renommé ${target}  en: ${nickname} .`;
+    case "changeTheme":
+      return `${agentName}changé le thème de la conversation. .`;
+
     default:
       return "";
   }
