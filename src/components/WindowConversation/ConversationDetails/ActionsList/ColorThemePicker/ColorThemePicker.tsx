@@ -78,7 +78,11 @@ function ColorThemePicker({
   return (
     <div className="color-picker-container" ref={ref}>
       <HexColorPicker color={colorPicker} onChange={setColorPicker} />
-      <button className="validate-button" onClick={() => changeColor()}>
+      <button
+        className="validate-button"
+        disabled={initialColor === colorPicker}
+        onClick={() => changeColor()}
+      >
         <CheckmarkDoneOutline width={"1.5rem"} height={"1.5rem"} />
       </button>
     </div>
