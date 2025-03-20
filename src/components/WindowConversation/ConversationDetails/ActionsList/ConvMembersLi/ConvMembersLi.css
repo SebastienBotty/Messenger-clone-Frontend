@@ -57,8 +57,8 @@
 
 .li-members-options-modal {
   position: absolute;
-  top: 100%; /* Position below the parent */
-  right: 50%;
+  bottom: 100%; /* Position below the parent */
+  right: 0;
   z-index: 1000; /* Ensure the modal appears above other content */
   filter: drop-shadow(0px 0px 3px rgba(50, 50, 0, 0.5));
   background-color: white;

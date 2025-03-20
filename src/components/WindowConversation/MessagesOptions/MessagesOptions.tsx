@@ -47,6 +47,7 @@ function MessagesOptions({
   const [showReactPicker, setShowReactPicker] = useState<boolean>(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string>("");
+  const [menuPosition, setMenuPosition] = useState<"top" | "bottom">("bottom");
 
   const moreOptionsRef = useRef<HTMLDivElement>(null);
   const reactPickerRef = useRef<HTMLDivElement>(null);
@@ -64,8 +65,8 @@ function MessagesOptions({
   const reactions = ["❤️", "😲", "😂", "😡", "👍", "👎"];
 
   const isUserAuthor = message.author === user?.userName;
+
   const handleClickOutside = useCallback((event: MouseEvent) => {
-    // Vérifier si le clic est à l'extérieur des trois options
     if (
       moreOptionsRef.current &&
       !moreOptionsRef.current.contains(event.target as Node) &&
@@ -80,45 +81,55 @@ function MessagesOptions({
   }, []);
 
   useEffect(() => {
-    // Ajouter l'écouteur global pour les clics à l'extérieur
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      // Nettoyer l'écouteur à la destruction du composant
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [handleClickOutside]);
 
+  useEffect(() => {
+    if (
+      (moreOptionsRef.current && showMoreOptions) ||
+      (reactPickerRef.current && showReactPicker)
+    ) {
+      const ref = showMoreOptions ? moreOptionsRef.current : reactPickerRef.current;
+      if (ref) {
+        const rect = ref.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        const isInTopHalf = rect.top < windowHeight / 2;
+
+        setMenuPosition(isInTopHalf ? "bottom" : "top");
+      }
+    }
+  }, [showMoreOptions, showReactPicker]);
+
   const toggleMoreOptions = () => {
-    // Si MoreOptions est déjà ouvert, on ferme les autres menus
     if (showMoreOptions) {
       setShowMoreOptions(false);
     } else {
       setShowMoreOptions(true);
-      setShowReactPicker(false); // Fermer reactPicker
-      setShowEmojiPicker(false); // Fermer emojiPicker
+      setShowReactPicker(false);
+      setShowEmojiPicker(false);
     }
   };
 
   const toggleReactPicker = () => {
-    // Si ReactPicker est déjà ouvert, on ferme les autres menus
     if (showReactPicker) {
       setShowReactPicker(false);
     } else {
       setShowReactPicker(true);
-      setShowMoreOptions(false); // Fermer moreOptions
-      setShowEmojiPicker(false); // Fermer emojiPicker
+      setShowMoreOptions(false);
+      setShowEmojiPicker(false);
     }
   };
 
   const toggleEmojiPicker = () => {
-    // Si emojiPicker est déjà ouvert, on ferme les autres menus
     if (showEmojiPicker) {
       setShowEmojiPicker(false);
-      console.log("test");
     } else {
       setShowEmojiPicker(true);
-      setShowMoreOptions(false); // Fermer moreOptions
+      setShowMoreOptions(false);
     }
   };
 
@@ -179,7 +190,6 @@ function MessagesOptions({
     const req = await changeMsgReaction(message._id, emoji, user._id, user.userName);
     if (req) {
       setSelectedEmoji(emoji);
-      console.log(emoji);
       updateMsgReactions(message._id, req, setMessages);
       setShowReactPicker(false);
     }
@@ -189,7 +199,6 @@ function MessagesOptions({
     if (!message._id || !setEditingMsg) return;
     setShowMoreOptions(false);
     setEditingMsg(message);
-    console.log("set editingMsgId: " + message._id);
   };
 
   const openRespondMsg = () => {
@@ -210,8 +219,6 @@ function MessagesOptions({
     if (message.reactions) {
       setSelectedEmoji(message.reactions.find((r) => r.userId === user?._id)?.reaction || "");
     }
-
-    return () => {};
   }, [message.reactions]);
 
   return (
@@ -220,7 +227,11 @@ function MessagesOptions({
         <div className="icon" ref={moreOptionsRef}>
           <EllipsisVertical title={"Plus"} onClick={toggleMoreOptions} color={"#65676b"} />
           {showMoreOptions && (
-            <div className="message-more-options">
+            <div
+              className={`message-more-options ${
+                menuPosition === "top" ? "menu-top" : "menu-bottom"
+              }`}
+            >
               <ul className="message-more-options-ul">
                 {!moreThanXmins(message.date, 10) &&
                   setEditingMsg &&
@@ -261,7 +272,11 @@ function MessagesOptions({
             <div className="icon" ref={reactPickerRef}>
               <HappyOutline title={"Réagir"} onClick={toggleReactPicker} color={"#65676b"} />
               {showReactPicker && (
-                <div className="reactions-container">
+                <div
+                  className={`reactions-container ${
+                    menuPosition === "top" ? "menu-top" : "menu-bottom"
+                  }`}
+                >
                   {reactions.map((reaction) => (
                     <div
                       className={`reaction ${selectedEmoji === reaction && "selected-emoji"}`}
@@ -273,7 +288,12 @@ function MessagesOptions({
                   <div className="reaction icon" ref={emojiPickerRef} onClick={toggleEmojiPicker}>
                     <Add />
                     {showEmojiPicker && (
-                      <div className="reactions-emoji-picker" onClick={(e) => e.stopPropagation()}>
+                      <div
+                        className={`reactions-emoji-picker ${
+                          menuPosition === "top" ? "menu-top" : "menu-bottom"
+                        }`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <EmojiPicker onEmojiClick={(e) => handleEmojiClick(e.emoji)} />
                       </div>
                     )}

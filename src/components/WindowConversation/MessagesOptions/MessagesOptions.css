@@ -1,6 +1,5 @@
 .message-more-options {
   position: absolute;
-  bottom: 100%;
   margin-bottom: 0.5rem;
   left: 50%;
   transform: translateX(-50%);
@@ -39,9 +38,6 @@
 
 .reactions-container {
   position: absolute;
-
-  bottom: 100%;
-
   margin-bottom: 0.5rem;
   background-color: #ffffff;
   border-radius: 5rem;
@@ -50,6 +46,14 @@
   z-index: 1;
   font-size: x-large;
   cursor: initial;
+}
+
+.menu-top {
+  bottom: 100%; /* Positionne le menu au-dessus de l'élément */
+}
+
+.menu-bottom {
+  top: 100%; /* Positionne le menu en dessous de l'élément */
 }
 
 #message-me .reactions-container {
@@ -78,11 +82,9 @@
 
 #message-me .reactions-emoji-picker {
   position: absolute;
-  top: 100%;
   right: 0;
 }
 #message-others .reactions-emoji-picker {
   position: absolute;
-  top: 100%;
   left: 0;
 }
