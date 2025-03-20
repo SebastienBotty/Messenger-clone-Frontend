@@ -55,6 +55,9 @@ function NormalFooter({
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
+  const [containerHeight, setContainerHeight] = useState("auto"); // État pour la hauteur du conteneur
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const handleValueChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(e.target.value);
 
@@ -306,7 +309,11 @@ function NormalFooter({
 
   const filePreview = () => {
     return (
-      <div className="file-preview-container">
+      <div
+        ref={containerRef}
+        style={{ height: containerHeight, overflowY: "auto", transition: "height 0.2s ease" }}
+        className="file-preview-container"
+      >
         {droppedFiles.map((file, index) => (
           <div key={index} className="file-preview-item">
             <div className="delete-file" onClick={() => deleteSelectedFile(index)}>
@@ -401,6 +408,25 @@ function NormalFooter({
     }
     return () => {};
   }, [quotedMessage]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      // Réinitialiser la hauteur pour recalculer
+      containerRef.current.style.height = "auto";
+
+      const maxHeight = window.innerHeight * 0.3;
+      const minHeight = window.innerHeight * 0.04; // 4vh en pixels
+
+      // Définit la nouvelle hauteur en fonction du contenu - part 1
+      const scrollHeight = Math.max(containerRef.current.scrollHeight, minHeight);
+      const newHeight = Math.min(scrollHeight, maxHeight);
+
+      // Met à jour la hauteur du footer
+      const footerHeightPercentage = (newHeight / window.innerHeight) * 100;
+      setContainerHeight(`${newHeight}px`); // Mettre à jour la hauteur
+      onTextAreaResize(footerHeightPercentage);
+    }
+  }, [droppedFiles]); // Dépendance sur les fichiers pour recalculer la hauteur
 
   return (
     <div className="normal-footer">

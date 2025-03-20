@@ -358,9 +358,7 @@
   margin-bottom: 1.5rem;
   left: 50%;
 }
-.message-input {
-  max-height: 10vh;
-}
+
 .conversation-footer .message-input {
   width: 85%;
   transition: flex 0.3s ease-in;
@@ -382,8 +380,9 @@
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  padding: 0.5rem;
-  max-height: 15rem;
+  padding: 0.75rem 2rem;
+  max-height: 5rem;
+  overflow-y: auto;
   height: fit-content;
   overflow-y: auto;
   width: auto;
@@ -393,14 +392,9 @@
 }
 .file-preview-item {
   position: relative;
-  height: 4rem;
-  width: 4rem;
-
+  width: 2.5rem;
+  aspect-ratio: 1/1;
   border-radius: 25%;
-}
-
-.file-preview-item:nth-child(1) {
-  margin-left: 0.75rem;
 }
 
 .file-preview-item img,
