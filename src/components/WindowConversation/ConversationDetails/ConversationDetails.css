@@ -27,6 +27,8 @@
 .conversation-title {
   font-size: large;
   font-weight: 600;
+  width: 80%;
+  text-align: center;
 }
 .user-online {
   height: 2rem;
