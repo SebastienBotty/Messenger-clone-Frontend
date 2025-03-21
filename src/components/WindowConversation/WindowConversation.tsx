@@ -9,6 +9,7 @@ import {
   ConfirmationModalPropsType,
   QuotedMessageType,
   StatusType,
+  CustomizationType,
 } from "../../typescript/types";
 import { Call, Videocam, InformationCircle, Close, ArrowDown } from "react-ionicons";
 import { compareNowToDate } from "../../functions/time";
@@ -726,6 +727,32 @@ function WindowConversation() {
         updateConvLastMsgEdited(message, setConversations);
       });
 
+      socket.on(
+        "changeConvCustomization",
+        ({
+          conversation,
+          customizationKey,
+          customizationValue,
+        }: {
+          conversation: ConversationType;
+          customizationKey: keyof CustomizationType;
+          customizationValue: string;
+        }) => {
+          console.log("CHANGE CONV CUSTOMIZATION LISTENED");
+          if (!conversation || !conversation.lastMessage._id) return;
+          if (conversation._id === displayedConv?._id) {
+            emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
+            setLastMsgSeenByConvMembers((prev) =>
+              prev.map((item) =>
+                item.username === conversation.lastMessage?.seenBy[0].username
+                  ? { ...item, messageId: conversation.lastMessage._id }
+                  : item
+              )
+            );
+          }
+        }
+      );
+
       //Close conversatoin details every time a new conversation is selected
     }
 
@@ -738,6 +765,7 @@ function WindowConversation() {
       socket.off("deletedMessage");
       socket.off("changeReaction");
       socket.off("editedMessage");
+      socket.off("changeConvCustomization");
     };
   }, [displayedConv?._id]);
 

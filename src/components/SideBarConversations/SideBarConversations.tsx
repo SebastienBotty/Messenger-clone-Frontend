@@ -409,14 +409,10 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
 
       setConversations((prev) => {
         return prev.map((conv) => {
-          /*           console.log("conv: " + conv._id + " currentMsg: " + currentMsg.conversationId);
-           */ if (conv._id === currentMsg.conversationId) {
-            /*             console.log("CONVO ICI XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-             */
+          if (conv._id === currentMsg.conversationId) {
             return { ...conv, lastMessage: { ...currentMsg, date: new Date(currentMsg.date) } };
           } else {
-            /*             console.log("là");
-             */ return conv;
+            return conv;
           }
         });
       });
@@ -558,6 +554,8 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
             updateConvCustomization(prev, customizationKey, customizationValue, conversation)
           );
           setMessages((prev) => [...prev, conversation.lastMessage]);
+          // On new message, if the displayed conversation is the one with the new message, update the last message and mark it as seen
+          updateSeenConversation(conversation.lastMessage._id, conversation);
         }
         setMostRecentConv((prev) => {
           return updateMostRecentConvCustomization(
