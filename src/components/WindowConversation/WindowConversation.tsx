@@ -466,6 +466,10 @@ function WindowConversation() {
       setBodyHeight(`${92.5 - newTextareaHeight}vh`);
       setFooterHeight(`${newTextareaHeight}vh`);
     }
+    scrollViewRef?.current?.scrollTo({
+      top: scrollViewRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   };
 
   // Fonction pour vérifier si le dernier message affiché correspond au dernier message de la conversation
