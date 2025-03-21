@@ -14,6 +14,7 @@ import {
 } from "../../../../../functions/updateConversation";
 import { patchConvTheme } from "../../../../../api/conversation";
 import { useConversationsContext, useUserContext } from "../../../../../constants/context";
+import LoadingSpinner from "../../../../Utiles/loadingSpinner/loadingSpinner";
 
 function ColorThemePicker({
   conversation,
@@ -26,6 +27,7 @@ function ColorThemePicker({
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { setMostRecentConv } = useMostRecentConvContext();
   const { conversations } = useConversationsContext();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -40,15 +42,18 @@ function ColorThemePicker({
   const changeColor = async () => {
     if (!colorPicker || !displayedConv || !user?._id) return;
     setHasColorChanged(false);
+    setLoading(true);
     const response = await patchConvTheme(colorPicker, displayedConv?._id, user._id);
 
     if (response) {
       setMostRecentConv((prev) =>
         updateMostRecentConvCustomization(conversations, prev, "theme", colorPicker, displayedConv)
       );
+      setLoading(false);
       setShowColorPicker(false);
       setHasColorChanged(true);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -78,13 +83,17 @@ function ColorThemePicker({
   return (
     <div className="color-picker-container" ref={ref}>
       <HexColorPicker color={colorPicker} onChange={setColorPicker} />
-      <button
-        className="validate-button"
-        disabled={initialColor === colorPicker}
-        onClick={() => changeColor()}
-      >
-        <CheckmarkDoneOutline width={"1.5rem"} height={"1.5rem"} />
-      </button>
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <button
+          className="validate-button"
+          disabled={initialColor === colorPicker}
+          onClick={() => changeColor()}
+        >
+          <CheckmarkDoneOutline width={"1.5rem"} height={"1.5rem"} />
+        </button>
+      )}
     </div>
   );
 }
