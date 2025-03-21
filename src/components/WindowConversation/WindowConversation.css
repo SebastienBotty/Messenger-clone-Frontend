@@ -399,19 +399,39 @@
 
 .file-preview-item img,
 .file-icon img {
-  height: 100%;
+  width: 2.5rem;
   aspect-ratio: 1/1;
   border-radius: 25%;
   object-fit: cover;
 }
+.file-preview-item img:hover {
+  filter: brightness(0.9);
+}
+
+.single-image-preview img {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3)) drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.3));
+  object-fit: contain;
+}
+
+.single-image-preview {
+  max-width: 20rem !important;
+  max-height: 20rem !important;
+  width: 20rem !important;
+  height: 20rem !important;
+  display: grid !important;
+}
 
 .file-name {
-  width: 5rem;
-  font-size: small;
+  width: 100%;
+  font-size: x-small;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: bold;
+  text-align: center;
 }
 
 .delete-file {

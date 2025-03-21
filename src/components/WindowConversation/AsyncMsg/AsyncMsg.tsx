@@ -103,6 +103,16 @@ function AsyncMsg({ message }: { message: MessageType }) {
           }
         }
 
+        if (tempContent.length === 1) {
+          const singleElement = tempContent[0];
+
+          if (React.isValidElement(singleElement) && singleElement.props.children.type === "img") {
+            tempContent[0] = React.cloneElement(singleElement, {
+              ...singleElement.props,
+              className: `${singleElement.props.className} single-image-preview`,
+            });
+          }
+        }
         setContent(tempContent);
       }
     };

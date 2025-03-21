@@ -7,11 +7,15 @@
 .msg-file-container .file-preview-item {
   box-sizing: unset;
   padding: 0.5rem 0.25rem;
+  width: auto;
+  height: auto;
 }
 .msg-file-container .file-preview-item img,
 .gif-img {
   cursor: pointer;
   border-radius: 10%;
+  aspect-ratio: 1/1;
+  width: 4rem;
 }
 
 a {
