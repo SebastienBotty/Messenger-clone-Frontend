@@ -418,7 +418,7 @@
 }
 
 .single-image-preview {
-  max-width: 20rem !important;
+  max-width: 100% !important;
   max-height: 20rem !important;
   width: 20rem !important;
   height: 20rem !important;
