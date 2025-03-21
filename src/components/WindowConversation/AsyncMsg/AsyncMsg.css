@@ -5,6 +5,10 @@
   gap: 0.25rem;
   width: auto;
 }
+
+.message:has(.async-msg .msg-file-container div img) .msg-file-container {
+  justify-content: end !important;
+}
 .msg-file-container .file-preview-item {
   box-sizing: unset;
   padding: 0.5rem 0.25rem;
