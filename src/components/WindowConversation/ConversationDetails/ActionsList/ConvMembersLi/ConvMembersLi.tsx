@@ -42,6 +42,7 @@ import {
   updateMostRecentConvAdmin,
   updateMostRecentConvRemovedMembers,
 } from "../../../../../functions/updateConversation";
+import { patchBlockUser } from "../../../../../api/user";
 
 export function ConvMembersLi({
   member,
@@ -170,6 +171,23 @@ export function ConvMembersLi({
     }
   };
 
+  const blockUser = async (blockedUserId: string) => {
+    if (!user?._id) return;
+    const blocingUser = !user.blockedUsers.some((id) => id === blockedUserId);
+    console.log(blocingUser);
+    const response = await patchBlockUser(user._id, blockedUserId, blocingUser);
+    if (response) {
+      setUser((prev) => {
+        if (!prev) return prev;
+        const updatedBlockUser = blocingUser
+          ? [...prev.blockedUsers, blockedUserId]
+          : prev.blockedUsers.filter((id) => id !== blockedUserId);
+        console.log(blockedUserId, blocingUser);
+        return { ...prev, blockedUsers: updatedBlockUser };
+      });
+    }
+  };
+
   useEffect(() => {
     showModalRef.current = showModal; // Toujours mettre à jour la référence avec la valeur actuelle de showModal
   }, [showModal]);
@@ -266,11 +284,16 @@ export function ConvMembersLi({
                     </div>
                     Envoyer un message
                   </li>
-                  <li className="li-members-options" onClick={() => alert("Not implemented")}>
+                  <li
+                    className="li-members-options"
+                    onClick={() => {
+                      blockUser(member.userId);
+                    }}
+                  >
                     <div className="members-options-icon">
                       <CloseCircleOutline color={"#00000"} height={"1.75rem"} width={"1.75rem"} />
                     </div>
-                    Bloquer
+                    {user.blockedUsers.some((id) => id === member.userId) ? "Débloquer" : "Bloquer"}
                   </li>
                   {user.userName && displayedConv.admin[0] == user.userName && (
                     <>

@@ -86,3 +86,39 @@ export const fetchSearchUser = async (searchQuery: string) => {
     return false;
   }
 };
+
+export const patchBlockUser = async (
+  userId: string,
+  blockedUserId: string,
+  isBlocking: boolean
+) => {
+  try {
+    const response = await fetch(REST_API_URI + "/user/userId/" + userId + "/blockUser", {
+      method: "PATCH",
+      headers: {
+        authorization: `Bearer ${ApiToken()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId,
+        blockedUserId,
+        isBlocking,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorMsg = await response.json();
+      throw new Error(errorMsg);
+    }
+    console.log("XXXXXXXXXXXXXXXX");
+    console.log(response);
+    return true;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+    return false;
+  }
+};

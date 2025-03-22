@@ -700,6 +700,29 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         });
       }
     );
+
+    socket.on(
+      "blockUser",
+      ({
+        blockerId,
+        blockedId,
+        isBlocking,
+      }: {
+        blockerId: string;
+        blockedId: string;
+        isBlocking: boolean;
+      }) => {
+        console.log("blockUser listened");
+        setUser((prev) => {
+          if (!prev) return prev;
+          const updatedBlockedByUsers = isBlocking
+            ? [...prev.blockedByUsers, blockerId]
+            : prev.blockedByUsers.filter((id) => id !== blockerId);
+
+          return { ...prev, blockedByUsers: updatedBlockedByUsers };
+        });
+      }
+    );
     return () => {
       socket.off("message");
       socket.off("convUpdate");
@@ -710,6 +733,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       socket.off("addMembers");
       socket.off("changeConvCustomization");
       socket.off("changeConvAdmin");
+      socket.off("blockUser");
     };
   }, [displayedConv?._id, user?.status]);
 
