@@ -43,6 +43,7 @@ import {
   updateMostRecentConvRemovedMembers,
 } from "../../../../../functions/updateConversation";
 import { patchBlockUser } from "../../../../../api/user";
+import { isUserBlocked } from "../../../../../functions/user";
 
 export function ConvMembersLi({
   member,
@@ -173,17 +174,12 @@ export function ConvMembersLi({
 
   const blockUser = async (blockedUserId: string) => {
     if (!user?._id) return;
-    const blocingUser = !user.blockedUsers.some((id) => id === blockedUserId);
-    console.log(blocingUser);
-    const response = await patchBlockUser(user._id, blockedUserId, blocingUser);
+    const blockingUser = !isUserBlocked(blockedUserId, user.blockedUsers);
+    const response = await patchBlockUser(user._id, blockedUserId, blockingUser);
     if (response) {
       setUser((prev) => {
         if (!prev) return prev;
-        const updatedBlockUser = blocingUser
-          ? [...prev.blockedUsers, blockedUserId]
-          : prev.blockedUsers.filter((id) => id !== blockedUserId);
-        console.log(blockedUserId, blocingUser);
-        return { ...prev, blockedUsers: updatedBlockUser };
+        return { ...prev, blockedUsers: response };
       });
     }
   };
@@ -293,7 +289,7 @@ export function ConvMembersLi({
                     <div className="members-options-icon">
                       <CloseCircleOutline color={"#00000"} height={"1.75rem"} width={"1.75rem"} />
                     </div>
-                    {user.blockedUsers.some((id) => id === member.userId) ? "Débloquer" : "Bloquer"}
+                    {isUserBlocked(member.userId, user.blockedUsers) ? "Débloquer" : "Bloquer"}
                   </li>
                   {user.userName && displayedConv.admin[0] == user.userName && (
                     <>

@@ -63,6 +63,7 @@ import SeenByMember from "../Utiles/SeenByMember/SeenByMember";
 import { getNewerMessages, getOlderMessages, getRecentMessages } from "../../api/message";
 import BidirectionalInfiniteScroll from "./BidirectionalInfiniteScroll/BidirectionalInfiniteScroll";
 import { getTextColor } from "../../functions/color";
+import { isUserBlocked } from "../../functions/user";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -1057,7 +1058,8 @@ function WindowConversation() {
                         return new Date(a.date).getTime() - new Date(b.date).getTime();
                       })
                       .map((message, index) => {
-                        if (!message._id) return null;
+                        if (!message._id || !user?._id) return null;
+                        if (isUserBlocked(message.authorId, user.blockedUsers)) return null;
                         const isMsgDeletedByUser =
                           message?.deletedBy &&
                           message.deletedBy.some((deletedBy) => deletedBy.userId === user?._id);

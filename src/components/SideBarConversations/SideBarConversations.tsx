@@ -43,6 +43,7 @@ import {
   updateMostRecentConvAdmin,
 } from "../../functions/updateConversation";
 import { getConversations } from "../../api/conversation";
+import { isUserBlocked } from "../../functions/user";
 
 function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const { user, setUser } = useUserContext();
@@ -248,6 +249,7 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     let partner;
     if (isPrivateConv) {
       partner = conversation.members.find((member) => member.userId !== user._id);
+      if (partner && isUserBlocked(partner.userId, user.blockedUsers)) return null;
     }
     return (
       <div
@@ -425,9 +427,12 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
 
       if (
         user?.status == "Busy" ||
-        isConvMuted(user?.mutedConversations, currentMsg.conversationId)
-      )
+        isConvMuted(user?.mutedConversations, currentMsg.conversationId) ||
+        user?.blockedUsers.includes(currentMsg.authorId)
+      ) {
+        console.log("not playing any sound");
         return;
+      }
 
       console.log(user?.status);
       if (data[2]) {
@@ -701,28 +706,6 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       }
     );
 
-    socket.on(
-      "blockUser",
-      ({
-        blockerId,
-        blockedId,
-        isBlocking,
-      }: {
-        blockerId: string;
-        blockedId: string;
-        isBlocking: boolean;
-      }) => {
-        console.log("blockUser listened");
-        setUser((prev) => {
-          if (!prev) return prev;
-          const updatedBlockedByUsers = isBlocking
-            ? [...prev.blockedByUsers, blockerId]
-            : prev.blockedByUsers.filter((id) => id !== blockerId);
-
-          return { ...prev, blockedByUsers: updatedBlockedByUsers };
-        });
-      }
-    );
     return () => {
       socket.off("message");
       socket.off("convUpdate");
@@ -733,7 +716,6 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
       socket.off("addMembers");
       socket.off("changeConvCustomization");
       socket.off("changeConvAdmin");
-      socket.off("blockUser");
     };
   }, [displayedConv?._id, user?.status]);
 

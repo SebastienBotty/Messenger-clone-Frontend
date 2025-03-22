@@ -1,5 +1,5 @@
 import { ApiToken } from "../localStorage";
-import { ConversationType, UserDataType } from "../typescript/types";
+import { BlockedUsersType, ConversationType, UserDataType } from "../typescript/types";
 
 const REST_API_URI = process.env.REACT_APP_REST_API_URI;
 export const deleteConversation = async (
@@ -91,7 +91,7 @@ export const patchBlockUser = async (
   userId: string,
   blockedUserId: string,
   isBlocking: boolean
-) => {
+): Promise<BlockedUsersType[] | false> => {
   try {
     const response = await fetch(REST_API_URI + "/user/userId/" + userId + "/blockUser", {
       method: "PATCH",
@@ -110,9 +110,10 @@ export const patchBlockUser = async (
       const errorMsg = await response.json();
       throw new Error(errorMsg);
     }
-    console.log("XXXXXXXXXXXXXXXX");
-    console.log(response);
-    return true;
+
+    const jsonData = await response.json();
+    console.log(jsonData);
+    return jsonData;
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);

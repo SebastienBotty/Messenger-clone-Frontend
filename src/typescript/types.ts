@@ -18,8 +18,13 @@ export type UserDataType = {
   isOnline: boolean;
   lastSeen: Date;
   status: string;
-  blockedUsers: string[];
-  blockedByUsers: string[];
+  blockedUsers: BlockedUsersType[];
+};
+
+export type BlockedUsersType = {
+  _id?: string;
+  userId: string;
+  dates: { start: Date; end: Date }[];
 };
 
 export type ConversationType = {
