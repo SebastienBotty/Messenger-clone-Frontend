@@ -269,12 +269,12 @@ function SideBarConversations() {
   useEffect(() => {
     if (!user?.blockedUsers) return;
     for (const blockedUser of user?.blockedUsers) {
-      if (!blockedUser?._id) continue;
       const isBlocked = isUserBlocked(blockedUser.userId, user.blockedUsers);
       const privateConv = hasPrivateConvWithUser(blockedUser.userId, conversations);
       if (!privateConv) continue;
 
       if (isBlocked) {
+        if (blockedConversations.some((conv) => conv._id === privateConv._id)) continue;
         setBlockedConversations((prev) => [...prev, privateConv]);
       } else {
         setBlockedConversations((prev) => {
