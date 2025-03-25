@@ -9,6 +9,7 @@ import {
   MessagesRefContextType,
   AddedMembersContextType,
   HasMoreMsgContextType,
+  BlockedConvsContextType,
 } from "../typescript/types";
 
 //User Context
@@ -109,6 +110,16 @@ export const useHasMoreContext = () => {
   const context = useContext(HasMoreContext);
   if (!context) {
     throw new Error("useHasMoreContext doit être utilisé dans un MessagesRefProvider");
+  }
+  return context;
+};
+
+export const BlockedConvsContext = createContext<BlockedConvsContextType | undefined>(undefined);
+
+export const useBlockedConvsContext = () => {
+  const context = useContext(BlockedConvsContext);
+  if (!context) {
+    throw new Error("useBlockedConvsContext doit être utilisé dans un MessagesRefProvider");
   }
   return context;
 };

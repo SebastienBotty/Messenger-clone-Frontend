@@ -239,3 +239,8 @@ export type HasMoreMsgContextType = {
   hasMoreNewer: boolean;
   setHasMoreNewer: React.Dispatch<React.SetStateAction<boolean>>;
 };
+
+export type BlockedConvsContextType = {
+  blockedConversations: ConversationType[];
+  setBlockedConversations: React.Dispatch<React.SetStateAction<ConversationType[]>>;
+};

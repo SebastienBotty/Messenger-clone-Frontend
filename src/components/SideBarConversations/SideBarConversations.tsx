@@ -18,6 +18,7 @@ import {
   useRecentConversationContext,
 } from "../../screens/userLoggedIn/userLoggedIn";
 import {
+  useBlockedConvsContext,
   useConversationsContext,
   useMessagesContext,
   useUserContext,
@@ -26,7 +27,7 @@ import { timeSince } from "../../functions/time";
 import { socket } from "../../Sockets/socket";
 import ConvSystemMsg from "../WindowConversation/ConvSystemMsg/ConvSystemMsg";
 import ProfilePic from "../Utiles/ProfilePic/ProfilePic";
-import { isConvMuted } from "../../functions/conversation";
+import { hasPrivateConvWithUser, isConvMuted } from "../../functions/conversation";
 import ConversationParams from "./ConversationParams/ConversationParams";
 import { getMessageText, getNickNameByUsername } from "../../functions/StrFormatter";
 import SeenByMember from "../Utiles/SeenByMember/SeenByMember";
@@ -45,7 +46,7 @@ import {
 import { getConversations } from "../../api/conversation";
 import { isUserBlocked } from "../../functions/user";
 
-function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
+function SideBarConversations() {
   const { user, setUser } = useUserContext();
   const { conversations, setConversations } = useConversationsContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
@@ -53,8 +54,10 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
   const { recentConversations, setRecentConversations } = useRecentConversationContext();
   const { messages, setMessages } = useMessagesContext();
   const { trigger, setTrigger } = useTriggerContext();
+  const { blockedConversations, setBlockedConversations } = useBlockedConvsContext();
   const RESTAPIUri: string | undefined = process.env.REACT_APP_REST_API_URI;
   const [searchConversationInput, setSearchConversationInput] = useState<string>("");
+  const [showBlockedConversations, setShowBlockedConversations] = useState<boolean>(false);
 
   const [clickedConvParamsBtn, setClickedConvParamsBtn] = useState<string>("");
 
@@ -112,11 +115,11 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     const conversations = await getConversations(user?._id);
 
     if (conversations && conversations.length > 0) {
-      setShowConversationWindow(true);
       console.log(conversations);
       setConversations(conversations);
       setMostRecentConv(conversations[0]);
       set5LatestConversation(conversations);
+      //---------------------------------------------------------TODO: Ajouter les conv bloqués à conv bloquées
     }
   };
 
@@ -235,6 +238,53 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
     return () => {};
   }, []);
 
+  useEffect(() => {
+    if (!user?.blockedUsers) return;
+    for (const blockedUser of user?.blockedUsers) {
+      if (!blockedUser?._id) continue;
+      const now = new Date();
+      const lastBlock = blockedUser.dates[blockedUser.dates.length - 1];
+      const privateBlockedConvWithUser = hasPrivateConvWithUser(
+        blockedUser._id,
+        blockedConversations
+      );
+      console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
+      console.log(blockedConversations);
+      if (privateBlockedConvWithUser && new Date(lastBlock.end) < now) {
+        setBlockedConversations((prev) => {
+          const updatedConvs = prev.filter(
+            (blockedConv) => blockedConv._id !== privateBlockedConvWithUser._id
+          );
+          return updatedConvs;
+        });
+        console.log("ICICICICICIC");
+        break;
+      }
+
+      const privateConvWithUser = hasPrivateConvWithUser(blockedUser._id, conversations);
+
+      if (privateConvWithUser) {
+        setBlockedConversations((prev) => {
+          const updatedConversations = prev.map((blockedConv) =>
+            blockedConv._id === privateConvWithUser._id ? privateConvWithUser : blockedConv
+          );
+
+          if (
+            !updatedConversations.some((blockedConv) => blockedConv._id === privateConvWithUser._id)
+          ) {
+            updatedConversations.push(privateConvWithUser);
+          }
+
+          return updatedConversations;
+        });
+
+        break;
+      }
+    }
+
+    return () => {};
+  }, [user?.blockedUsers]);
+
   /**
    * Renders a single conversation item.
    *
@@ -242,14 +292,19 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
    * @param {number} index - The index of the conversation in the conversations array.
    * @return {JSX.Element} The rendered conversation item.
    */
-  const conversationsMap = (conversation: ConversationType, index: number) => {
+  const conversationsMap = (
+    conversation: ConversationType,
+    index: number,
+    showBlockedConv: boolean
+  ) => {
     if (!user) return null;
     //console.log(conversation.lastMessage);
     const isPrivateConv = !conversation.isGroupConversation;
     let partner;
     if (isPrivateConv) {
       partner = conversation.members.find((member) => member.userId !== user._id);
-      if (partner && isUserBlocked(partner.userId, user.blockedUsers)) return null;
+      if (partner && !showBlockedConv && isUserBlocked(partner.userId, user.blockedUsers))
+        return null;
     }
     return (
       <div
@@ -735,7 +790,13 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
           <div className="first-line-title">Discussions</div>
           <div className="sideBar-header-buttons">
             <button onClick={() => console.log(user)}>
-              <EllipsisHorizontal color={"#00000"} title="Paramètres" height="75%" width="75%" />
+              <EllipsisHorizontal
+                color={"#00000"}
+                title="Paramètres"
+                height="75%"
+                width="75%"
+                onClick={() => setShowBlockedConversations((prev) => !prev)}
+              />
             </button>
 
             <button onClick={() => setDisplayedConv(null)}>
@@ -776,7 +837,28 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
         </div>
       </div>
       <div className="conversations-container">
-        {searchConversationInput
+        {showBlockedConversations
+          ? searchConversationInput
+            ? blockedConversations
+                .filter((item) => convFilterMember(item))
+                .sort((a, b) => {
+                  // If either a or b has test: true, it should come first
+                  if (a.isGroupConversation) return 1;
+                  if (b.isGroupConversation) return -1;
+
+                  // If neither has test: true, sort by date
+                  return (
+                    new Date(a.lastMessage.date).getTime() - new Date(b.lastMessage.date).getTime()
+                  );
+                })
+                .map((conversation, index) => conversationsMap(conversation, index, true))
+            : blockedConversations
+                .sort(
+                  (a, b) =>
+                    new Date(b.lastMessage.date).getTime() - new Date(a.lastMessage.date).getTime()
+                )
+                .map((conversation, index) => conversationsMap(conversation, index, true))
+          : searchConversationInput
           ? conversations
               .filter((item) => convFilterMember(item))
               .sort((a, b) => {
@@ -789,13 +871,13 @@ function SideBarConversations({ setShowConversationWindow }: SideBarPropsType) {
                   new Date(a.lastMessage.date).getTime() - new Date(b.lastMessage.date).getTime()
                 );
               })
-              .map((conversation, index) => conversationsMap(conversation, index))
+              .map((conversation, index) => conversationsMap(conversation, index, false))
           : conversations
               .sort(
                 (a, b) =>
                   new Date(b.lastMessage.date).getTime() - new Date(a.lastMessage.date).getTime()
               )
-              .map((conversation, index) => conversationsMap(conversation, index))}
+              .map((conversation, index) => conversationsMap(conversation, index, false))}
       </div>
     </div>
   );

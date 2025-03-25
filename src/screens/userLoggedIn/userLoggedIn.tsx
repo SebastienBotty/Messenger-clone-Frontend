@@ -12,7 +12,12 @@ import {
   UserDataType,
   MessageType,
 } from "../../typescript/types";
-import { ConversationsContext, MessagesContext, UserContext } from "../../constants/context";
+import {
+  BlockedConvsContext,
+  ConversationsContext,
+  MessagesContext,
+  UserContext,
+} from "../../constants/context";
 import { socket } from "../../Sockets/socket";
 import { useLocation } from "react-router-dom";
 import { ApiToken } from "../../localStorage";
@@ -37,6 +42,7 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
   const [mostRecentConv, setMostRecentConv] = useState<ConversationType | null>(null);
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [trigger, setTrigger] = useState<boolean | null>(false);
+  const [blockedConversations, setBlockedConversations] = useState<ConversationType[]>([]);
 
   const [showConversationWindow, setShowConversationWindow] = useState<boolean>(false);
 
@@ -64,41 +70,36 @@ function UserLoggedIn({ handleSignOut }: NavBarProps) {
     };
   }, []);
   // When page loads, displayedConv is set to null, when it receives a data, it sets the state to true then shows the conversation window.
-  useEffect(() => {
-    if (displayedConv !== null) {
-      setShowConversationWindow(true);
-    }
-
-    return () => {};
-  }, [displayedConv]);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
       {" "}
       <ConversationsContext.Provider value={{ conversations, setConversations }}>
-        <DisplayedConvContext.Provider value={{ displayedConv, setDisplayedConv }}>
-          <RecentConversationsContext.Provider
-            value={{ recentConversations, setRecentConversations }}
-          >
-            <MostRecentConvContext.Provider value={{ mostRecentConv, setMostRecentConv }}>
-              <MessagesContext.Provider value={{ messages, setMessages }}>
-                <div className="userLoggedIn">
-                  <div className="page-header">
-                    {" "}
-                    <NavBar handleSignOut={handleSignOut} />
-                  </div>
-                  <div className="content">
-                    <TriggerContext.Provider value={{ trigger, setTrigger }}>
-                      <SideBarConversations setShowConversationWindow={setShowConversationWindow} />
+        <BlockedConvsContext.Provider value={{ blockedConversations, setBlockedConversations }}>
+          <DisplayedConvContext.Provider value={{ displayedConv, setDisplayedConv }}>
+            <RecentConversationsContext.Provider
+              value={{ recentConversations, setRecentConversations }}
+            >
+              <MostRecentConvContext.Provider value={{ mostRecentConv, setMostRecentConv }}>
+                <MessagesContext.Provider value={{ messages, setMessages }}>
+                  <div className="userLoggedIn">
+                    <div className="page-header">
+                      {" "}
+                      <NavBar handleSignOut={handleSignOut} />
+                    </div>
+                    <div className="content">
+                      <TriggerContext.Provider value={{ trigger, setTrigger }}>
+                        <SideBarConversations />
 
-                      {showConversationWindow && <WindowConversation />}
-                    </TriggerContext.Provider>
+                        <WindowConversation />
+                      </TriggerContext.Provider>
+                    </div>
                   </div>
-                </div>
-              </MessagesContext.Provider>
-            </MostRecentConvContext.Provider>
-          </RecentConversationsContext.Provider>
-        </DisplayedConvContext.Provider>{" "}
+                </MessagesContext.Provider>
+              </MostRecentConvContext.Provider>
+            </RecentConversationsContext.Provider>
+          </DisplayedConvContext.Provider>{" "}
+        </BlockedConvsContext.Provider>
       </ConversationsContext.Provider>
     </UserContext.Provider>
   );
