@@ -109,16 +109,42 @@ function SideBarConversations() {
       .reverse();
     return responseArr;
   };
+  const getBlockedConvs = (conversationsArr: ConversationType[]) => {
+    if (!user?._id) return [];
+    return conversationsArr.filter((conv) => {
+      if (conv.isGroupConversation) return false;
+      const partner = conv.members.find((member) => member.userId !== user._id);
+      if (!partner) return false;
+      if (isUserBlocked(partner.userId, user.blockedUsers)) return true;
+      return false;
+    });
+  };
+
+  const getNonBlockedConvs = (conversationsArr: ConversationType[]) => {
+    const blockedConvs = getBlockedConvs(conversationsArr);
+    return conversationsArr.filter(
+      (conv) => !blockedConvs.some((blockedConv) => blockedConv._id === conv._id)
+    );
+  };
 
   const fetchConversations = async () => {
     if (!user?._id) return;
     const conversations = await getConversations(user?._id);
 
     if (conversations && conversations.length > 0) {
+      const blockedConvs = getBlockedConvs(conversations);
+
       console.log(conversations);
       setConversations(conversations);
-      setMostRecentConv(conversations[0]);
-      set5LatestConversation(conversations);
+
+      const nonBlockedConvs = getNonBlockedConvs(conversations);
+      console.log("XXXXXXXXXXXXXXXXXXXXXXXXX");
+      console.log(nonBlockedConvs);
+      console.log("XXXXXXXXXXXXXXXXXXXXXXXXX");
+
+      setMostRecentConv(nonBlockedConvs[0]);
+      set5LatestConversation(nonBlockedConvs);
+      setBlockedConversations(blockedConvs);
       //---------------------------------------------------------TODO: Ajouter les conv bloqués à conv bloquées
     }
   };
@@ -199,16 +225,18 @@ function SideBarConversations() {
   };
 
   const set5LatestConversation = (arrConversations: ConversationType[]): void => {
-    let sortedConvArr = [...arrConversations].sort((a, b) => {
+    let sortedConvArr = getNonBlockedConvs([...arrConversations]).sort((a, b) => {
       return new Date(b.lastMessage.date).getTime() - new Date(a.lastMessage.date).getTime();
     });
+    console.log("ICICICICICICICICIC");
+    console.log(sortedConvArr);
     //console.log(sortedConvArr.slice(0, 5).reverse());
     setRecentConversations(sortedConvArr.slice(0, 5));
   };
 
   const update5LatestConversations = (): void => {
     setTimeout(() => {
-      const convs = [...conversations].sort(
+      const convs = getNonBlockedConvs([...conversations]).sort(
         (a, b) => new Date(b.lastMessage.date).getTime() - new Date(a.lastMessage.date).getTime()
       );
       let slicedArr: ConversationType[] = [];
@@ -242,43 +270,17 @@ function SideBarConversations() {
     if (!user?.blockedUsers) return;
     for (const blockedUser of user?.blockedUsers) {
       if (!blockedUser?._id) continue;
-      const now = new Date();
-      const lastBlock = blockedUser.dates[blockedUser.dates.length - 1];
-      const privateBlockedConvWithUser = hasPrivateConvWithUser(
-        blockedUser._id,
-        blockedConversations
-      );
-      console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
-      console.log(blockedConversations);
-      if (privateBlockedConvWithUser && new Date(lastBlock.end) < now) {
+      const isBlocked = isUserBlocked(blockedUser.userId, user.blockedUsers);
+      const privateConv = hasPrivateConvWithUser(blockedUser.userId, conversations);
+      if (!privateConv) continue;
+
+      if (isBlocked) {
+        setBlockedConversations((prev) => [...prev, privateConv]);
+      } else {
         setBlockedConversations((prev) => {
-          const updatedConvs = prev.filter(
-            (blockedConv) => blockedConv._id !== privateBlockedConvWithUser._id
-          );
+          const updatedConvs = prev.filter((conv) => conv._id !== privateConv._id);
           return updatedConvs;
         });
-        console.log("ICICICICICIC");
-        break;
-      }
-
-      const privateConvWithUser = hasPrivateConvWithUser(blockedUser._id, conversations);
-
-      if (privateConvWithUser) {
-        setBlockedConversations((prev) => {
-          const updatedConversations = prev.map((blockedConv) =>
-            blockedConv._id === privateConvWithUser._id ? privateConvWithUser : blockedConv
-          );
-
-          if (
-            !updatedConversations.some((blockedConv) => blockedConv._id === privateConvWithUser._id)
-          ) {
-            updatedConversations.push(privateConvWithUser);
-          }
-
-          return updatedConversations;
-        });
-
-        break;
       }
     }
 
