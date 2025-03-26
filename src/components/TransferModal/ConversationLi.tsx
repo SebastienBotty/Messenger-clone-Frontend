@@ -20,8 +20,6 @@ function ConversationLi(props: {
   const user = props.user;
   const selectedImg = props.selectedImg;
   const selectedMsg = props.selectedMsg;
-  console.log("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
-  console.log(selectedImg);
 
   const [sendingStatus, setSendingStatus] = useState<number>(-1);
   const [btnMessage, setBtnMessage] = useState<string>("Envoyer");

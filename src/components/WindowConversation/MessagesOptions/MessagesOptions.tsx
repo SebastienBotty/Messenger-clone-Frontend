@@ -11,6 +11,7 @@ import { deleteMessage } from "../../../constants/ConfirmationMessage";
 import DeleteMessage from "./DeleteMessage/DeleteMessage";
 import ConfirmationModal from "../../Utiles/ConfirmationModal/ConfirmationModal";
 import {
+  useBlockedConvsContext,
   useConversationsContext,
   useMessagesContext,
   useUserContext,
@@ -23,6 +24,8 @@ import {
   updateRemoveMsgReaction,
 } from "../../../functions/updateMessage";
 import { moreThanXmins } from "../../../functions/time";
+import { useDisplayedConvContext } from "../../../screens/userLoggedIn/userLoggedIn";
+import { isPrivateConvBlocked } from "../../../functions/conversation";
 
 function MessagesOptions({
   message,
@@ -40,6 +43,9 @@ function MessagesOptions({
   const { user } = useUserContext();
   const { messages, setMessages } = useMessagesContext();
   const { setConversations } = useConversationsContext();
+  const { displayedConv } = useDisplayedConvContext();
+  const { blockedConversations } = useBlockedConvsContext();
+
   const isImg =
     message.text[message.text.length - 1].startsWith("PATHIMAGE/" + message.conversationId + ":") ||
     message.text[message.text.length - 1].startsWith("GIF/" + message.conversationId + ":");
@@ -135,7 +141,18 @@ function MessagesOptions({
 
   const openConfirmationModal = (eventName: string) => {
     if (!user || !message._id) return;
-    switch (eventName) {
+    let newEventName = eventName;
+    console.log(newEventName);
+    if (
+      eventName === "deleteUserMsg" &&
+      displayedConv?._id &&
+      isPrivateConvBlocked(displayedConv?._id, blockedConversations)
+    ) {
+      newEventName = "deleteMsgOther";
+    }
+    console.log(newEventName);
+
+    switch (newEventName) {
       case "deleteUserMsg":
         setConfirmationModalProps({
           title: deleteMessage.title,
@@ -264,45 +281,47 @@ function MessagesOptions({
           )}
           {showConfirmationModal && <ConfirmationModal {...confirmationModalProps} />}
         </div>
-        {!message.deletedForEveryone && (
-          <>
-            <div className="icon">
-              <ArrowUndo title={"Répondre"} color={"#65676b"} onClick={() => openRespondMsg()} />
-            </div>
-            <div className="icon" ref={reactPickerRef}>
-              <HappyOutline title={"Réagir"} onClick={toggleReactPicker} color={"#65676b"} />
-              {showReactPicker && (
-                <div
-                  className={`reactions-container ${
-                    menuPosition === "top" ? "menu-top" : "menu-bottom"
-                  }`}
-                >
-                  {reactions.map((reaction) => (
-                    <div
-                      className={`reaction ${selectedEmoji === reaction && "selected-emoji"}`}
-                      onClick={() => handleEmojiClick(reaction)}
-                    >
-                      {reaction}
-                    </div>
-                  ))}
-                  <div className="reaction icon" ref={emojiPickerRef} onClick={toggleEmojiPicker}>
-                    <Add />
-                    {showEmojiPicker && (
+        {!message.deletedForEveryone &&
+          displayedConv?._id &&
+          !isPrivateConvBlocked(displayedConv?._id, blockedConversations) && (
+            <>
+              <div className="icon">
+                <ArrowUndo title={"Répondre"} color={"#65676b"} onClick={() => openRespondMsg()} />
+              </div>
+              <div className="icon" ref={reactPickerRef}>
+                <HappyOutline title={"Réagir"} onClick={toggleReactPicker} color={"#65676b"} />
+                {showReactPicker && (
+                  <div
+                    className={`reactions-container ${
+                      menuPosition === "top" ? "menu-top" : "menu-bottom"
+                    }`}
+                  >
+                    {reactions.map((reaction) => (
                       <div
-                        className={`reactions-emoji-picker ${
-                          menuPosition === "top" ? "menu-top" : "menu-bottom"
-                        }`}
-                        onClick={(e) => e.stopPropagation()}
+                        className={`reaction ${selectedEmoji === reaction && "selected-emoji"}`}
+                        onClick={() => handleEmojiClick(reaction)}
                       >
-                        <EmojiPicker onEmojiClick={(e) => handleEmojiClick(e.emoji)} />
+                        {reaction}
                       </div>
-                    )}
+                    ))}
+                    <div className="reaction icon" ref={emojiPickerRef} onClick={toggleEmojiPicker}>
+                      <Add />
+                      {showEmojiPicker && (
+                        <div
+                          className={`reactions-emoji-picker ${
+                            menuPosition === "top" ? "menu-top" : "menu-bottom"
+                          }`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <EmojiPicker onEmojiClick={(e) => handleEmojiClick(e.emoji)} />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          </>
-        )}
+                )}
+              </div>
+            </>
+          )}
       </div>
     </div>
   );

@@ -25,6 +25,7 @@ import {
   MessagesRefContext,
   AddedMembersContext,
   HasMoreContext,
+  useBlockedConvsContext,
 } from "../../constants/context";
 import TypingDots from "../Utiles/TypingDots/TypingdDots";
 import _ from "lodash";
@@ -64,6 +65,7 @@ import { getNewerMessages, getOlderMessages, getRecentMessages } from "../../api
 import BidirectionalInfiniteScroll from "./BidirectionalInfiniteScroll/BidirectionalInfiniteScroll";
 import { getTextColor } from "../../functions/color";
 import { isUserBlocked } from "../../functions/user";
+import { isPrivateConvBlocked } from "../../functions/conversation";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -75,6 +77,7 @@ function WindowConversation() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { setConversations } = useConversationsContext();
+  const { blockedConversations, setBlockedConversations } = useBlockedConvsContext();
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
   const [lastMsgSeenByConvMembers, setLastMsgSeenByConvMembers] = useState<
     LastMsgSeenByMembersType[]
@@ -388,9 +391,11 @@ function WindowConversation() {
   }, []); */
 
   const displayMembersTyping = () => {
-    if (!displayedConv) return;
+    if (!displayedConv || !user) return;
 
-    const typingMembers = displayedConv.members.filter((member) => member.isTyping);
+    const typingMembers = displayedConv.members.filter(
+      (member) => member.isTyping && !isUserBlocked(member.userId, user?.blockedUsers)
+    );
     if (typingMembers.length === 0) return;
     if (typingMembers.length > 2) {
       return (
@@ -444,6 +449,8 @@ function WindowConversation() {
   };
 
   const handleMouseEnter = (id: string | undefined) => {
+    console.log("ICI");
+    console.log(id);
     if (!id) return;
     const timer = setTimeout(() => {
       setHoveredId(id);
@@ -493,26 +500,29 @@ function WindowConversation() {
   };
 
   useEffect(() => {
-    if (displayedConv) {
-      setDroppedFiles([]);
-      setMessages([]);
-      setEditingMsg(null);
-      setSelectedFoundMsgId("");
-      setQuotedMessage(null);
-      setHasMoreNewer(false);
-      setHasMoreOlder(false);
+    if (!displayedConv) return;
+    setDroppedFiles([]);
+    setMessages([]);
+    setEditingMsg(null);
+    setSelectedFoundMsgId("");
+    setQuotedMessage(null);
+    setHasMoreNewer(false);
+    setHasMoreOlder(false);
 
-      /*   console.log("MESSSSSSSAGE RESET");
+    /*   console.log("MESSSSSSSAGE RESET");
       console.log(displayedConv._id); */
-      asyncFetchMsg();
-
+    asyncFetchMsg();
+  }, [displayedConv?._id]);
+  useEffect(() => {
+    if (displayedConv) {
       // Utiliser une fonction de référence pour accéder aux valeurs les plus récentes
       const messageHandler = (data: any) => {
+        if (!displayedConv || !user) return;
         const message: MessageType = data[0];
         const convId = data[1]._id;
         /*  console.log("MESSAGE RECU");
-        console.log(message);
-        console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id); */
+console.log(message);
+console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id); */
         if (convId === displayedConv?._id) {
           // Utiliser une fonction pour obtenir l'état le plus récent
           // Accéder aux valeurs actuelles via une fonction de rappel
@@ -522,12 +532,16 @@ function WindowConversation() {
               currentMessages.length > 0 ? currentMessages[currentMessages.length - 1] : null;
             const lastConvMsgId = lastMessageIdRef.current;
             /* console.log("Last visible message:", lastVisibleMessage?._id);
-            console.log("LASTMESSAGE:" + lastConvMsgId); */
+  console.log("LASTMESSAGE:" + lastConvMsgId); */
 
             // Si nous sommes au bas de la conversation ou si c'est le premier message
             if (!lastVisibleMessage || lastVisibleMessage._id === lastConvMsgId) {
               console.log("LE DERNIER MESSAGE EST LE DERNIER MESSAGE VISIBLE");
-              emitSeenMsgToSocket(message, displayedConv);
+
+              if (!isPrivateConvBlocked(displayedConv._id, blockedConversations)) {
+                console.log("personné non bloquée donc  emit seen");
+                emitSeenMsgToSocket(message, displayedConv);
+              }
               setLastMsgSeenByConvMembers((prev) =>
                 prev.map((item) =>
                   item.username === message.seenBy[0].username
@@ -561,7 +575,7 @@ function WindowConversation() {
         }
       };
 
-      socket.on("message", messageHandler);
+      socket.on("message", (data) => messageHandler(data));
 
       socket.on(
         "seenMessage",
@@ -661,7 +675,9 @@ function WindowConversation() {
           if (conversation._id === displayedConv?._id) {
             console.log("c les meme");
             setMessages((prev) => [...prev, conversation.lastMessage]);
-            emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
+            if (!isPrivateConvBlocked(displayedConv._id, blockedConversations)) {
+              emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
+            }
             setLastMsgSeenByConvMembers((prev) =>
               prev.map((item) =>
                 item.username === conversation.lastMessage?.seenBy[0].username
@@ -746,7 +762,10 @@ function WindowConversation() {
           console.log("CHANGE CONV CUSTOMIZATION LISTENED");
           if (!conversation || !conversation.lastMessage._id) return;
           if (conversation._id === displayedConv?._id) {
-            emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
+            if (!isPrivateConvBlocked(displayedConv._id, blockedConversations)) {
+              console.log("personné non bloquée donc pas emit seen");
+              emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
+            }
             setLastMsgSeenByConvMembers((prev) =>
               prev.map((item) =>
                 item.username === conversation.lastMessage?.seenBy[0].username
@@ -757,8 +776,6 @@ function WindowConversation() {
           }
         }
       );
-
-      //Close conversatoin details every time a new conversation is selected
     }
 
     return () => {
@@ -772,7 +789,7 @@ function WindowConversation() {
       socket.off("editedMessage");
       socket.off("changeConvCustomization");
     };
-  }, [displayedConv?._id]);
+  }, [displayedConv?._id, blockedConversations]);
 
   useEffect(() => {
     console.log("ICI USEFFECT");
@@ -913,7 +930,8 @@ function WindowConversation() {
     else if (
       user &&
       displayedConv.members &&
-      displayedConv.members.some((member) => member.username === user.userName)
+      displayedConv.members.some((member) => member.username === user.userName) &&
+      !blockedConversations.some((conv) => conv._id === displayedConv._id)
     ) {
       return (
         <NormalFooter
@@ -983,11 +1001,13 @@ function WindowConversation() {
           >
             <div className="WindowConversation" onDragOver={handleDragOver} onDrop={handleDrop}>
               <div className={`conversation-container ${showConvDetails ? "retracted" : ""}`}>
-                {showDragOverOverlay && (
-                  <div className="drag-overlay">
-                    <span>Déposer un fichier</span>{" "}
-                  </div>
-                )}
+                {showDragOverOverlay &&
+                  displayedConv?._id &&
+                  !isPrivateConvBlocked(displayedConv._id, blockedConversations) && (
+                    <div className="drag-overlay">
+                      <span>Déposer un fichier</span>{" "}
+                    </div>
+                  )}
                 <div className="conversation-header">
                   <div className="conversation-member-info">
                     {displayedConv ? (
@@ -1059,7 +1079,13 @@ function WindowConversation() {
                       })
                       .map((message, index) => {
                         if (!message._id || !user?._id) return null;
-                        if (isUserBlocked(message.authorId, user.blockedUsers)) return null;
+                        const userBlocked = isUserBlocked(
+                          message.authorId,
+                          user.blockedUsers,
+                          new Date(message.date)
+                        );
+
+                        if (userBlocked) return null;
                         const isMsgDeletedByUser =
                           message?.deletedBy &&
                           message.deletedBy.some((deletedBy) => deletedBy.userId === user?._id);
@@ -1174,6 +1200,7 @@ function WindowConversation() {
                                   setQuotedMessage={setQuotedMessage}
                                   quotedMessage={quotedMessage}
                                 />
+
                                 <div
                                   className={`message ${
                                     selectedFoundMsgId === message._id ? "selectedFoundMsg" : ""
@@ -1306,8 +1333,9 @@ function WindowConversation() {
                                 </div>
                                 <MessagesOptions
                                   message={message}
+                                  setEditingMsg={setEditingMsg}
+                                  editingMsg={editingMsg}
                                   setQuotedMessage={setQuotedMessage}
-                                  editingMsg={null}
                                   quotedMessage={quotedMessage}
                                 />
                               </div>
@@ -1408,8 +1436,9 @@ function WindowConversation() {
                               </div>
                               <MessagesOptions
                                 message={message}
+                                setEditingMsg={setEditingMsg}
+                                editingMsg={editingMsg}
                                 setQuotedMessage={setQuotedMessage}
-                                editingMsg={null}
                                 quotedMessage={quotedMessage}
                               />
                             </div>

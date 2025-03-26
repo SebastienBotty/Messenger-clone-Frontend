@@ -187,6 +187,8 @@
   text-align: left;
 }
 #message-others .msg-date {
+  position: absolute;
+  right: unset !important;
   left: 100% !important;
 }
 .message:has(.async-msg .msg-file-container div img) {

@@ -383,6 +383,35 @@ export const editTextMessage = async (
   }
 };
 
+export const markMessagesAsSeen = async (messageId: string, userId: string, username: string) => {
+  try {
+    const response = await fetch(RESTAPIUri + "/message/userId/" + userId + "/markMessageAsSeen", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + ApiToken(),
+      },
+      body: JSON.stringify({
+        messageId: messageId,
+        username: username,
+      }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message);
+    }
+    const jsonData = await response.json();
+    //console.log(jsonData);
+    return jsonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("An unknown error occurred");
+    }
+  }
+};
+
 export const fetchMessagesBeforeAndAfter = async (
   messageId: string,
   conversationId: string,

@@ -43,7 +43,7 @@ import {
   updateMostRecentConvRemovedMembers,
 } from "../../../../../functions/updateConversation";
 import { patchBlockUser } from "../../../../../api/user";
-import { isUserBlocked } from "../../../../../functions/user";
+import { blockUser, isUserBlocked } from "../../../../../functions/user";
 
 export function ConvMembersLi({
   member,
@@ -69,8 +69,6 @@ export function ConvMembersLi({
       action: () => {},
       closeModal: () => setShowConfirmationModal(false),
     });
-
-  const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
 
   const removeUser = async (
     conversationId: string,
@@ -169,18 +167,6 @@ export function ConvMembersLi({
       setTimeout(() => {
         setAddedMembers([member.username]);
       }, 100);
-    }
-  };
-
-  const blockUser = async (blockedUserId: string) => {
-    if (!user?._id) return;
-    const blockingUser = !isUserBlocked(blockedUserId, user.blockedUsers);
-    const response = await patchBlockUser(user._id, blockedUserId, blockingUser);
-    if (response) {
-      setUser((prev) => {
-        if (!prev) return prev;
-        return { ...prev, blockedUsers: response };
-      });
     }
   };
 
@@ -283,7 +269,7 @@ export function ConvMembersLi({
                   <li
                     className="li-members-options"
                     onClick={() => {
-                      blockUser(member.userId);
+                      blockUser(member.userId, user.blockedUsers, user._id, setUser);
                     }}
                   >
                     <div className="members-options-icon">

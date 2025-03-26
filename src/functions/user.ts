@@ -1,7 +1,11 @@
-import { BlockedUsersType } from "../typescript/types";
+import { patchBlockUser } from "../api/user";
+import { BlockedUsersType, UserDataType } from "../typescript/types";
 
-export const isUserBlocked = (userId: string, usersBlockedArr: BlockedUsersType[]) => {
-  const now = new Date();
+export const isUserBlocked = (
+  userId: string,
+  usersBlockedArr: BlockedUsersType[],
+  now = new Date()
+) => {
   const blockedUser = usersBlockedArr.find((user) => user.userId === userId);
   if (!blockedUser) return false;
 
@@ -11,4 +15,20 @@ export const isUserBlocked = (userId: string, usersBlockedArr: BlockedUsersType[
     return true;
   }
   return false;
+};
+
+export const blockUser = async (
+  blockedUserId: string,
+  blockedUsersArr: BlockedUsersType[],
+  userId: string,
+  setUser: React.Dispatch<React.SetStateAction<UserDataType | null>>
+) => {
+  const blockingUser = !isUserBlocked(blockedUserId, blockedUsersArr);
+  const response = await patchBlockUser(userId, blockedUserId, blockingUser);
+  if (response) {
+    setUser((prev) => {
+      if (!prev) return prev;
+      return { ...prev, blockedUsers: response };
+    });
+  }
 };

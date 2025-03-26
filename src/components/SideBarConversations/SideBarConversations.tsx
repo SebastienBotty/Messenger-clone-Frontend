@@ -45,6 +45,7 @@ import {
 } from "../../functions/updateConversation";
 import { getConversations } from "../../api/conversation";
 import { isUserBlocked } from "../../functions/user";
+import { markMessagesAsSeen } from "../../api/message";
 
 function SideBarConversations() {
   const { user, setUser } = useUserContext();
@@ -171,38 +172,9 @@ function SideBarConversations() {
       }
     }
   };
-  const markMessagesAsSeen = async (messageId: string, userId: string, username: string) => {
-    try {
-      const response = await fetch(
-        RESTAPIUri + "/message/userId/" + userId + "/markMessageAsSeen",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + ApiToken(),
-          },
-          body: JSON.stringify({
-            messageId: messageId,
-            username: username,
-          }),
-        }
-      );
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-      const jsonData = await response.json();
-      //console.log(jsonData);
-      return jsonData;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  };
+
   const updateSeenConversation = async (messageId: string, conversation: ConversationType) => {
+    if (blockedConversations.some((conv) => conv._id === conversation._id)) return;
     if (user) {
       const setMsgSeen = await markMessagesAsSeen(messageId, user._id, user.userName);
       if (setMsgSeen) {
@@ -348,8 +320,7 @@ function SideBarConversations() {
                   .filter((item) => item.username !== user?.userName)
                   .map((member) => getNickNameByUsername(conversation.members, member.username))}
           </div>
-
-          {conversation.lastMessage && (
+          {conversation.lastMessage && !showBlockedConv && (
             <div id="conversation-last-message">
               <div
                 className="truncated-text"
@@ -460,6 +431,7 @@ function SideBarConversations() {
     return differenceInMinutes > 1;
   };
   useEffect(() => {
+    if (!user?._id) return;
     socket.on("message", (data) => {
       console.log("Message reçu");
       console.log(data[0]);
@@ -485,7 +457,7 @@ function SideBarConversations() {
       if (
         user?.status == "Busy" ||
         isConvMuted(user?.mutedConversations, currentMsg.conversationId) ||
-        user?.blockedUsers.includes(currentMsg.authorId)
+        isUserBlocked(currentMsg.authorId, user.blockedUsers)
       ) {
         console.log("not playing any sound");
         return;
@@ -774,7 +746,7 @@ function SideBarConversations() {
       socket.off("changeConvCustomization");
       socket.off("changeConvAdmin");
     };
-  }, [displayedConv?._id, user?.status]);
+  }, [displayedConv?._id, user?.status, user?.blockedUsers]);
 
   useEffect(() => {
     if (mostRecentConv) {

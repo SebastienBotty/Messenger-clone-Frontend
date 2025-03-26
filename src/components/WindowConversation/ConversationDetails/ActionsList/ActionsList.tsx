@@ -8,6 +8,7 @@ import { ConvMembersLi } from "./ConvMembersLi/ConvMembersLi";
 import imageCompression from "browser-image-compression";
 
 import {
+  useBlockedConvsContext,
   useConversationsContext,
   useMessagesContext,
   useUserContext,
@@ -40,8 +41,9 @@ import {
   updateConvCustomization,
   updateMostRecentConvCustomization,
 } from "../../../../functions/updateConversation";
-import { HexColorPicker } from "react-colorful";
 import ColorThemePicker from "./ColorThemePicker/ColorThemePicker";
+import { blockUser, isUserBlocked } from "../../../../functions/user";
+import { ConversationMemberType } from "../../../../typescript/types";
 
 function ActionsList({
   openMoreDetailsComp,
@@ -51,6 +53,7 @@ function ActionsList({
   const { conversations } = useConversationsContext();
   const { user, setUser } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
+  const { blockedConversations } = useBlockedConvsContext();
   const { setMostRecentConv } = useMostRecentConvContext();
   const { setMessages } = useMessagesContext();
   const [active1, setActive1] = useState<boolean>(false);
@@ -75,7 +78,7 @@ function ActionsList({
     action: () => {},
     closeModal: () => setShowConfirmationModal(false),
   });
-
+  const [partner, setPartner] = useState<ConversationMemberType | undefined>(undefined);
   const [mutedConv, setMutedConv] = useState<boolean>();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -143,7 +146,6 @@ function ActionsList({
   const handleThemeClick = () => {
     setShowColorPicker(true);
   };
-  const changeColor = () => {};
 
   const handleEmojiClick = async (emojiData: EmojiClickData) => {
     if (!displayedConv || !user) return;
@@ -242,6 +244,25 @@ function ActionsList({
       console.log("no file");
     }
   };
+
+  const handleBlockClick = () => {
+    console.log("ALALALALAAOALAO");
+    if (!displayedConv || !user?._id || displayedConv.isGroupConversation) return;
+    console.log("111111");
+    console.log(partner);
+    if (partner) {
+      console.log("blocking");
+      blockUser(partner.userId, user.blockedUsers, user._id, setUser);
+    }
+    console.log("over");
+  };
+
+  useEffect(() => {
+    if (!displayedConv?.isGroupConversation && displayedConv && user?._id) {
+      setPartner(displayedConv.members.find((member) => member.userId !== user._id));
+    }
+    return () => {};
+  }, [displayedConv?._id]);
 
   useEffect(() => {
     setMutedConv(isConvMuted(user?.mutedConversations, displayedConv?._id));
@@ -390,25 +411,31 @@ function ActionsList({
             </div>
             <span>Vérifier le chiffrement bout en bout</span>
           </li>
-          <li className="li-actions" onClick={() => alert("Not implemented")}>
-            <div className="li-icon">
-              <Disc color={"#00000"} />
-            </div>
-            <span>Restreindre</span>
-          </li>
-          <li className="li-actions" onClick={() => alert("Not implemented")}>
-            <div className="li-icon">
-              <BanOutline color={"#00000"} />
-            </div>
-            <span>Bloquer</span>
-          </li>
-          {displayedConv.isGroupConversation && (
+
+          {displayedConv.isGroupConversation ? (
             <li className="li-actions" onClick={() => handleActionsClick("leaveConv")}>
               <div className="li-icon">
                 <ExitOutline color={"#00000"} />
               </div>
               <span>Quitter le groupe</span>
             </li>
+          ) : (
+            <>
+              <li className="li-actions" onClick={() => console.log(blockedConversations)}>
+                <div className="li-icon">
+                  <Disc color={"#00000"} />
+                </div>
+                <span>Restreindre</span>
+              </li>
+              <li className="li-actions" onClick={() => handleBlockClick()}>
+                <div className="li-icon">
+                  <BanOutline color={"#00000"} />
+                </div>
+                {partner && isUserBlocked(partner.userId, user.blockedUsers)
+                  ? "Débloquer"
+                  : "Bloquer"}
+              </li>
+            </>
           )}
         </ul>
       </ul>

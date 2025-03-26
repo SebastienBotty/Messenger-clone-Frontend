@@ -24,3 +24,10 @@ export const hasPrivateConvWithUser = (userId: string, conversationsArr: Convers
   );
   return conv;
 };
+
+export const isPrivateConvBlocked = (
+  conversationId: string,
+  blockedConvsArr: ConversationType[]
+) => {
+  return blockedConvsArr.some((blockedConv) => blockedConv._id === conversationId);
+};
