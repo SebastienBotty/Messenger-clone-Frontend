@@ -446,6 +446,7 @@
   cursor: pointer;
   border: 1px solid lightgray;
   transform: translate(50%, -50%);
+  z-index: 1;
 }
 .delete-file > * {
   display: flex;
