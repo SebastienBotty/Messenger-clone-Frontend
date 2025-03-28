@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Close, CreateOutline, EllipsisHorizontal, NotificationsOff, Search } from "react-ionicons";
+import {
+  Close,
+  CreateOutline,
+  EllipsisHorizontal,
+  NotificationsOff,
+  PersonRemoveOutline,
+  Search,
+} from "react-ionicons";
 import {
   ConversationMemberType,
   ConversationType,
@@ -656,10 +663,11 @@ function SideBarConversations() {
                   console.log(status ? "STATUS CHANGED" : "STATUS NOT CHANGED");
                   console.log("MEMBER STATUS", mbr.status);
  */
+                  const newStatus = status !== null ? status : mbr.status;
                   return {
                     ...mbr,
                     isOnline: isOnline,
-                    status: status !== null ? status : "Offline",
+                    status: status !== null ? status : newStatus,
                     lastSeen: lastSeen,
                   };
                 }
@@ -763,15 +771,14 @@ function SideBarConversations() {
         <div className="first-line">
           <div className="first-line-title">Discussions</div>
           <div className="sideBar-header-buttons">
-            <button onClick={() => console.log(user)}>
-              <EllipsisHorizontal
+            <div onClick={() => setShowBlockedConversations((prev) => !prev)}>
+              <PersonRemoveOutline
                 color={"#00000"}
-                title="Paramètres"
+                title="Comptes bloqués"
                 height="75%"
                 width="75%"
-                onClick={() => setShowBlockedConversations((prev) => !prev)}
               />
-            </button>
+            </div>
 
             <button onClick={() => setDisplayedConv(null)}>
               <CreateOutline
