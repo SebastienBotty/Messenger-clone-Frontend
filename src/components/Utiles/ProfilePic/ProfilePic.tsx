@@ -30,7 +30,7 @@ function ProfilePic({
     } else {
       return (
         <div className="profile-pic">
-          <PeopleOutline height={"75%"} width={"75%"} />
+          <PeopleOutline height={"100%"} width={"100%"} />
         </div>
       );
     }
@@ -49,7 +49,7 @@ function ProfilePic({
     } else if (status) {
       return (
         <div className="profile-pic">
-          <PersonOutline height={"75%"} width={"75%"} />{" "}
+          <PersonOutline height={"100%"} width={"100%"} />{" "}
           {showStatus && isOnline && (
             <div className="profile-pic-user-status">
               <UserStatus status={status} />

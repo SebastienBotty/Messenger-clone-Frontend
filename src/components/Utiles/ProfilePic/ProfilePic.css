@@ -19,8 +19,8 @@
 
 .profile-pic > *:has(svg) {
   background-color: #f0f2f5;
-  width: 100%;
-  height: 100%;
+  width: 75%;
+  height: 75%;
 }
 .profile-pic > img {
   border-radius: 50%;
@@ -34,8 +34,8 @@
   height: 75%;
 }
 .profile-pic svg {
-  width: 100%;
-  height: 100%;
+  width: 75%;
+  height: 75%;
 }
 
 .profile-pic-user-status {
