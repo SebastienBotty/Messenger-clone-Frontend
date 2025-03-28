@@ -262,7 +262,7 @@ function SideBarConversations() {
         });
       }
     }
-
+    update5LatestConversations();
     return () => {};
   }, [user?.blockedUsers]);
 
