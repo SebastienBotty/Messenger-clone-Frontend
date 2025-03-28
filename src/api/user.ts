@@ -66,7 +66,7 @@ export const getUsersSocket = async (
   }
 };
 
-export const fetchSearchUser = async (searchQuery: string) => {
+export const fetchSearchUser = async (searchQuery: string): Promise<UserDataType[] | false> => {
   try {
     const response = await fetch(REST_API_URI + "/user/username?search=" + searchQuery, {
       headers: { authorization: `Bearer ${ApiToken()}` },

@@ -21,6 +21,7 @@ function CreateConvHeader({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchUserInput, setSearchUserInput] = useState<string>("");
   const [usersPrediction, setUsersPrediction] = useState<UserDataType[]>([]);
+  const [preSelectedUser, setPreSelectedUser] = useState<number>(0);
 
   const handleSearch = (user: UserDataType) => {
     if (addedMembers.includes(user.userName)) {
@@ -34,9 +35,33 @@ function CreateConvHeader({
     setSearchUserInput("");
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    switch (event.key) {
+      case "ArrowUp":
+        setPreSelectedUser(
+          (prevIndex) => (prevIndex - 1 + usersPrediction.length) % usersPrediction.length
+        );
+        break;
+      case "ArrowDown":
+        setPreSelectedUser((prevIndex) => (prevIndex + 1) % usersPrediction.length);
+        break;
+      case "Enter":
+        setPreSelectedUser((prevIndex) => {
+          addMember(usersPrediction[prevIndex].userName);
+          setUsersPrediction([]);
+          setSearchUserInput("");
+          return 0;
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
   const searchUser = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchUserInput(e.target.value);
     debouncedFetchUsers(e.target.value);
+    setPreSelectedUser(0);
   };
 
   const addMember = (username: string) => {
@@ -52,13 +77,14 @@ function CreateConvHeader({
       if (searchQuery.length > 2) {
         const users = await fetchSearchUser(searchQuery);
         if (users) {
-          setUsersPrediction(users);
+          const filteredUsers = users.filter((user) => !addedMembers.includes(user.userName));
+          setUsersPrediction(filteredUsers);
         }
       } else {
         return false;
       }
     }, 300),
-    []
+    [addedMembers]
   );
 
   useEffect(() => {
@@ -96,17 +122,22 @@ function CreateConvHeader({
           id="add-members-input"
           name="add-members-input"
           onChange={(e) => searchUser(e)}
+          onKeyDown={handleKeyDown}
           value={searchUserInput}
         />
         <div className="dropdown-search-list" id={searchUserInput.length > 2 ? "visible" : ""}>
           {usersPrediction.length > 0 ? (
-            usersPrediction.map((userPrediction) => {
+            usersPrediction.map((userPrediction, index) => {
               if (
                 !addedMembers.includes(userPrediction.userName) &&
                 userPrediction.userName !== user?.userName
               ) {
                 return (
-                  <li key={userPrediction._id} onClick={() => handleSearch(userPrediction)}>
+                  <li
+                    key={userPrediction._id}
+                    onClick={() => handleSearch(userPrediction)}
+                    style={index === preSelectedUser ? { backgroundColor: "#97b9db" } : {}}
+                  >
                     <div className="user-profile-pic">
                       <ProfilePic
                         picSrc={userPrediction.photo}
