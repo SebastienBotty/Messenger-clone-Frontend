@@ -136,7 +136,7 @@ function CreateConvHeader({
                   <li
                     key={userPrediction._id}
                     onClick={() => handleSearch(userPrediction)}
-                    style={index === preSelectedUser ? { backgroundColor: "#97b9db" } : {}}
+                    style={index === preSelectedUser ? { backgroundColor: " #f2f2f2" } : {}}
                   >
                     <div className="user-profile-pic">
                       <ProfilePic
