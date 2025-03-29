@@ -5,6 +5,7 @@ import {
   EllipsisHorizontal,
   NotificationsOff,
   PersonRemoveOutline,
+  PersonOutline,
   Search,
 } from "react-ionicons";
 import {
@@ -772,12 +773,16 @@ function SideBarConversations() {
           <div className="first-line-title">Discussions</div>
           <div className="sideBar-header-buttons">
             <div onClick={() => setShowBlockedConversations((prev) => !prev)}>
-              <PersonRemoveOutline
-                color={"#00000"}
-                title="Comptes bloqués"
-                height="75%"
-                width="75%"
-              />
+              {showBlockedConversations ? (
+                <PersonOutline color={"#00000"} title="Conversations" height="75%" width="75%" />
+              ) : (
+                <PersonRemoveOutline
+                  color={"#00000"}
+                  title="Comptes bloqués"
+                  height="75%"
+                  width="75%"
+                />
+              )}
             </div>
 
             <button onClick={() => setDisplayedConv(null)}>
