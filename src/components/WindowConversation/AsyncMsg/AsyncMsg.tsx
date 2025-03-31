@@ -5,6 +5,8 @@ import { LinkFormatter } from "../../Utiles/LinkFormatter/LinkFormatter";
 import ImageVizualizer from "../../ImageVizualizer/ImageVizualizer";
 import { ImgS3DataType, MessageType } from "../../../typescript/types";
 import { fetchFilesData } from "../../../api/file";
+import PlayOverlay from "../../Utiles/PlayOverlay/PlayOverlay";
+import { formatFileName } from "../../../functions/file";
 
 function AsyncMsg({ message }: { message: MessageType }) {
   const convId = message.conversationId;
@@ -92,17 +94,21 @@ function AsyncMsg({ message }: { message: MessageType }) {
             );
           } else if (file.type === "video") {
             tempContent.push(
-              <div className="file-preview-item" onClick={() => console.log(file)}>
+              <div
+                className="file-preview-item"
+                onClick={() => handleImgClick(file.url, file.fileName, file._id, file.lastModified)}
+              >
+                <PlayOverlay svgSize="50%" />
+
                 <video src={file.url} />
               </div>
             );
           } else {
             tempContent.push(
               <div onClick={() => console.log(file)}>
-                {" "}
                 <a href={file.url} download={file.fileName.split("-")[1]}>
                   <img src="/file-icon.png" alt={file.fileName} loading="lazy" />
-                  <div className="file-name">{file.fileName.split("-")[1]}</div>
+                  <div className="file-name">{formatFileName(file.fileName.split("-")[1], 10)}</div>
                 </a>
               </div>
             );
@@ -111,12 +117,16 @@ function AsyncMsg({ message }: { message: MessageType }) {
 
         if (tempContent.length === 1) {
           const singleElement = tempContent[0];
-
-          if (React.isValidElement(singleElement) && singleElement.props.children.type === "img") {
-            tempContent[0] = React.cloneElement(singleElement, {
-              ...singleElement.props,
-              className: `${singleElement.props.className} single-image-preview`,
-            });
+          if (React.isValidElement(singleElement)) {
+            if (
+              singleElement.props.children.type === "img" ||
+              singleElement.props.children.type === "video"
+            ) {
+              tempContent[0] = React.cloneElement(singleElement, {
+                ...singleElement.props,
+                className: `${singleElement.props.className} single-image-preview`,
+              });
+            }
           }
         }
         setContent(tempContent);

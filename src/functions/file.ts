@@ -17,3 +17,10 @@ export const getFileTypeFromPathName = (pathName: string) => {
 export const calculateTotalSize = (files: File[]): number => {
   return files.reduce((totalSize, file) => totalSize + file.size, 0);
 };
+
+export const formatFileName = (filename: string, maxChar: number) => {
+  const extension = filename.split(".")[filename.split(".").length - 1];
+  const reducedName = filename.slice(0, maxChar);
+
+  return filename.length <= maxChar ? filename : reducedName + "..." + extension;
+};

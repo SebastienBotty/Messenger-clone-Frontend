@@ -191,7 +191,8 @@
   right: unset !important;
   left: 100% !important;
 }
-.message:has(.async-msg .msg-file-container div img) {
+.message:has(.async-msg .msg-file-container div img),
+.message:has(.async-msg .msg-file-container div video) {
   background-color: transparent !important;
 }
 
@@ -412,7 +413,8 @@
   filter: brightness(0.9);
 }
 
-.single-image-preview img {
+.single-image-preview img,
+.single-image-preview video {
   width: auto !important;
   height: auto !important;
   max-width: 100% !important;

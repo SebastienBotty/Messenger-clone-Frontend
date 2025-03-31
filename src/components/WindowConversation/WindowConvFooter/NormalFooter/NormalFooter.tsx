@@ -20,6 +20,7 @@ import { calculateTotalSize, formatFileSize } from "../../../../functions/file";
 
 import "./NormalFooter.css";
 import { uploadFiles } from "../../../../api/file";
+import PlayOverlay from "../../../Utiles/PlayOverlay/PlayOverlay";
 
 function NormalFooter({
   setShowDragOverOverlay,
@@ -306,6 +307,32 @@ function NormalFooter({
       }
     }
   };
+  const renderDroppedFiles = (file: File, index: number) => {
+    return (
+      <div key={index} className="file-preview-item">
+        <div className="delete-file" onClick={() => deleteSelectedFile(index)}>
+          <Close color={"red"} title={"Supprimer"} height="1rem" width="1rem" />
+        </div>
+        {file.type.startsWith("image/") ? (
+          <img
+            src={URL.createObjectURL(file)}
+            alt={`Preview ${file.name}`}
+            className="file-preview-image"
+          />
+        ) : file.type.startsWith("video/") ? (
+          <div className="file-icon">
+            <PlayOverlay svgSize="50%" />
+            <video src={URL.createObjectURL(file)} className="file-icon-img" />
+          </div>
+        ) : (
+          <div className="file-icon">
+            <img src="/file-icon.png" alt={`File Icon`} className="file-icon-img" />
+            <div className="file-name">{file.name}</div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const filePreview = () => {
     return (
@@ -314,25 +341,7 @@ function NormalFooter({
         style={{ height: containerHeight, overflowY: "auto", transition: "height 0.2s ease" }}
         className="file-preview-container"
       >
-        {droppedFiles.map((file, index) => (
-          <div key={index} className="file-preview-item">
-            <div className="delete-file" onClick={() => deleteSelectedFile(index)}>
-              <Close color={"red"} title={"Supprimer"} height="1rem" width="1rem" />
-            </div>
-            {file.type.startsWith("image/") ? (
-              <img
-                src={URL.createObjectURL(file)}
-                alt={`Preview ${file.name}`}
-                className="file-preview-image"
-              />
-            ) : (
-              <div className="file-icon">
-                <img src="/file-icon.png" alt={`File Icon`} className="file-icon-img" />
-                <div className="file-name">{file.name}</div>
-              </div>
-            )}
-          </div>
-        ))}
+        {droppedFiles.map((file, index) => renderDroppedFiles(file, index))}
       </div>
     );
   };
