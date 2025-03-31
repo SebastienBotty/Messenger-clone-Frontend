@@ -400,13 +400,15 @@
 }
 
 .file-preview-item img,
+.file-preview-item video,
 .file-icon img {
   width: 2.5rem;
   aspect-ratio: 1/1;
   border-radius: 25%;
   object-fit: cover;
 }
-.file-preview-item img:hover {
+.file-preview-item img:hover,
+.file-preview-item video:hover {
   filter: brightness(0.9);
 }
 

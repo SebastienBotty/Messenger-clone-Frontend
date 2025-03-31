@@ -449,8 +449,6 @@ function WindowConversation() {
   };
 
   const handleMouseEnter = (id: string | undefined) => {
-    console.log("ICI");
-    console.log(id);
     if (!id) return;
     const timer = setTimeout(() => {
       setHoveredId(id);

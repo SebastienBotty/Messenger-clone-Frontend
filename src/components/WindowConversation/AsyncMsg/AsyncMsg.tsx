@@ -90,9 +90,15 @@ function AsyncMsg({ message }: { message: MessageType }) {
                 />
               </div>
             );
+          } else if (file.type === "video") {
+            tempContent.push(
+              <div className="file-preview-item" onClick={() => console.log(file)}>
+                <video src={file.url} />
+              </div>
+            );
           } else {
             tempContent.push(
-              <div>
+              <div onClick={() => console.log(file)}>
                 {" "}
                 <a href={file.url} download={file.fileName.split("-")[1]}>
                   <img src="/file-icon.png" alt={file.fileName} loading="lazy" />

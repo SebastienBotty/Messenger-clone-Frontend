@@ -14,11 +14,13 @@ import TransferModal from "../TransferModal/TransferModal";
 import { ImgS3DataType, ThumbnailsImgType } from "../../typescript/types";
 import { useUserContext } from "../../constants/context";
 import { fetchConvImagesAround, getMoreFiles } from "../../api/file";
+import VideoPlayer from "../Utiles/VideoPlayer/VideoPlayer";
 
 type SelectedImageType = {
   src: string;
   index: number;
   _id: string;
+  fileName: string;
   lastModified: Date;
 };
 
@@ -95,6 +97,7 @@ function ImageVizualizer({
       index: 0,
       _id: previousImage._id,
       lastModified: previousImage.lastModified,
+      fileName: previousImage.fileName,
     });
     const response = await getMoreFiles(
       user._id,
@@ -124,6 +127,7 @@ function ImageVizualizer({
       index: 0,
       _id: nextImage._id,
       lastModified: nextImage.lastModified,
+      fileName: nextImage.fileName,
     });
 
     const response = await getMoreFiles(
@@ -156,6 +160,18 @@ function ImageVizualizer({
     setShowModal(true);
   };
 
+  const renderSelectedImg = () => {
+    if (!selectedImg) return <></>;
+    else if (selectedImg.fileName.endsWith(".mp4")) {
+      console.log(
+        "zFRZZRZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+      );
+      return <VideoPlayer src={selectedImg.src} />;
+    } else {
+      return <img src={selectedImg.src} />;
+    }
+  };
+
   const closeTransferModal = (): void => {
     setShowModal(false);
   };
@@ -176,6 +192,7 @@ function ImageVizualizer({
           index: images.findIndex((img) => img._id === imgData._id) || 0,
           _id: imgData._id,
           lastModified: imgData.lastModified,
+          fileName: imgData.name,
         });
       }
     };
@@ -185,6 +202,7 @@ function ImageVizualizer({
       index: -1,
       _id: imgData ? imgData._id : images[0]._id,
       lastModified: imgData ? imgData.lastModified : images[0].lastModified,
+      fileName: imgData ? imgData.name : images[0].fileName,
     });
 
     fetchImages();
@@ -211,6 +229,7 @@ function ImageVizualizer({
           index: newIndex,
           _id: prev._id,
           lastModified: prev.lastModified,
+          fileName: prev.fileName,
         };
       }
       return prev;
@@ -271,9 +290,7 @@ function ImageVizualizer({
         >
           <ArrowBackCircleOutline color={"white"} title={"Précédent"} height="4rem" width="4rem" />
         </div>
-        <div className="image-visualiser-container">
-          {selectedImg !== null && <img src={selectedImg.src} />}
-        </div>
+        <div className="image-visualiser-container">{renderSelectedImg()}</div>
         <div
           className="arrow"
           id="right-arrow"
@@ -286,7 +303,22 @@ function ImageVizualizer({
           {selectedImg !== null && (
             <div className="content" ref={thumbnailsRef}>
               {images.map((image, index) => {
-                return (
+                return image.fileName.endsWith(".mp4") ? (
+                  <video
+                    src={image.src}
+                    onClick={() =>
+                      handleImgClick({
+                        src: image.src,
+                        index,
+                        _id: image._id,
+                        lastModified: image.lastModified,
+                        fileName: image.fileName,
+                      })
+                    }
+                    key={image._id + "-" + index}
+                    style={image._id === selectedImg._id ? { filter: "brightness(1)" } : {}}
+                  />
+                ) : (
                   <img
                     src={image.src}
                     onClick={() =>
@@ -295,11 +327,12 @@ function ImageVizualizer({
                         index,
                         _id: image._id,
                         lastModified: image.lastModified,
+                        fileName: image.fileName,
                       })
                     }
                     key={image._id + "-" + index}
                     style={image._id === selectedImg._id ? { filter: "brightness(1)" } : {}}
-                  ></img>
+                  />
                 );
               })}
             </div>

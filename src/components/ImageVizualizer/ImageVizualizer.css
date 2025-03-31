@@ -31,7 +31,8 @@
   /*backdrop-filter: blur(15px); /* Blur effect */
   /*-webkit-backdrop-filter: blur(20px); /* For Safari */
 }
-.image-visualiser-container img {
+.image-visualiser-container img,
+.image-visualiser-container video {
   height: auto;
   max-height: 100%;
   width: auto;
