@@ -7,7 +7,7 @@ import {
   ArrowForwardCircleOutline,
   CloseCircle,
   DownloadOutline,
-  LogOutOutline,
+  ArrowUndo,
 } from "react-ionicons";
 import { useDisplayedConvContext } from "../../screens/userLoggedIn/userLoggedIn";
 import TransferModal from "../TransferModal/TransferModal";
@@ -268,7 +268,7 @@ function ImageVizualizer({
       >
         <div className="top-right">
           <div className="transfer-button" onClick={openTransferModal}>
-            <LogOutOutline
+            <ArrowUndo
               color={"#FFFFFF"}
               title={"Transférer"}
               height="2rem"
