@@ -110,14 +110,14 @@ function ConversationDetails() {
   useEffect(() => {
     setShowMoreDetailsComp(false); // Close search message when conv is changed
     return () => {};
-  }, [displayedConv]);
+  }, [displayedConv?._id]);
 
   useEffect(() => {
     const mutedConv = isConvMuted(user?.mutedConversations, displayedConv?._id);
     setNotifications(!mutedConv);
 
     return () => {};
-  }, [displayedConv, user?.mutedConversations]);
+  }, [displayedConv?._id, user?.mutedConversations]);
 
   useEffect(() => {
     return () => {
