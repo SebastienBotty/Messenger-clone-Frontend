@@ -43,7 +43,7 @@ export default function ConfirmationModal({
             <div className="modal-title modal-confirmation-title">
               <div className="modal-title-text modal-confirmation-title-text">
                 {" "}
-                <h2>{title}</h2>
+                <h2 className="confirmation-modal-title">{title}</h2>
               </div>
               <div className="modal-close-button modal-confirmation-close-button">
                 <Close

@@ -20,6 +20,10 @@
   padding: 0.5rem !important;
 }
 
+.confirmation-modal-title {
+  text-align: center;
+}
+
 .modal-confirmation-close-button {
   position: absolute;
   top: 0 !important;
