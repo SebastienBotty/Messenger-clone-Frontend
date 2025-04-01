@@ -268,13 +268,7 @@ function ImageVizualizer({
       >
         <div className="top-right">
           <div className="transfer-button" onClick={openTransferModal}>
-            <ArrowUndo
-              color={"#FFFFFF"}
-              title={"Transférer"}
-              height="2rem"
-              width="2rem"
-              style={{ rotate: "-90deg" }}
-            />
+            <ArrowUndo color={"#FFFFFF"} title={"Transférer"} height="2rem" width="2rem" />
           </div>
           <div>
             <a href={selectedImg?.src} download={selectedImg?.src}>
