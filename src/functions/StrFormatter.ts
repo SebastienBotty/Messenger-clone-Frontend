@@ -48,6 +48,7 @@ export const convMemberMsg = (
     case "changeConversationPhoto":
       return `${agentName}changé la photo de la conversation.`;
     case "changeConversationName":
+      if (!target) return `${agentName}supprimé le nom de la conversation`;
       return `${agentName}nommé la conversation. ${target}`; // Not a real "target", just used it to show the new name
     case "changeEmoji":
       return `${agentName}défini ${target} comme emoji de la conversation.`;

@@ -41,10 +41,6 @@ function ChangeConvName({ closeModal, text }: { closeModal: () => void; text: st
       }, 5000);
       return;
     }
-    if (!value || value === "") {
-      setErrorMsg("Veuillez entrer un nom de conversation valide");
-      return;
-    }
 
     if (value.length > maxLength) {
       setErrorMsg("Le nom de conversation doit avoir moins de 30 caractères");
