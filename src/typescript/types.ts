@@ -155,7 +155,7 @@ export type StatusType = "Online" | "Offline" | "Busy";
 export type ImgS3DataType = {
   _id: string;
   src: string;
-  name: string;
+  fileName: string;
   convId?: string;
   lastModified: Date;
 };

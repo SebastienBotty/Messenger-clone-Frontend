@@ -182,7 +182,6 @@ function ImageVizualizer({
       console.log("IMMMMMG DATAAAAAAAAAAAAAAA");
       console.log(imgData);
       const images = await fetchConvImagesAround(user._id, displayedConv._id, imgData._id);
-
       if (images) {
         console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         console.log(images);
@@ -192,7 +191,7 @@ function ImageVizualizer({
           index: images.findIndex((img) => img._id === imgData._id) || 0,
           _id: imgData._id,
           lastModified: imgData.lastModified,
-          fileName: imgData.name,
+          fileName: imgData.fileName,
         });
       }
     };
@@ -202,7 +201,7 @@ function ImageVizualizer({
       index: -1,
       _id: imgData ? imgData._id : images[0]._id,
       lastModified: imgData ? imgData.lastModified : images[0].lastModified,
-      fileName: imgData ? imgData.name : images[0].fileName,
+      fileName: imgData ? imgData.fileName : images[0].fileName,
     });
 
     fetchImages();

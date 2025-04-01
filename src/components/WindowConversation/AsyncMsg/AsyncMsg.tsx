@@ -16,7 +16,7 @@ function AsyncMsg({ message }: { message: MessageType }) {
   const [imgData, setImgData] = useState<ImgS3DataType>({
     _id: "",
     src: "",
-    name: "",
+    fileName: "",
     convId: "",
     lastModified: new Date(),
   });
@@ -39,7 +39,7 @@ function AsyncMsg({ message }: { message: MessageType }) {
       console.log(fileName);
       setImgData({
         src: fileUrl,
-        name: fileName,
+        fileName: fileName,
         convId: convId,
         _id: fileId,
         lastModified: lastModified,
@@ -93,6 +93,8 @@ function AsyncMsg({ message }: { message: MessageType }) {
               </div>
             );
           } else if (file.type === "video") {
+            console.log("8888888888888888888888888888888888888888888888888888");
+            console.log(file);
             tempContent.push(
               <div
                 className="file-preview-item"

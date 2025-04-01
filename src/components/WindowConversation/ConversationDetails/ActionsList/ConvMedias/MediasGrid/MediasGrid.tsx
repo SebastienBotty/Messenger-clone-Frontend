@@ -17,7 +17,7 @@ function MediasGrid() {
   const [imgData, setImgData] = useState<ImgS3DataType>({
     _id: "",
     src: "",
-    name: "",
+    fileName: "",
     convId: "",
     lastModified: new Date(),
   });
@@ -31,7 +31,7 @@ function MediasGrid() {
     const fileName = getFilenameFromUrl(media.Url);
     setImgData({
       src: media.Url,
-      name: fileName,
+      fileName: fileName,
       convId: displayedConv._id,
       _id: media._id,
       lastModified: media.LastModified,
