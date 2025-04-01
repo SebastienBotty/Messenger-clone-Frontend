@@ -8,11 +8,11 @@ function UserNotLogged() {
 
   return (
     <div className="auth-container">
-      <div className="auth-slogan">
-        <h1>Not Messenger</h1>
-        <p>Works like messenger, looks like messenger but it's Not messenger</p>
-      </div>
       <div className="auth-card">
+        <div className="auth-slogan">
+          <h1>Not Messenger</h1>
+          <p>Works like messenger, looks like messenger but it's Not messenger</p>
+        </div>
         <div className="auth-header">
           <div
             className={`auth-tab ${activeTab === "signin" ? "active" : ""}`}
