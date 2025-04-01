@@ -15,6 +15,7 @@ import { ImgS3DataType, ThumbnailsImgType } from "../../typescript/types";
 import { useUserContext } from "../../constants/context";
 import { fetchConvImagesAround, getMoreFiles } from "../../api/file";
 import VideoPlayer from "../Utiles/VideoPlayer/VideoPlayer";
+import { isVideoFile } from "../../functions/file";
 
 type SelectedImageType = {
   src: string;
@@ -162,7 +163,7 @@ function ImageVizualizer({
 
   const renderSelectedImg = () => {
     if (!selectedImg) return <></>;
-    else if (selectedImg.fileName.endsWith(".mp4")) {
+    else if (isVideoFile(selectedImg.fileName)) {
       console.log(
         "zFRZZRZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
       );
@@ -302,7 +303,7 @@ function ImageVizualizer({
           {selectedImg !== null && (
             <div className="content" ref={thumbnailsRef}>
               {images.map((image, index) => {
-                return image.fileName.endsWith(".mp4") ? (
+                return isVideoFile(image.fileName) ? (
                   <video
                     src={image.src}
                     onClick={() =>

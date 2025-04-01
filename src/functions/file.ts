@@ -1,3 +1,5 @@
+import { videoFileExtensions } from "../constants/OthersConstant";
+
 export const formatFileSize = (bytes: number) => {
   const units = ["o", "Ko", "Mo", "Go", "To"];
   let index = 0;
@@ -24,3 +26,6 @@ export const formatFileName = (filename: string, maxChar: number) => {
 
   return filename.length <= maxChar ? filename : reducedName + "..." + extension;
 };
+
+export const isVideoFile = (fileName: string) =>
+  videoFileExtensions.some((extension) => fileName.endsWith(extension));

@@ -7,6 +7,9 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 import "./MediasGrid.css";
 import { useConversationMediasContext, useUserContext } from "../../../../../../constants/context";
+import PlayOverlay from "../../../../../Utiles/PlayOverlay/PlayOverlay";
+import { videoFileExtensions } from "../../../../../../constants/OthersConstant";
+import { isVideoFile } from "../../../../../../functions/file";
 
 function MediasGrid() {
   const RESTAPIUri = process.env.REACT_APP_REST_API_URI;
@@ -120,11 +123,20 @@ function MediasGrid() {
             loader={<h4>Loading...</h4>}
             scrollableTarget="infinite-scroll-container"
           >
-            {mediasCtxt.map((item, index) => (
-              <div key={index} className="media-item">
-                <img src={item.Url} onClick={() => handleImgClick(item)} />
-              </div>
-            ))}
+            {mediasCtxt.map((item, index) => {
+              return isVideoFile(item.Key) ? (
+                <>
+                  <div key={index} className="media-item">
+                    <PlayOverlay svgSize="50%" />
+                    <video src={item.Url} onClick={() => handleImgClick(item)} />
+                  </div>
+                </>
+              ) : (
+                <div key={index} className="media-item">
+                  <img src={item.Url} onClick={() => handleImgClick(item)} />
+                </div>
+              );
+            })}
           </InfiniteScroll>
         ) : (
           <div className="no-media">Aucun média</div>
