@@ -84,17 +84,6 @@
   box-sizing: border-box;
 }
 
-.load-more-messages {
-  color: #0084ff;
-  text-align: center;
-}
-
-.load-more-messages > span {
-  cursor: pointer;
-}
-.load-more-messages > span:hover {
-  color: #65676b;
-}
 .message-container {
   width: 100%;
   margin-top: 0.125rem;
@@ -129,7 +118,7 @@
 
 .message-author-name {
   margin-left: 3.5rem;
-  color: #65676b;
+  color: var(--secondary-text-color);
   font-size: small;
   margin-top: 0.75rem;
 }
@@ -138,20 +127,20 @@
   flex-direction: column;
   align-items: end;
   justify-content: end;
-  color: #65676b;
+  color: var(--secondary-text-color);
   font-size: small;
   margin-top: 0.75rem;
   margin-right: 1rem;
 }
 .edited-msg {
-  color: #0084ff;
+  color: var(--dark-blue);
   font-size: small;
   cursor: pointer;
   width: fit-content;
 }
 
 .edited-msg:hover {
-  color: #65676b;
+  color: var(--secondary-text-color);
 }
 
 .message {
@@ -175,7 +164,7 @@
   font-size: 0.75rem;
   padding: 0.5rem 0;
   color: white;
-  background-color: #333333;
+  background-color: var(--tooltip-background-color);
   border-radius: 0.75rem;
   z-index: 1;
 }
@@ -208,7 +197,7 @@
   justify-content: end;
 }
 #message-me .message {
-  background-color: #0084ff;
+  background-color: var(--dark-blue);
   margin-right: 0.5rem;
   color: white;
 }
@@ -226,7 +215,7 @@
 
   margin: 0 auto;
   text-align: center;
-  color: gray !important;
+  color: var(--message-system-color) !important;
   font-size: small;
 }
 
@@ -343,7 +332,7 @@
 }
 
 .icons .icon:hover {
-  background-color: #f0f2f5;
+  background-color: var(----icon-background-color-hover);
 }
 
 .icons .icon > * {
@@ -389,7 +378,7 @@
   height: fit-content;
   overflow-y: auto;
   width: auto;
-  background-color: #f0f2f5;
+  background-color: var(--icon-background-color);
   border-radius: 2.5rem;
   flex: 1;
 }
@@ -459,12 +448,12 @@
 }
 
 .delete-file:hover {
-  background-color: #f0f2f5;
+  background-color: var(--icon-background-color-hover);
 }
 .send-message {
   position: relative;
   font-size: larger;
-  background-color: #f0f2f5;
+  background-color: var(--icon-background-color-hover);
   border-radius: 2rem;
   height: 4vh;
   width: 100%;

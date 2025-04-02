@@ -1,3 +1,18 @@
+:root {
+  --dark-blue: #0866ff;
+  --secondary-color: #2ecc71;
+  --font-size-large: clamp(18px, 3vw + 1rem, 22px);
+  --font-size-medium: clamp(14px, 1.5vw + 0.5rem, 18px);
+  --font-size-small: clamp(10px, 1.5vw + 0.5rem, 14px);
+  --primary-text-color: ;
+  --secondary-text-color: #65676b;
+  --icon-background-color: #f0f2f5;
+  --icon-background-color-hover: #e4e6eb;
+  --selected-item-background-color: #f2f2f2;
+  --tooltip-background-color: #333333;
+  --message-system-color: gray;
+}
+
 * {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }

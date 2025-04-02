@@ -17,7 +17,7 @@
 
 .first-line-title {
   flex: 1;
-  font-size: x-large;
+  font-size: var(--font-size-large);
   padding-left: 1rem;
   font-weight: bold;
 }
@@ -38,7 +38,7 @@
   border-radius: 50%;
   padding: 0.25rem;
   cursor: pointer;
-  background-color: #e4e6eb;
+  background-color: var(--icon-background-color);
 }
 
 .sideBar-header-buttons > * > * {
@@ -48,7 +48,7 @@
 }
 
 .sideBar-header-buttons > *:hover {
-  background-color: #d8dadf;
+  background-color: var(--icon-background-color-hover);
 }
 .sideBar-header-buttons button {
   border: none;
@@ -71,8 +71,8 @@
   position: relative;
 }
 #search-conversations {
-  font-size: medium;
-  background-color: #f0f2f5;
+  font-size: var(--font-size-small);
+  background-color: var(--icon-background-color);
   border-radius: 0 2rem 2rem 0;
   width: 80%;
   height: 2rem;
@@ -80,14 +80,14 @@
   outline: none;
 }
 .search-conversations-label {
-  background-color: #f0f2f5;
+  background-color: var(--icon-background-color);
   border-radius: 2rem 0 0 2rem;
   height: 2rem;
   width: 10%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #f0f2f5;
+  border: 1px solid var();
   padding-left: 0.25rem;
 }
 
@@ -119,11 +119,11 @@
   padding: 0.25rem;
   cursor: pointer;
   color: green;
-  background-color: #f0f2f5;
+  background-color: var(--icon-background-color);
   pointer-events: all;
 }
 #search-input-cross > *:hover {
-  background-color: #e4e6eb;
+  background-color: var(--icon-background-color-hover);
 }
 
 /*--------------------------------------------CONVERSATIONS--------------------------------------*/
@@ -145,7 +145,7 @@
 }
 
 .conversation:hover {
-  background-color: #f2f2f2;
+  background-color: var(--selected-item-background-color);
 }
 
 .conversation-img-container {
@@ -173,7 +173,7 @@
 }
 
 .conversation-name {
-  font-size: large;
+  font-size: var(--font-size-medium);
   font-weight: 600;
   width: 100%;
   overflow: hidden;
@@ -184,7 +184,7 @@
 #conversation-last-message {
   position: relative;
   width: 100%;
-  font-size: medium;
+  font-size: var(--font-size-small);
   font-weight: 400;
   display: flex;
 }
@@ -195,7 +195,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #65676b;
+  color: var(--secondary-text-color);
 }
 
 #unseen-conversation {
@@ -209,7 +209,7 @@
   gap: 0.5rem;
 }
 .unseen-conversation-notification {
-  background-color: #0c6bd3;
+  background-color: var(--dark-blue);
   width: 0.75rem;
   height: 0.75rem;
   border-radius: 50%;
@@ -255,7 +255,7 @@
 }
 
 .conversation-params:hover {
-  background-color: #e4e6eb;
+  background-color: var(--icon-background-color-hover);
 }
 
 .conversation-params-menu-container {

@@ -1053,9 +1053,6 @@ console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id); */
                     )}
                     {displayedConv && (
                       <>
-                        {/* <div className="load-more-messages">
-                        <span onClick={() => fetchOlderMessages()}>Charger plus de message</span>
-                      </div> */}
                         {(!isAtBottom && hasScroll) ||
                           (hasMoreNewer && (
                             <div className="button-go-to-last-message">
