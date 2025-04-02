@@ -119,7 +119,7 @@
 .message-author-name {
   margin-left: 3.5rem;
   color: var(--secondary-text-color);
-  font-size: small;
+  font-size: var(--font-size-small);
   margin-top: 0.75rem;
 }
 .message-author-name-me {
@@ -128,13 +128,13 @@
   align-items: end;
   justify-content: end;
   color: var(--secondary-text-color);
-  font-size: small;
+  font-size: var(--font-size-small);
   margin-top: 0.75rem;
   margin-right: 1rem;
 }
 .edited-msg {
   color: var(--dark-blue);
-  font-size: small;
+  font-size: var(--font-size-small);
   cursor: pointer;
   width: fit-content;
 }
@@ -161,7 +161,7 @@
   top: 50%;
   transform: translateY(-50%);
   right: 100%;
-  font-size: 0.75rem;
+  font-size: var(--font-size-small);
   padding: 0.5rem 0;
   color: white;
   background-color: var(--tooltip-background-color);
@@ -216,7 +216,7 @@
   margin: 0 auto;
   text-align: center;
   color: var(--message-system-color) !important;
-  font-size: small;
+  font-size: var(--font-size-small);
 }
 
 .conversation-body-bottom {
@@ -422,7 +422,7 @@
 
 .file-name {
   width: 100%;
-  font-size: x-small;
+  font-size: var(--font-size-x-small);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -452,7 +452,6 @@
 }
 .send-message {
   position: relative;
-  font-size: larger;
   background-color: var(--icon-background-color-hover);
   border-radius: 2rem;
   height: 4vh;
@@ -461,7 +460,7 @@
   outline: none;
   padding-left: 0.75rem;
   resize: none;
-  font-size: 1.25rem;
+  font-size: var(--font-size-medium);
   padding: 0.75rem;
   overflow-y: hidden;
 }
