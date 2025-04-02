@@ -395,6 +395,18 @@ function NormalFooter({
     return text;
   };
 
+  const stopQuotingMsg = () => {
+    setQuotedMessage(null);
+    setInputMessage("");
+    if (textAreaRef.current) {
+      console.log("OCOCOCOCOCOC");
+      onTextAreaResize(0, "reset");
+      const height = window.innerHeight * 0.04; // 4vh en pixels
+      console.log(height);
+      textAreaRef.current.style.height = height + "px";
+    }
+  };
+
   useEffect(() => {
     document.addEventListener("mousedown", handleGifPickerContainerClick);
 
@@ -446,12 +458,7 @@ function NormalFooter({
             <span>{renderQuotedMessageText()}</span>
           </div>
           <div className="close-icon">
-            <Close
-              color={"#00000"}
-              height="3vh"
-              width="3vh"
-              onClick={() => setQuotedMessage(null)}
-            />
+            <Close color={"#00000"} height="3vh" width="3vh" onClick={() => stopQuotingMsg()} />
           </div>
         </div>
       )}
