@@ -70,6 +70,9 @@ function App() {
   }
   return (
     <>
+      <div className="responsive-div">
+        <span>Responsive in progress...</span>
+      </div>
       <Routes>
         <Route path="/" element={<UserNotLogged />}></Route>
         <Route path="/MyMessages" element={<UserLoggedIn handleSignOut={handleSignOut} />} />
