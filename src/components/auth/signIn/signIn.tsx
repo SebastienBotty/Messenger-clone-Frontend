@@ -114,7 +114,7 @@ function SignIn() {
       </button>
 
       <div className="auth-footer">
-        <a href="#" className="forgot-password">
+        <a href="#" className="forgot-password" onClick={() => alert("Not implemented")}>
           Mot de passe oublié?
         </a>
       </div>
