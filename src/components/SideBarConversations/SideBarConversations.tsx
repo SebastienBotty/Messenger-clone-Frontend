@@ -146,12 +146,15 @@ function SideBarConversations() {
       console.log(conversations);
       setConversations(conversations);
 
-      const nonBlockedConvs = getNonBlockedConvs(conversations);
+      const nonBlockedConvs = getNonBlockedConvs(conversations).sort(
+        (a, b) => new Date(b.lastMessage.date).getTime() - new Date(a.lastMessage.date).getTime()
+      );
       console.log("XXXXXXXXXXXXXXXXXXXXXXXXX");
       console.log(nonBlockedConvs);
       console.log("XXXXXXXXXXXXXXXXXXXXXXXXX");
 
       setMostRecentConv(nonBlockedConvs[0]);
+      handleConversationClick(nonBlockedConvs[0]);
       set5LatestConversation(nonBlockedConvs);
       setBlockedConversations(blockedConvs);
       //---------------------------------------------------------TODO: Ajouter les conv bloqués à conv bloquées
@@ -595,7 +598,6 @@ function SideBarConversations() {
           setDisplayedConv((prev) =>
             updateConvCustomization(prev, customizationKey, customizationValue, conversation)
           );
-          setMessages((prev) => [...prev, conversation.lastMessage]);
           // On new message, if the displayed conversation is the one with the new message, update the last message and mark it as seen
           updateSeenConversation(conversation.lastMessage._id, conversation);
         }
