@@ -13,7 +13,11 @@ import {
   updateMostRecentConvCustomization,
 } from "../../../../../functions/updateConversation";
 import { patchConvTheme } from "../../../../../api/conversation";
-import { useConversationsContext, useUserContext } from "../../../../../constants/context";
+import {
+  useConversationsContext,
+  useUserContext,
+  useMessagesContext,
+} from "../../../../../constants/context";
 import LoadingSpinner from "../../../../Utiles/loadingSpinner/loadingSpinner";
 
 function ColorThemePicker({
@@ -26,6 +30,7 @@ function ColorThemePicker({
   const { user } = useUserContext();
   const { displayedConv, setDisplayedConv } = useDisplayedConvContext();
   const { setMostRecentConv } = useMostRecentConvContext();
+  const { setMessages } = useMessagesContext();
   const { conversations } = useConversationsContext();
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -52,6 +57,9 @@ function ColorThemePicker({
       setLoading(false);
       setShowColorPicker(false);
       setHasColorChanged(true);
+      setMessages((prev) => {
+        return [...prev, response.conversation.lastMessage];
+      });
     }
     setLoading(false);
   };
