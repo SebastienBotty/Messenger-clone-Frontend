@@ -10,6 +10,7 @@ import {
   QuotedMessageType,
   StatusType,
   CustomizationType,
+  ConversationMemberType,
 } from "../../typescript/types";
 import { Call, Videocam, InformationCircle, Close, ArrowDown } from "react-ionicons";
 import { compareNowToDate } from "../../functions/time";
@@ -518,9 +519,9 @@ function WindowConversation() {
         if (!displayedConv || !user) return;
         const message: MessageType = data[0];
         const convId = data[1]._id;
-        /*  console.log("MESSAGE RECU");
-console.log(message);
-console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id); */
+        console.log("MESSAGE RECU");
+        console.log(message);
+        console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id);
         if (convId === displayedConv?._id) {
           // Utiliser une fonction pour obtenir l'état le plus récent
           // Accéder aux valeurs actuelles via une fonction de rappel
@@ -529,8 +530,8 @@ console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id); */
             const lastVisibleMessage =
               currentMessages.length > 0 ? currentMessages[currentMessages.length - 1] : null;
             const lastConvMsgId = lastMessageIdRef.current;
-            /* console.log("Last visible message:", lastVisibleMessage?._id);
-  console.log("LASTMESSAGE:" + lastConvMsgId); */
+            console.log("Last visible message:", lastVisibleMessage?._id);
+            console.log("LASTMESSAGE:" + lastConvMsgId);
 
             // Si nous sommes au bas de la conversation ou si c'est le premier message
             if (!lastVisibleMessage || lastVisibleMessage._id === lastConvMsgId) {
@@ -673,6 +674,13 @@ console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id); */
           if (conversation._id === displayedConv?._id) {
             console.log("c les meme");
             setMessages((prev) => [...prev, conversation.lastMessage]);
+            setDisplayedConv((prev) => {
+              if (!prev) return prev;
+              else {
+                return { ...prev, lastMessage: conversation.lastMessage };
+              }
+            });
+
             if (!isPrivateConvBlocked(displayedConv._id, blockedConversations)) {
               emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
             }
@@ -745,6 +753,47 @@ console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id); */
         }
         updateConvLastMsgEdited(message, setConversations);
       });
+      socket.on(
+        "addMembers",
+        ({
+          conversation,
+          addedUsersArr,
+        }: {
+          conversation: ConversationType;
+          addedUsersArr: ConversationMemberType[];
+        }) => {
+          if (!conversation || !conversation.lastMessage._id) return;
+          if (conversation._id === displayedConv?._id) {
+            setDisplayedConv((prev) => {
+              if (!prev) return prev;
+              else {
+                return { ...prev, lastMessage: conversation.lastMessage };
+              }
+            });
+          }
+        }
+      );
+
+      socket.on(
+        "removeMember",
+        ({
+          conversation,
+          removedUsername,
+        }: {
+          conversation: ConversationType;
+          removedUsername: string;
+        }) => {
+          if (!conversation || !conversation.lastMessage._id) return;
+          if (conversation._id === displayedConv?._id) {
+            setDisplayedConv((prev) => {
+              if (!prev) return prev;
+              else {
+                return { ...prev, lastMessage: conversation.lastMessage };
+              }
+            });
+          }
+        }
+      );
 
       socket.on(
         "changeConvCustomization",
@@ -764,6 +813,19 @@ console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id); */
               console.log("personné non bloquée donc pas emit seen");
               emitSeenMsgToSocket(conversation.lastMessage, displayedConv);
             }
+
+            setMessages((prev) => [...prev, conversation.lastMessage]);
+            setDisplayedConv((prev) => {
+              if (!prev) return prev;
+              else {
+                console.log(
+                  "LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                );
+                console.log({ ...prev, lastMessage: conversation.lastMessage });
+
+                return { ...prev, lastMessage: conversation.lastMessage };
+              }
+            });
             setLastMsgSeenByConvMembers((prev) =>
               prev.map((item) =>
                 item.username === conversation.lastMessage?.seenBy[0].username
@@ -785,6 +847,8 @@ console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id); */
       socket.off("deletedMessage");
       socket.off("changeReaction");
       socket.off("editedMessage");
+      socket.off("addMembers");
+      socket.off("removeMember");
       socket.off("changeConvCustomization");
     };
   }, [displayedConv?._id, blockedConversations]);
@@ -806,29 +870,6 @@ console.log("DISPLAYED CONV DEBUT" + displayedConv.lastMessage._id); */
     return () => {};
   }, [messages.length, displayedConv?._id]);
 
-  /* Scroll Management --------------------------------------------------------------------------------------------
-    Check if the scroll height is greater than the client height and update the hasScroll state
-  */
-  /*  useEffect(() => {
-    const checkScroll = () => {
-      if (scrollViewRef.current) {
-        setHasScroll(scrollViewRef.current.scrollHeight > scrollViewRef.current.clientHeight);
-        /*  console.log("CHEKC ICI");
-        console.log(scrollViewRef.current.scrollHeight > scrollViewRef.current.clientHeight); 
-      }
-    };
-
-    checkScroll();
-
-    const observer = new MutationObserver(checkScroll);
-    if (scrollViewRef.current) {
-      observer.observe(scrollViewRef.current, { childList: true, subtree: true });
-    }
-
-    return () => observer.disconnect();
-  }, []); */
-
-  // Files Management ----------------------------------------------------------------------------------------------
   const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
