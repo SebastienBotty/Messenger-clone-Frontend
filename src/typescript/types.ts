@@ -17,7 +17,7 @@ export type UserDataType = {
   }>;
   isOnline: boolean;
   lastSeen: Date;
-  status: string;
+  status: StatusType;
   blockedUsers: BlockedUsersType[];
 };
 
@@ -35,10 +35,7 @@ export type ConversationType = {
   photo: string;
   lastMessage: MessageType;
   creationDate: Date;
-  removedMembers: {
-    username: string;
-    removedData: Date;
-  };
+  removedMembers: RemovedMembersType[];
   customization: CustomizationType;
 };
 
@@ -148,6 +145,13 @@ export type ConversationMemberType = {
   lastSeen: Date;
   isTyping: boolean;
   _id: string; // idk why it appears when i don't add it
+};
+
+export type RemovedMembersType = {
+  userId: string;
+  username: string;
+  photo: string;
+  date: Date;
 };
 
 export type StatusType = "Online" | "Offline" | "Busy";

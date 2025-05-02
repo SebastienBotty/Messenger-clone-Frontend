@@ -11,6 +11,7 @@ import {
   StatusType,
   CustomizationType,
   ConversationMemberType,
+  RemovedMembersType,
 } from "../../typescript/types";
 import { Call, Videocam, InformationCircle, Close, ArrowDown } from "react-ionicons";
 import { compareNowToDate } from "../../functions/time";
@@ -1318,7 +1319,7 @@ function WindowConversation() {
                                   <div className="message-author-name">
                                     <div className="message-author">
                                       {" "}
-                                      {getNickNameById(displayedConv.members, message.authorId)}
+                                      {getNickNameByUsername(displayedConv.members, message.author)}
                                     </div>
                                     {isgMsgEdit && (
                                       <div
@@ -1389,6 +1390,14 @@ function WindowConversation() {
                             </div>
                           );
                         }
+
+                        const userPhoto =
+                          displayedConv?.members.find(
+                            (member: ConversationMemberType) => member.userId === message.authorId
+                          )?.photo ??
+                          displayedConv?.removedMembers.find(
+                            (member: RemovedMembersType) => member.userId === message.authorId
+                          )?.photo;
                         return (
                           <div
                             key={message.author + "-" + index}
@@ -1402,7 +1411,7 @@ function WindowConversation() {
                               displayedConv?.isGroupConversation && (
                                 <div className="message-author-name">
                                   <div className="message-author">
-                                    {getNickNameById(displayedConv.members, message.authorId)}
+                                    {getNickNameByUsername(displayedConv.members, message.author)}
                                   </div>
                                 </div>
                               )}
@@ -1428,18 +1437,27 @@ function WindowConversation() {
                               )}
                             <div className="message-container" id="message-others">
                               {" "}
-                              <div className="img-container">
+                              <div
+                                className="img-container"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  console.log(
+                                    displayedConv?.members.find(
+                                      (member) => member.userId === message.authorId
+                                    )?.photo,
+                                    "oui",
+                                    displayedConv?.removedMembers.find(
+                                      (member) => member.userId === message.authorId
+                                    )?.photo,
+                                    message.authorId,
+                                    displayedConv?.members,
+                                    displayedConv?.removedMembers
+                                  );
+                                }}
+                              >
                                 <ProfilePic
-                                  picSrc={
-                                    displayedConv?.members.find(
-                                      (member) => member.userId === message.authorId
-                                    )?.photo
-                                  }
-                                  status={
-                                    displayedConv?.members.find(
-                                      (member) => member.userId === message.authorId
-                                    )?.status
-                                  }
+                                  picSrc={userPhoto}
+                                  status={"Online"}
                                   isGroupConversationPic={false}
                                   showStatus={false}
                                 />

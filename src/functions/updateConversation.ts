@@ -1,4 +1,9 @@
-import { ConversationMemberType, ConversationType, CustomizationType } from "../typescript/types";
+import {
+  ConversationMemberType,
+  ConversationType,
+  CustomizationType,
+  RemovedMembersType,
+} from "../typescript/types";
 
 export const updateConv = (
   prev: any,
@@ -65,9 +70,16 @@ export const updateConvAddedMembers = (
     console.log("CONVERSATION prev is null");
     return conversation;
   }
+  const addedMemberIds = new Set(members.map((member) => member.userId));
+
+  const updatedRemovedMembers = prev.removedMembers
+    ? prev.removedMembers.filter((member: RemovedMembersType) => !addedMemberIds.has(member.userId))
+    : [];
+
   return {
     ...prev,
     members: [...prev.members, ...members],
+    removedMembers: updatedRemovedMembers,
   };
 };
 
@@ -88,7 +100,9 @@ export const updateMostRecentConvAddedMembers = (
 
 export const updateConvRemovedMembers = (
   prev: any,
-  removedUsername: string,
+  targetUsername: string,
+  targetUserId: string,
+  targetPhoto: string,
   conversation: ConversationType
 ) => {
   if (!prev) {
@@ -98,11 +112,11 @@ export const updateConvRemovedMembers = (
   return {
     ...prev,
     members: prev.members.filter(
-      (member: ConversationMemberType) => member.username !== removedUsername
+      (member: ConversationMemberType) => member.username !== targetUsername
     ),
     removedMembers: [
       ...prev.removedMembers,
-      { username: removedUsername, removedData: new Date() },
+      { username: targetUsername, userId: targetUserId, date: new Date(), photo: targetPhoto },
     ],
   };
 };
@@ -110,13 +124,21 @@ export const updateConvRemovedMembers = (
 export const updateMostRecentConvRemovedMembers = (
   conversations: ConversationType[],
   prev: any,
-  removedUsername: string,
+  targetUsername: string,
+  targetUserId: string,
+  targetPhoto: string,
   conversation: ConversationType
 ) => {
   const conv = conversations.find((conv) => conv._id === conversation._id);
   if (conv) {
     const convCopy = { ...conv };
-    const updatedConv = updateConvRemovedMembers(convCopy, removedUsername, convCopy);
+    const updatedConv = updateConvRemovedMembers(
+      convCopy,
+      targetUsername,
+      targetUserId,
+      targetPhoto,
+      convCopy
+    );
     return { ...updatedConv, lastMessage: conversation.lastMessage };
   }
   return prev;

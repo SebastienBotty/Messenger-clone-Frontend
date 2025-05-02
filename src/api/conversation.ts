@@ -436,8 +436,18 @@ export const patchRemoveMember = async (
   conversationId: string,
   removerUsername: string,
   removerUserId: string,
-  removedUsername: string
+  targetUsername: string,
+  targetUserId: string,
+  targetPhoto: string
 ): Promise<false | { conversation: ConversationType; removedUsername: string }> => {
+  /*  console.log({
+    conversationId,
+    removerUsername,
+    removerUserId,
+    targetUsername,
+    targetUserId,
+    targetPhoto,
+  }); */
   try {
     const response = await fetch(RESTAPIUri + "/conversation/removeUser", {
       method: "PATCH",
@@ -449,7 +459,9 @@ export const patchRemoveMember = async (
         conversationId: conversationId,
         removerUsername: removerUsername,
         removerUserId: removerUserId,
-        removedUsername: removedUsername,
+        targetUsername: targetUsername,
+        targetUserId: targetUserId,
+        targetPhoto: targetPhoto,
         date: new Date(),
       }),
     });

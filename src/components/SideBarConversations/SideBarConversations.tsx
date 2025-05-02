@@ -557,24 +557,32 @@ function SideBarConversations() {
       "removeMember",
       ({
         conversation,
-        removedUsername,
+        targetUsername,
+        targetUserId,
+        targetPhoto,
       }: {
         conversation: ConversationType;
-        removedUsername: string;
+        targetUsername: string;
+        targetUserId: string;
+        targetPhoto: string;
       }) => {
         console.log("REMOVED MEMBER LISTENED");
         if (!conversation || !conversation.lastMessage._id) return;
         if (conversation._id === displayedConv?._id) {
           console.log("IS DISPLAYEDCONV");
           updateSeenConversation(conversation.lastMessage._id, conversation);
-          setDisplayedConv((prev) => updateConvRemovedMembers(prev, removedUsername, conversation));
+          setDisplayedConv((prev) =>
+            updateConvRemovedMembers(prev, targetUsername, targetUserId, targetPhoto, conversation)
+          );
           setMessages((prev) => [...prev, conversation.lastMessage]);
         }
         setMostRecentConv((prev) => {
           return updateMostRecentConvRemovedMembers(
             conversations,
             prev,
-            removedUsername,
+            targetUsername,
+            targetUserId,
+            targetPhoto,
             conversation
           );
         });

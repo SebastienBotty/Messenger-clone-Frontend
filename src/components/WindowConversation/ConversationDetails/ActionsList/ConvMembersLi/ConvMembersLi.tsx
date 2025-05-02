@@ -73,16 +73,34 @@ export function ConvMembersLi({
   const removeUser = async (
     conversationId: string,
     username: string,
+    userId: string,
+    targetUsername: string,
     targetUserId: string,
-    targetUsername: string
+    targetPhoto: string
   ) => {
     if (!displayedConv) return;
-    const res = await patchRemoveMember(conversationId, username, targetUserId, targetUsername);
+    const res = await patchRemoveMember(
+      conversationId,
+      username,
+      userId,
+      targetUsername,
+      targetUserId,
+      targetPhoto
+    );
     if (res) {
       setShowConfirmationModal(false);
-      setDisplayedConv((prev) => updateConvRemovedMembers(prev, targetUsername, displayedConv));
+      setDisplayedConv((prev) =>
+        updateConvRemovedMembers(prev, targetUsername, targetUserId, targetPhoto, displayedConv)
+      );
       setMostRecentConv((prev) =>
-        updateMostRecentConvRemovedMembers(conversations, prev, targetUsername, displayedConv)
+        updateMostRecentConvRemovedMembers(
+          conversations,
+          prev,
+          targetUsername,
+          targetUserId,
+          targetPhoto,
+          displayedConv
+        )
       );
       setMessages((prev) => {
         return [...prev, res.conversation.lastMessage];
@@ -111,9 +129,14 @@ export function ConvMembersLi({
     }
   };
 
-  const handleActions = (action: string, member: string): boolean => {
+  const handleActions = (
+    action: string,
+    member: string,
+    memberId: string,
+    targetPhoto: string
+  ): boolean => {
     if (!displayedConv || !user) return false;
-    //console.log("called" + action + " " + member);
+    console.log("called" + action + " " + member + memberId);
     setShowModal(false);
     switch (action) {
       case "setAdmin":
@@ -140,7 +163,8 @@ export function ConvMembersLi({
         setConfirmationModalAction({
           title: confirmationMessage.removeMember.title,
           text: confirmationMessage.removeMember.text,
-          action: () => removeUser(displayedConv._id, user.userName, user._id, member),
+          action: () =>
+            removeUser(displayedConv._id, user.userName, user._id, member, memberId, targetPhoto),
           closeModal: () => setShowConfirmationModal(false),
         });
         break;
@@ -247,7 +271,7 @@ export function ConvMembersLi({
                         ? alert(
                             "Vous devez d'abord nomber une autre personne admin avant de quitter la conversation"
                           )
-                        : handleActions("leaveConv", user.userName);
+                        : handleActions("leaveConv", user.userName, user._id, user.photo || "");
                     }}
                   >
                     <div className="members-options-icon">
@@ -284,7 +308,14 @@ export function ConvMembersLi({
                       {displayedConv.admin.includes(member.username) ? (
                         <li
                           className="li-members-options"
-                          onClick={() => handleActions("removeAdmin", member.username)}
+                          onClick={() =>
+                            handleActions(
+                              "removeAdmin",
+                              member.username,
+                              member.userId,
+                              member.photo
+                            )
+                          }
                         >
                           <div className="members-options-icon">
                             <ShieldOutline color={"#00000"} height={"1.75rem"} width={"1.75rem"} />
@@ -294,7 +325,9 @@ export function ConvMembersLi({
                       ) : (
                         <li
                           className="li-members-options"
-                          onClick={() => handleActions("setAdmin", member.username)}
+                          onClick={() =>
+                            handleActions("setAdmin", member.username, member.userId, member.photo)
+                          }
                         >
                           <div className="members-options-icon">
                             <ShieldCheckmarkOutline
@@ -313,7 +346,12 @@ export function ConvMembersLi({
                       <li
                         className="li-members-options"
                         onClick={() => {
-                          handleActions("removeMember", member.username);
+                          handleActions(
+                            "removeMember",
+                            member.username,
+                            member.userId,
+                            member.photo
+                          );
                         }}
                       >
                         <div className="members-options-icon">
