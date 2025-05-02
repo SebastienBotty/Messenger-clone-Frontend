@@ -108,7 +108,7 @@ function FoundMsgLi({
         <div className="found-msg-user-img-container">
           <ProfilePic
             picSrc={memberPhoto}
-            status={msg.authorId} // We don't care about the data we put there
+            status={"Online"} // We don't care about the data we put there
             isGroupConversationPic={false}
             showStatus={false}
           />

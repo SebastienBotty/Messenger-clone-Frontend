@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import "./ProfilePic.css";
 import { PeopleOutline, PersonOutline } from "react-ionicons";
 import UserStatus from "../../UserStatus/UserStatus";
+import { StatusType } from "../../../typescript/types";
 
 function ProfilePic({
   picSrc,
@@ -11,7 +12,7 @@ function ProfilePic({
   showStatus = true,
 }: {
   picSrc: string | undefined;
-  status: string | undefined;
+  status: StatusType | undefined;
   isGroupConversationPic: boolean;
   isOnline?: boolean;
   showStatus?: boolean;
