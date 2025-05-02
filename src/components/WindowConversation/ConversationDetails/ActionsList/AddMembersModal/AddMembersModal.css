@@ -4,6 +4,7 @@
   height: 20%;
   margin: 0 2rem;
   overflow-x: auto;
+  overflow-y: hidden;
 }
 .no-added-members {
   width: 100%;
@@ -13,18 +14,19 @@
   margin: 0 0.5rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   width: 5rem;
   min-width: 5rem;
+  overflow: hidden;
+  height: 80%;
 }
 
 .added-member-img-container {
   height: 2.5rem;
   width: 2.5rem;
   border-radius: 50%;
-  background-color: aqua;
   position: relative;
+  margin-top: 0.5rem;
 }
 .modal-delete-added-member {
   position: absolute;
@@ -50,8 +52,8 @@
   transform: scale(0.9);
 }
 .added-member-username {
-  margin-top: 0.25rem;
   text-align: center;
+  font-size: small;
 }
 
 .users-found-list {
