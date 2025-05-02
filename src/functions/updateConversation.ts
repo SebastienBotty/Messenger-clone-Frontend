@@ -95,7 +95,9 @@ export const updateMostRecentConvAddedMembers = (
     const updatedConv = updateConvAddedMembers(convCopy, members, convCopy);
     return { ...updatedConv, lastMessage: conversation.lastMessage };
   }
-  return prev;
+  //if conv isn't found
+  const updatedConv = updateConvAddedMembers(conversation, members, conversation);
+  return updatedConv;
 };
 
 export const updateConvRemovedMembers = (
