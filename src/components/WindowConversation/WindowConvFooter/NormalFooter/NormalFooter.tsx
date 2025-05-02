@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { AddCircle, Close, ImagesOutline, Send } from "react-ionicons";
+import { AddCircle, Close, ImagesOutline, Send, HappyOutline } from "react-ionicons";
 import { useMessagesContext, useUserContext } from "../../../../constants/context";
 import {
   useDisplayedConvContext,
@@ -21,6 +21,7 @@ import { calculateTotalSize, formatFileSize } from "../../../../functions/file";
 import "./NormalFooter.css";
 import { uploadFiles } from "../../../../api/file";
 import PlayOverlay from "../../../Utiles/PlayOverlay/PlayOverlay";
+import EmojiPicker from "emoji-picker-react";
 
 function NormalFooter({
   setShowDragOverOverlay,
@@ -54,10 +55,33 @@ function NormalFooter({
   const [showGifPicker, setShowGifPicker] = useState<boolean>(false);
   const gifPickerRef = useRef<HTMLDivElement>(null);
 
+  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+  const emojiPickerContainerRef = useRef<HTMLDivElement>(null);
+
+  const [emojiPickerPosition, setEmojiPickerPosition] = useState({ top: 0, right: 0 });
+
+  // Fonction pour mettre à jour la position quand on clique sur l'icône
+
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const [containerHeight, setContainerHeight] = useState("auto"); // État pour la hauteur du conteneur
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const toggleEmojiPicker = () => {
+    if (emojiPickerContainerRef.current) {
+      // Obtenez la position et dimensions de votre élément parent
+      const rect = emojiPickerContainerRef.current.getBoundingClientRect();
+
+      // Mettez à jour la position du sélecteur d'émojis
+      setEmojiPickerPosition({
+        // Positionner exactement au-dessus de l'élément parent
+        top: rect.top,
+        // Centrer horizontalement
+        right: rect.right,
+      });
+      setTimeout(() => setShowEmojiPicker((prev) => !prev), 1);
+    }
+  };
 
   const handleValueChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(e.target.value);
@@ -271,9 +295,15 @@ function NormalFooter({
     }
   };
 
-  const handleGifPickerContainerClick = (event: MouseEvent) => {
+  const ContainersClick = (event: MouseEvent) => {
     if (gifPickerRef.current && !gifPickerRef.current.contains(event.target as Node)) {
       setShowGifPicker(false);
+    }
+    if (
+      emojiPickerContainerRef.current &&
+      !emojiPickerContainerRef.current.contains(event.target as Node)
+    ) {
+      setShowEmojiPicker(false);
     }
   };
   const handleGifClick = (gif: TenorImage) => {
@@ -407,8 +437,13 @@ function NormalFooter({
     }
   };
 
+  const handleEmojiClick = (emoji: string) => {
+    setInputMessage((prev) => prev + emoji);
+    if (textAreaRef.current) textAreaRef.current.focus();
+  };
+
   useEffect(() => {
-    document.addEventListener("mousedown", handleGifPickerContainerClick);
+    document.addEventListener("mousedown", ContainersClick);
 
     // Initialise la hauteur du textarea
     if (textAreaRef.current) {
@@ -418,7 +453,7 @@ function NormalFooter({
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleGifPickerContainerClick);
+      document.removeEventListener("mousedown", ContainersClick);
     };
   }, []);
 
@@ -515,21 +550,40 @@ function NormalFooter({
           {droppedFiles.length > 0 ? (
             <>{filePreview()}</>
           ) : (
-            <textarea
-              className="send-message"
-              placeholder="Aa"
-              value={inputMessage}
-              ref={textAreaRef}
-              onChange={handleValueChange}
-              onKeyDown={handleKeyDown}
-              onFocus={() => emitUserWrittingToSocket(true)}
-              onBlur={() => emitUserWrittingToSocket(false)}
-              style={{
-                minHeight: "4vh",
-                maxHeight: "30vh",
-                resize: "none",
-              }}
-            />
+            <>
+              <textarea
+                className="send-message"
+                placeholder="Aa"
+                value={inputMessage}
+                ref={textAreaRef}
+                onChange={handleValueChange}
+                onKeyDown={handleKeyDown}
+                onFocus={() => emitUserWrittingToSocket(true)}
+                onBlur={() => emitUserWrittingToSocket(false)}
+                style={{
+                  minHeight: "4vh",
+                  maxHeight: "30vh",
+                  resize: "none",
+                }}
+              />
+              <div className="send-emoji" ref={emojiPickerContainerRef}>
+                <HappyOutline onClick={toggleEmojiPicker} />
+                {showEmojiPicker && (
+                  <div
+                    className="emojiPicker-container"
+                    style={{
+                      position: "fixed",
+                      bottom: `calc(100vh - ${emojiPickerPosition.top}px)`,
+                      right: `calc(100vw - ${emojiPickerPosition.right}px)`,
+                      zIndex: 1000,
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    <EmojiPicker onEmojiClick={(e) => handleEmojiClick(e.emoji)} />
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
         <div className="like-icon">
