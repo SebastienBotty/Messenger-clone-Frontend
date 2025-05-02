@@ -68,6 +68,7 @@ import BidirectionalInfiniteScroll from "./BidirectionalInfiniteScroll/Bidirecti
 import { getTextColor } from "../../functions/color";
 import { isUserBlocked } from "../../functions/user";
 import { isPrivateConvBlocked } from "../../functions/conversation";
+import { log } from "console";
 
 function WindowConversation() {
   const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // Limite de 25 Mo en octets
@@ -1087,6 +1088,7 @@ function WindowConversation() {
                     endMessageNewer={<div className="end-message">Vous êtes à jour</div>}
                     onScroll={handleCustomScroll}
                     scrollRef={scrollViewRef}
+                    firstMessageRef={firstMessageRef}
                   >
                     {editingMsg && (
                       <div className="editingMsgOverlay" onClick={() => setEditingMsg(null)}>
@@ -1437,24 +1439,7 @@ function WindowConversation() {
                               )}
                             <div className="message-container" id="message-others">
                               {" "}
-                              <div
-                                className="img-container"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  console.log(
-                                    displayedConv?.members.find(
-                                      (member) => member.userId === message.authorId
-                                    )?.photo,
-                                    "oui",
-                                    displayedConv?.removedMembers.find(
-                                      (member) => member.userId === message.authorId
-                                    )?.photo,
-                                    message.authorId,
-                                    displayedConv?.members,
-                                    displayedConv?.removedMembers
-                                  );
-                                }}
-                              >
+                              <div className="img-container">
                                 <ProfilePic
                                   picSrc={userPhoto}
                                   status={"Online"}

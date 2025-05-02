@@ -17,7 +17,8 @@ interface BidirectionalInfiniteScrollProps {
   height?: number | string;
   threshold?: number;
   onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
-  scrollRef: React.RefObject<HTMLDivElement>; // Ajoutez cette ligne
+  scrollRef: React.RefObject<HTMLDivElement>;
+  firstMessageRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const BidirectionalInfiniteScroll: React.FC<BidirectionalInfiniteScrollProps> = ({
@@ -34,6 +35,7 @@ const BidirectionalInfiniteScroll: React.FC<BidirectionalInfiniteScrollProps> = 
   threshold = 50,
   onScroll,
   scrollRef,
+  firstMessageRef,
 }) => {
   const [isAtTop, setIsAtTop] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -83,18 +85,15 @@ const BidirectionalInfiniteScroll: React.FC<BidirectionalInfiniteScrollProps> = 
   // Maintenir la position de défilement après chargement de messages plus anciens
   useEffect(() => {
     if (dataLength > prevDataLength && !isAtBottom) {
-      const newScrollHeight = scrollRef.current?.scrollHeight || 0;
-      const heightDifference = newScrollHeight - prevScrollHeight;
-
-      if (heightDifference > 0 && scrollRef.current) {
+      if (scrollRef.current) {
         scrollRef.current.scrollTo({
-          top: scrollPosition + heightDifference,
+          top: firstMessageRef.current?.offsetTop,
         });
       }
     }
 
     setPrevDataLength(dataLength);
-  }, [dataLength, prevDataLength, prevScrollHeight, scrollPosition, isAtBottom]);
+  }, [dataLength, prevDataLength, prevScrollHeight, scrollPosition, isAtBottom, firstMessageRef]);
 
   return (
     <div
