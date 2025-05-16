@@ -271,7 +271,7 @@ function ImageVizualizer({
             <ArrowUndo color={"#FFFFFF"} title={"Transférer"} height="2rem" width="2rem" />
           </div>
           <div>
-            <a href={selectedImg?.src} download={selectedImg?.src}>
+            <a href={selectedImg?.src} download>
               <DownloadOutline color={"#FFFFFF"} title={"Télécharger"} height="2rem" width="2rem" />
             </a>
           </div>
