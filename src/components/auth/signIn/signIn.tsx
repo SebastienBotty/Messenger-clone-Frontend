@@ -3,9 +3,9 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
 import "./signIn.css";
 
-function SignIn() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function SignIn(user: { selectedMail: string; selectedPassword: string }) {
+  const [email, setEmail] = useState(user.selectedMail);
+  const [password, setPassword] = useState(user.selectedPassword);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -66,7 +66,6 @@ function SignIn() {
       } else {
         setError("Une erreur inconnue s'est produite");
       }
-    } finally {
       setLoading(false);
     }
   };

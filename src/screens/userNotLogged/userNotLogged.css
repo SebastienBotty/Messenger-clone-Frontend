@@ -8,27 +8,25 @@
   padding: 20px;
 }
 
-.signal-light{
-  position:absolute;
-  top:0;
-  left:0;
+.signal-light {
+  position: absolute;
+  top: 0;
+  left: 0;
   margin-left: 24px;
   margin-top: 24px;
   display: flex;
-  gap:10px;
+  gap: 10px;
   background-color: #555;
   color: white;
   padding: 12px;
   border-radius: 24px;
 }
 
-.light-dot{
-height: 24px;
-width: 24px;
-border-radius: 50%;
+.light-dot {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
 }
-
-
 
 .auth-card {
   position: relative;
@@ -101,6 +99,7 @@ border-radius: 50%;
   text-align: center;
 }
 
-.accounts-list:hover {
+.accounts-list tr:hover {
   opacity: 1;
+  cursor: pointer;
 }

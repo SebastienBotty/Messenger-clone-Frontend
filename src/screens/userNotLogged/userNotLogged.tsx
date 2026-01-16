@@ -8,10 +8,16 @@ function UserNotLogged() {
   const [activeTab, setActiveTab] = useState("signin");
   const [isBackendOn, setIsBackendOn] = useState(false);
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
+  const [selectedUser, setSelectedUser] = useState({ selectedMail: "", selectedPassword: "" });
 
+  const selectUser = (account: { username: string; password: string }) => {
+    setSelectedUser({
+      selectedMail: account.username,
+      selectedPassword: account.password,
+    });
+  };
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval> | null = null;
-    alert("Due to free hosting backend, please wait for the green light to log in");
 
     const loadBackend = async () => {
       try {
@@ -20,6 +26,9 @@ function UserNotLogged() {
         if (response.ok) {
           if (intervalId) clearInterval(intervalId);
           setIsBackendOn(true);
+        } else {
+          if (!intervalId)
+            alert("Due to free hosting backend, please wait for the green light to log in");
         }
       } catch (err) {
         console.log("Backend still sleeping...");
@@ -60,7 +69,16 @@ function UserNotLogged() {
             Inscription
           </div>
         </div>
-        <div className="auth-body">{activeTab === "signin" ? <SignIn /> : <SignUp />}</div>
+        <div className="auth-body">
+          {activeTab === "signin" ? (
+            <SignIn
+              selectedMail={selectedUser.selectedMail}
+              selectedPassword={selectedUser.selectedPassword}
+            />
+          ) : (
+            <SignUp />
+          )}
+        </div>
       </div>
       <div className="accounts-list">
         <h4>Test accounts</h4>
@@ -72,7 +90,7 @@ function UserNotLogged() {
           {comptes
             .sort((a, b) => a.username.localeCompare(b.username))
             .map((account) => (
-              <tr>
+              <tr onClick={() => selectUser(account)}>
                 <td className="accounts-list-username">{account.username}</td>
                 <td className="accounts-list-password">{account.password}</td>
               </tr>
