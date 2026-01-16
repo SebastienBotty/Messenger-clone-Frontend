@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
 import "./signIn.css";
@@ -69,6 +69,11 @@ function SignIn(user: { selectedMail: string; selectedPassword: string }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setEmail(user.selectedMail);
+    setPassword(user.selectedPassword);
+  }, [user.selectedMail, user.selectedPassword]);
 
   return (
     <form className="auth-form" onSubmit={(e) => signIn(e)}>

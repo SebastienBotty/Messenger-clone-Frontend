@@ -87,7 +87,7 @@
 
 .accounts-list {
   position: fixed;
-  opacity: 0.5;
+  color: #555;
   top: 5%;
   right: 0;
   margin-right: 1rem;
@@ -102,4 +102,5 @@
 .accounts-list tr:hover {
   opacity: 1;
   cursor: pointer;
+  color: black;
 }
