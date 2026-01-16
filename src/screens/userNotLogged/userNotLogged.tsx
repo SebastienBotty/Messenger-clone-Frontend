@@ -7,7 +7,7 @@ import { comptes } from "../../constants/testAccounts";
 function UserNotLogged() {
   const [activeTab, setActiveTab] = useState("signin");
   const [isBackendOn, setIsBackendOn] = useState(false);
-  const backendUrl = process.env.REACT_APP_REST_API_URI;
+  const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval> | null = null;
@@ -38,7 +38,7 @@ function UserNotLogged() {
   return (
     <div className="auth-container">
       <div className="signal-light">
-        <div className="light-dot"></div>
+        <div className="light-dot" style={{ backgroundColor: isBackendOn ? "Green" : "Red" }}></div>
         <div className="light-text">{isBackendOn ? "ON" : "OFF"}</div>
       </div>
       <div className="auth-card">
