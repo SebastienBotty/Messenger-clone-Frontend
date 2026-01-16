@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SignIn from "../../components/auth/signIn/signIn";
 import SignUp from "../../components/auth/signUp/signUp";
 import "./userNotLogged.css";
@@ -6,9 +6,41 @@ import { comptes } from "../../constants/testAccounts";
 
 function UserNotLogged() {
   const [activeTab, setActiveTab] = useState("signin");
+  const [isBackendOn, setIsBackendOn] = useState(false);
+  const backendUrl = process.env.REACT_APP_REST_API_URI;
+
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    alert("Due to free hosting backend, please wait for the green light to log in");
+
+    const loadBackend = async () => {
+      try {
+        const response = await fetch(backendUrl + "/pingTest");
+
+        if (response.ok) {
+          if (intervalId) clearInterval(intervalId);
+          setIsBackendOn(true);
+        }
+      } catch (err) {
+        console.log("Backend still sleeping...");
+      }
+    };
+
+    loadBackend();
+
+    intervalId = setInterval(loadBackend, 20000);
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, []);
 
   return (
     <div className="auth-container">
+      <div className="signal-light">
+        <div className="light-dot"></div>
+        <div className="light-text">{isBackendOn ? "ON" : "OFF"}</div>
+      </div>
       <div className="auth-card">
         <div className="auth-slogan">
           <h1>Not Messenger</h1>
