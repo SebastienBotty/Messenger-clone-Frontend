@@ -17,32 +17,35 @@ function UserNotLogged() {
       selectedPassword: account.password,
     });
   };
+  
   useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-
+    let intervalId: ReturnType<typeof setInterval>;
+    let alertShown = false; 
+  
     const loadBackend = async () => {
       try {
         const response = await fetch(backendUrl + "/pingTest");
-
+  
         if (response.ok) {
-          if (intervalId) clearInterval(intervalId);
           setIsBackendOn(true);
-        } else {
-          if (!intervalId)
-            alert("Due to free hosting backend, please wait for the green light to log in");
+          clearInterval(intervalId);
+        } else if (!alertShown) {
+          alert("Due to free hosting backend, please wait for the green light to log in. It might take a few minutes");
+          alertShown = true;
         }
-      } catch (err) {
+      } catch {
         console.log("Backend still sleeping...");
+        if (!alertShown) {
+          alert("Due to free hosting backend, please wait for the green light to log in. It might take a few minutes");
+          alertShown = true;
+        }
       }
     };
-
+  
     loadBackend();
-
     intervalId = setInterval(loadBackend, 20000);
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
+  
+    return () => clearInterval(intervalId);
   }, []);
 
   return (
