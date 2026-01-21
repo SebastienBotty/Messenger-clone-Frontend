@@ -19,8 +19,9 @@ function UserNotLogged() {
   };
   
   useEffect(() => {
+    alert("Due to free hosting backend, please wait for the green light to log in. It might take a few minutes");
+
     let intervalId: ReturnType<typeof setInterval>;
-    let alertShown = false; 
   
     const loadBackend = async () => {
       try {
@@ -29,16 +30,10 @@ function UserNotLogged() {
         if (response.ok) {
           setIsBackendOn(true);
           clearInterval(intervalId);
-        } else if (!alertShown) {
-          alert("Due to free hosting backend, please wait for the green light to log in. It might take a few minutes");
-          alertShown = true;
-        }
+        } 
       } catch {
         console.log("Backend still sleeping...");
-        if (!alertShown) {
-          alert("Due to free hosting backend, please wait for the green light to log in. It might take a few minutes");
-          alertShown = true;
-        }
+       
       }
     };
   
