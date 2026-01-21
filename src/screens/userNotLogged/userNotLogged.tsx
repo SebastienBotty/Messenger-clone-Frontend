@@ -3,6 +3,7 @@ import SignIn from "../../components/auth/signIn/signIn";
 import SignUp from "../../components/auth/signUp/signUp";
 import "./userNotLogged.css";
 import { comptes } from "../../constants/testAccounts";
+import LoadingSpinner from "../../components/Utiles/loadingSpinner/loadingSpinner";
 
 function UserNotLogged() {
   const [activeTab, setActiveTab] = useState("signin");
@@ -47,7 +48,7 @@ function UserNotLogged() {
   return (
     <div className="auth-container">
       <div className="signal-light">
-        <div className="light-dot" style={{ backgroundColor: isBackendOn ? "Green" : "Red" }}></div>
+        <div className="light-dot" style={{ backgroundColor: isBackendOn ? "Green" : "" }}>{!isBackendOn && <LoadingSpinner/>}</div>
         <div className="light-text">{isBackendOn ? "ON" : "OFF"}</div>
       </div>
       <div className="auth-card">
